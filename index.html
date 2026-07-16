@@ -3,78 +3,511 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hub v6 — Índice de peças</title>
+<title>Peça 10 · elevada (craft dentro dos tokens)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --neutral-50:#FFFFFF; --neutral-100:#FAF9FC; --neutral-200:#ECEBF0; --neutral-300:#E2E1E5;
+    --neutral-50:#FFFFFF; --neutral-100:#FAF9FC; --neutral-200:#ECEBF0;
+    --neutral-300:#E2E1E5; --neutral-400:#C9C8CC; --neutral-500:#B0AFB2;
     --neutral-600:#6C6B6E; --neutral-700:#505052; --neutral-900:#1E1E1F;
-    --club-500:#ED1A57; --club-600:#C70F43;
+    --club-50:#FEF0F4; --club-100:#FEC8D8; --club-400:#FA4277;
+    --club-500:#ED1A57; --club-600:#C70F43; --club-700:#980B38;
+    --green-100:#E6F6E5; --green-200:#D1EECE; --green-600:#50AE47; --green-700:#33922A; --green-800:#2B6A25;
+    --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-700:#B45309; --amber-800:#92400E;
+    --red-600:#CF3030; --red-700:#A31F1F;
+    --alfa-10-light:rgba(255,255,255,.1);
+    --sp-100:4px; --sp-200:8px; --sp-300:12px; --sp-400:16px;
+    --sp-500:20px; --sp-600:24px; --sp-800:32px; --sp-1000:40px; --sp-1200:48px; --sp-1600:64px; --sp-2000:80px;
+    --r-200:8px; --r-300:12px; --r-400:16px; --r-500:20px; --r-full:9999px;
     --font-display:'Syne',system-ui,sans-serif;
     --font-body:'Nunito Sans',system-ui,sans-serif;
+    --shadow-sm:0 0 8px rgba(5,5,5,.10);
+    --ease-out:cubic-bezier(.22,1,.36,1);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
-    font-family:var(--font-body); background:var(--neutral-100); color:var(--neutral-900);
-    -webkit-font-smoothing:antialiased; padding:64px 24px 96px;
+    font-family:var(--font-body); color:var(--neutral-900);
+    -webkit-font-smoothing:antialiased; display:flex; flex-direction:column; align-items:center;
+    /* atmosfera: brilho Club (club-50) fadeando do topo sobre gradiente neutral (tokens) */
+    background:
+      radial-gradient(130% 90% at 50% -12%, var(--club-50) 0%, rgba(254,240,244,0) 46%),
+      linear-gradient(180deg, var(--neutral-100) 0%, var(--neutral-200) 62%);
+    background-attachment:fixed;
+    min-height:100vh;
   }
-  .page{max-width:760px; margin:0 auto}
-  h1{font-family:var(--font-display); font-weight:700; font-size:28px; letter-spacing:-.01em}
-  .lead{margin-top:8px; font-size:15px; color:var(--neutral-700); max-width:520px}
-  .group{margin-top:48px}
-  .group h2{font-family:var(--font-display); font-weight:600; font-size:18px}
-  .group .path{font-size:13px; color:var(--neutral-600); margin-top:2px; font-family:monospace}
-  ul{list-style:none; margin-top:20px; display:grid; gap:10px}
-  li a{
-    display:flex; align-items:center; gap:10px; background:var(--neutral-50);
-    border:1px solid var(--neutral-300); border-radius:12px; padding:14px 16px;
-    text-decoration:none; color:var(--neutral-900); font-size:14px; font-weight:600;
-    transition:border-color .15s ease, box-shadow .15s ease;
+  /* grão sutil (efeito $noise-kz-sm do DS) — textura premium, out-of-flow p/ não virar flex item */
+  .grain{
+    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:140px 140px;
   }
-  li a:hover{border-color:var(--club-500); box-shadow:0 0 8px rgba(5,5,5,.08)}
-  li a .num{color:var(--club-600); font-family:var(--font-display); font-weight:700; min-width:22px}
-  footer{margin-top:64px; font-size:13px; color:var(--neutral-600)}
+  .page{width:100%; max-width:390px; position:relative; z-index:1; padding-top:var(--sp-800); padding-bottom:var(--sp-1600)}
+  @media (prefers-reduced-motion: reduce){.grain{opacity:.03}}
+
+  .reveal{opacity:0; transform:translateY(12px); animation:reveal .6s var(--ease-out) forwards}
+  .d-0{animation-delay:0ms} .d-1{animation-delay:90ms} .d-2{animation-delay:180ms}
+  .d-3{animation-delay:260ms} .d-4{animation-delay:340ms} .d-5{animation-delay:420ms}
+  @keyframes reveal{to{opacity:1; transform:none}}
+  @media (prefers-reduced-motion: reduce){.reveal{opacity:1; transform:none; animation:none}}
+
+  /* topbar + hero */
+  .site-header{width:100%; display:flex; align-items:center; justify-content:center; padding:var(--sp-400); background:var(--neutral-50); border-bottom:1px solid var(--neutral-200)}
+  .site-header img{height:30px; width:auto}
+  .hero{display:flex; flex-direction:column; align-items:center; text-align:center; padding:0 var(--sp-400) var(--sp-500); gap:var(--sp-400)}
+  .hero__media{width:100%; border-radius:var(--r-500); overflow:hidden; background:var(--neutral-100); border:1px solid var(--neutral-300); aspect-ratio:1/1; position:relative}
+  .hero__media img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .8s var(--ease-out)}
+  .hero__media:hover img{transform:scale(1.04)}
+  .hero__media::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 62%,rgba(5,5,5,.18)); pointer-events:none}
+  .hero__referral{position:absolute; left:var(--sp-300); bottom:var(--sp-300); z-index:1; display:inline-flex; align-items:center; gap:var(--sp-200); background:rgba(255,255,255,.9); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); border-radius:var(--r-full); padding:6px 12px 6px 6px; text-decoration:none; cursor:pointer; transition:background .2s ease}
+  .hero__referral:hover{background:#fff}
+  .hero__referral:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
+  .hero__avatar{width:24px; height:24px; border-radius:var(--r-full); background:var(--club-100); color:var(--club-700); display:flex; align-items:center; justify-content:center; flex:none}
+  .hero__avatar svg{width:14px; height:14px}
+  .hero__referral span:last-child{font-size:14px; line-height:18px; font-weight:700; color:var(--neutral-900)}
+  .hero__title{font-family:var(--font-display); font-weight:600; font-size:24px; line-height:32px; letter-spacing:-.01em; padding:0 var(--sp-200)}
+  .hero__lead{font-size:14px; line-height:20px; color:var(--neutral-600); max-width:280px; margin-top:calc(-1 * var(--sp-200))}
+
+  /* CEP */
+  .cep-wrap{padding:0 var(--sp-400) var(--sp-500)}
+  .cep{background:var(--neutral-50); border:1px solid var(--neutral-300); border-radius:var(--r-400); padding:var(--sp-400)}
+  .cep__lead{display:flex; align-items:center; gap:var(--sp-200); font-size:14px; line-height:18px; font-weight:600; color:var(--neutral-900); margin-bottom:var(--sp-300)}
+  .cep__lead svg{width:18px; height:18px; color:var(--neutral-600); flex:none}
+  .cep__form{display:flex; gap:var(--sp-200)}
+  .cep__input{flex:1 1 auto; min-width:0; height:44px; border-radius:var(--r-300); border:1px solid var(--neutral-500); padding:0 var(--sp-400); font-family:var(--font-body); font-size:16px; font-weight:600; color:var(--neutral-900); background:var(--neutral-50)}
+  .cep__input::placeholder{color:var(--neutral-600); font-weight:400}
+  .cep__input:focus{outline:none; border-color:var(--neutral-900); box-shadow:0 0 0 3px rgba(30,30,31,.08)}
+  .cep__apply{flex:none; min-width:92px; height:44px; border:0; border-radius:var(--r-300); cursor:pointer; font-family:var(--font-body); font-weight:700; font-size:15px; background:var(--neutral-900); color:#fff; display:inline-flex; align-items:center; justify-content:center; gap:6px}
+  .cep__apply:hover{background:var(--neutral-700)}
+  .cep__apply:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
+  .cep__note{display:flex; align-items:center; gap:6px; margin-top:var(--sp-300); font-size:12px; line-height:16px; color:var(--neutral-600)}
+  .cep__note svg{width:13px; height:13px; flex:none}
+  .cep--error .cep__input{border-color:var(--red-600); box-shadow:0 0 0 3px rgba(207,48,48,.10)}
+  .cep__error{display:flex; align-items:center; gap:6px; margin-top:var(--sp-300); font-size:13px; line-height:18px; font-weight:600; color:var(--red-700)}
+  .cep__error svg{width:15px; height:15px; flex:none}
+  .cep--applied{display:flex; align-items:center; gap:var(--sp-300); padding:var(--sp-300) var(--sp-400)}
+  .cep__pin{width:36px; height:36px; border-radius:var(--r-300); flex:none; background:var(--green-100); color:var(--green-800); display:flex; align-items:center; justify-content:center}
+  .cep__pin svg{width:18px; height:18px}
+  .cep__applied-body{flex:1 1 auto; min-width:0}
+  .cep__applied-label{font-size:12px; line-height:16px; color:var(--neutral-600); font-weight:600}
+  .cep__applied-value{font-size:16px; line-height:20px; font-weight:700; color:var(--neutral-900)}
+  .cep__applied-value .muted{display:block; font-size:13px; line-height:18px; color:var(--neutral-700); font-weight:600}
+  .cep__change{flex:none; border:1px solid var(--neutral-400); background:var(--neutral-50); color:var(--neutral-900); font-family:var(--font-body); font-weight:700; font-size:14px; min-height:44px; padding:0 18px; display:inline-flex; align-items:center; border-radius:var(--r-full); cursor:pointer}
+  .cep__change:hover{background:var(--neutral-100)}
+  .cep__change:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
+  .cep__spin{width:16px; height:16px; border-radius:50%; border:2px solid rgba(255,255,255,.45); border-top-color:#fff; animation:spin .7s linear infinite}
+
+  /* pilha */
+  .compare{display:flex; flex-direction:column; gap:var(--sp-400); padding:0 var(--sp-400)}
+  .compare-head{display:flex; align-items:flex-end; justify-content:space-between; gap:var(--sp-300) var(--sp-400); flex-wrap:wrap; padding:0 var(--sp-100)}
+  .compare-head__sub{margin-top:4px; font-size:14px; line-height:20px; color:var(--neutral-700); font-weight:600}
+  .compare-head h2{font-family:var(--font-display); font-weight:600; font-size:18px; line-height:24px}
+  .compare-head .freshness{font-size:14px; line-height:18px; color:var(--neutral-600); font-weight:500; display:flex; align-items:center; gap:6px}
+  .compare-head .freshness::before{content:""; width:6px; height:6px; border-radius:var(--r-full); background:var(--green-600); flex:none}
+  .compare-head .freshness .src{color:var(--neutral-900)}
+
+  .pilha{display:flex; flex-direction:column; gap:var(--sp-400); margin-top:var(--sp-500)}
+  /* ===== card DETALHADO (por canal) ===== */
+  .channel{position:relative; background:var(--neutral-50); border:1px solid var(--neutral-300); border-radius:var(--r-400); padding:var(--sp-500); transition:box-shadow .3s ease, border-color .3s ease; will-change:transform}
+  .channel__head{display:flex; flex-wrap:wrap; align-items:center; column-gap:var(--sp-300); row-gap:var(--sp-300); margin-bottom:var(--sp-400)}
+  .channel__id{flex:1 1 auto; min-width:0}
+  .channel__logo{width:44px; height:44px; border-radius:var(--r-300); background:var(--neutral-100); border:1px solid var(--neutral-200); display:flex; align-items:center; justify-content:center; overflow:hidden; flex:none}
+  .channel__logo img{width:26px; height:26px; object-fit:contain}
+  .channel__name{font-family:var(--font-display); font-weight:600; font-size:16px; line-height:22px; color:var(--neutral-900)}
+  .channel__sub{display:block; font-size:13px; line-height:16px; color:var(--neutral-600); font-weight:600}
+  /* 4 blocos em colunas: rótulo em cima, valor embaixo (2×2 no mobile, 4 col no desktop) */
+  .channel__rows{display:grid; grid-template-columns:repeat(2,1fr); gap:var(--sp-400) var(--sp-300); margin:0}
+  .channel__row{display:flex; flex-direction:column; gap:3px; min-width:0}
+  .channel__row dt{font-size:12px; line-height:16px; color:var(--neutral-600); font-weight:600}
+  .channel__row dd{font-size:15px; line-height:20px; color:var(--neutral-900); font-weight:700}
+  .channel__row dd.free{color:var(--green-800)}
+  .channel__divider{height:1px; background:var(--neutral-200); margin:var(--sp-300) 0}
+  .channel__total{display:flex; align-items:center; justify-content:space-between; gap:var(--sp-400)}
+  .channel__total-label{display:flex; flex-direction:column; align-items:flex-start; gap:6px}
+  .channel__total-label b{font-size:12px; line-height:16px; font-weight:600; color:var(--neutral-600)}
+  .channel__savings{display:inline-flex; font-size:12px; line-height:16px; font-weight:700; color:var(--green-800); background:var(--green-100); border-radius:var(--r-full); padding:2px 8px; white-space:nowrap}
+  .channel__total-val{font-family:var(--font-display); font-weight:700; font-size:26px; line-height:30px; letter-spacing:-.01em; color:var(--neutral-900); white-space:nowrap}
+  .channel__cta{flex:1 1 100%; order:3; width:100%; display:flex; align-items:center; justify-content:center; gap:var(--sp-200); height:46px; padding:0 var(--sp-500); border-radius:var(--r-300); border:0; cursor:pointer; font-family:var(--font-body); font-weight:700; font-size:15px; background:var(--neutral-900); color:#fff; text-decoration:none; transition:background .2s ease, transform .08s ease}
+  .channel__cta:hover{background:var(--neutral-700)}
+  .channel__cta:active{transform:scale(.985)}
+  .channel__cta:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
+  .channel__cta svg{width:18px; height:18px}
+  .channel__cta .arrow{transition:transform .25s var(--ease-out)}
+  .channel__cta:hover .arrow{transform:translate(3px,-3px)}
+  .channel:not(.channel--best) .channel__savings{display:none}
+  .channel:hover{box-shadow:var(--shadow-sm); border-color:var(--neutral-400)}
+  /* melhor custo */
+  .channel--best{border-color:var(--club-500); box-shadow:var(--shadow-sm); padding-top:var(--sp-600)}
+  .channel--best:hover{border-color:var(--club-600)}
+  .channel__badge{position:absolute; top:0; left:var(--sp-600); transform:translateY(-50%); display:inline-flex; align-items:center; gap:5px; background:var(--green-100); color:var(--green-800); border:1px solid var(--green-200); font-weight:700; font-size:12px; line-height:1; letter-spacing:.02em; padding:6px 12px; border-radius:var(--r-full); box-shadow:var(--shadow-sm)}
+  .channel__badge svg{width:13px; height:13px; flex:none}
+  .channel--best .channel__cta{background:var(--club-600)}
+  .channel--best .channel__cta:hover{background:var(--club-700)}
+  .channel--best .channel__total-val{color:var(--club-600)}
+  /* não entrega neste CEP */
+  .channel--noship{background:var(--neutral-100); border-color:var(--neutral-400); border-style:dashed}
+  .channel--noship .channel__head{margin-bottom:var(--sp-400)}
+  .channel--noship .channel__name{color:var(--neutral-700)}
+  .channel__notice{display:flex; align-items:center; gap:var(--sp-200); background:var(--amber-100); border:1px solid var(--amber-200); color:var(--amber-800); border-radius:var(--r-300); padding:12px var(--sp-400); font-size:14px; line-height:18px; font-weight:700}
+  .channel__notice svg{width:16px; height:16px; flex:none}
+
+  .channel--just-best .channel__badge{animation:badgePop .5s ease}
+  @keyframes badgePop{0%{transform:translateY(-50%) scale(.7); opacity:.4}60%{transform:translateY(-50%) scale(1.08)}100%{transform:translateY(-50%) scale(1)}}
+  .swap{animation:swap .42s ease}
+  @keyframes swap{0%{opacity:.15}100%{opacity:1}}
+  @media (prefers-reduced-motion: reduce){.channel{transition:none !important} .channel--just-best .channel__badge,.swap{animation:none !important}}
+
+  /* footer — fundo sangra a viewport, conteúdo preso ao mesmo grid (max-width) do .page */
+  .site-footer{width:100%; margin-top:auto; background:var(--neutral-900); color:var(--neutral-400);
+    padding:var(--sp-1000) var(--sp-400)}
+  .footer__inner{width:100%; max-width:1160px; margin:0 auto; padding:0 var(--sp-400);
+    display:flex; flex-direction:column; align-items:center; text-align:center; gap:var(--sp-500)}
+  .footer__trust{display:flex; flex-wrap:wrap; justify-content:center; gap:var(--sp-400) var(--sp-600); width:100%}
+  .trust__item{flex:1 1 240px; display:flex; align-items:center; justify-content:flex-start; text-align:left; gap:var(--sp-300);
+    font-size:14px; line-height:20px; font-weight:600; color:var(--neutral-200)}
+  .trust__item svg{width:18px; height:18px; color:var(--neutral-200); flex:none}
+  .footer__divider{width:100%; height:1px; background:var(--alfa-10-light);
+    margin-top:calc(var(--sp-200) + var(--sp-500)); margin-bottom:var(--sp-300)}
+  .site-footer__logo{height:24px; width:auto}
+  .site-footer__privacy{font-size:14px; line-height:22px; color:var(--neutral-400); max-width:440px}
+  .site-footer__links{display:flex; flex-wrap:wrap; justify-content:center; gap:var(--sp-400) var(--sp-600)}
+  .site-footer__links a{color:var(--neutral-200); text-decoration:none; font-size:14px; font-weight:600}
+  .site-footer__links a:hover{color:#fff}
+  .site-footer__copy{font-size:13px; line-height:18px; color:var(--neutral-500)}
+
+  /* fluxo de saída */
+  .channel__cta[data-state="loading"]{pointer-events:none}
+  .channel__cta[data-state="loading"] .arrow{display:none}
+  .spinner{width:18px; height:18px; border-radius:var(--r-full); border:2px solid rgba(255,255,255,.35); border-top-color:#fff; animation:spin .7s linear infinite; display:none}
+  .channel__cta[data-state="loading"] .spinner{display:block}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .exit{position:fixed; inset:0; z-index:100; background:rgba(255,255,255,.9); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--sp-400); text-align:center; padding:var(--sp-600); opacity:0; pointer-events:none; transition:opacity .35s var(--ease-out)}
+  .exit.on{opacity:1; pointer-events:auto}
+  .exit__logo{width:72px; height:72px; border-radius:var(--r-400); background:var(--neutral-50); border:1px solid var(--neutral-300); box-shadow:var(--shadow-sm); display:flex; align-items:center; justify-content:center; transform:scale(.8); transition:transform .45s var(--ease-out)}
+  .exit.on .exit__logo{transform:scale(1)}
+  .exit__logo img{width:48px; height:48px; object-fit:contain}
+  .exit h2{font-family:var(--font-display); font-weight:600; font-size:24px; line-height:32px}
+  .exit p{font-size:14px; line-height:20px; color:var(--neutral-600); max-width:260px}
+  .exit__dots{display:flex; gap:6px}
+  .exit__dots i{width:6px; height:6px; border-radius:var(--r-full); background:var(--club-500); animation:pulse 1.2s ease-in-out infinite}
+  .exit__dots i:nth-child(2){animation-delay:.15s} .exit__dots i:nth-child(3){animation-delay:.3s}
+  @keyframes pulse{0%,100%{opacity:.25; transform:scale(.9)} 50%{opacity:1; transform:scale(1.1)}}
+  @media (prefers-reduced-motion: reduce){.exit__dots i,.spinner{animation-duration:1.4s}}
+
+  /* barra dev */
+  .devbar{position:fixed; bottom:0; left:0; right:0; z-index:50; display:flex; justify-content:center; gap:6px; flex-wrap:wrap; padding:10px 16px calc(10px + env(safe-area-inset-bottom)); background:rgba(30,30,31,.92); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+  .devbar .tag{align-self:center; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--neutral-500)}
+  .devbar button{font-family:var(--font-body); font-size:12px; font-weight:700; padding:6px 12px; border-radius:var(--r-full); border:1px solid var(--neutral-600); background:transparent; color:var(--neutral-400); cursor:pointer; white-space:nowrap}
+  .devbar button[aria-pressed="true"]{background:var(--neutral-50); color:var(--neutral-900); border-color:var(--neutral-50)}
+
+  /* ===== DESKTOP — mobile-first é mobile primeiro, não mobile só (correção de escopo) =====
+     Breakpoint em 1080px (= largura máxima da página): abaixo disso a coluna direita fica
+     estreita demais e o card horizontal (logo+nome+preço+botão) não tem folga — o botão
+     raspa/vaza da borda. Só a partir de 1080px a coluna direita tem os 656px cheios, com
+     espaçador ~56px de folga. Até 1079px = coluna única empilhada (sempre segura). */
+  @media (min-width:1080px){
+    body{padding-bottom:0}
+    .page{max-width:1160px; padding:var(--sp-1000) var(--sp-800) var(--sp-2000)}
+    .site-header{padding:var(--sp-500) var(--sp-800)}
+    .site-footer{padding:var(--sp-1200) var(--sp-800)}
+    .footer__inner{padding:0 var(--sp-800)}
+    .trust__item{justify-content:center; text-align:center}
+    .layout{
+      display:grid; grid-template-columns:minmax(0,40fr) minmax(0,60fr);
+      gap:var(--sp-1000); align-items:start;
+    }
+    .col-left{position:sticky; top:var(--sp-800)}
+    .hero{padding:0; align-items:flex-start; text-align:left; gap:var(--sp-300)}
+    .hero__title{font-size:28px; line-height:36px; padding:0}
+    .hero__lead{margin-top:0; max-width:none}
+    .cep-wrap{padding:0; margin-top:var(--sp-500)}
+    .compare{padding:0}
+    .channel__rows{grid-template-columns:repeat(4,1fr)}
+    .channel__cta{flex:0 0 auto; order:0; width:auto}
+  }
 </style>
 </head>
 <body>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="site-header reveal d-0"><img src="pecas/comparador-publico/assets/logo-black.svg" alt="Ybera"></header>
+
 <div class="page">
-  <h1>Hub v6 — Índice de peças</h1>
-  <p class="lead">Este repositório não tem uma página inicial de produto — é o processo de design AI-first em si. Esta página só lista as peças HTML pra navegação rápida no preview da Vercel.</p>
-
-  <section class="group">
-    <h2>comparador-publico</h2>
-    <p class="path">pecas/comparador-publico/</p>
-    <ul>
-      <li><a href="pecas/comparador-publico/10-elevada.html"><span class="num">10</span> Página elevada (craft dentro dos tokens)</a></li>
-      <li><a href="pecas/comparador-publico/10-pagina-completa-cep.html"><span class="num">10</span> Página completa com CEP</a></li>
-      <li><a href="pecas/comparador-publico/09-reordenacao-pilha.html"><span class="num">09</span> Reordenação da pilha</a></li>
-      <li><a href="pecas/comparador-publico/08-card-canal-cep.html"><span class="num">08</span> Card de canal com CEP</a></li>
-      <li><a href="pecas/comparador-publico/07-entrada-cep.html"><span class="num">07</span> Entrada de CEP</a></li>
-      <li><a href="pecas/comparador-publico/06-feedback-redirecionamento.html"><span class="num">06</span> Feedback de redirecionamento</a></li>
-      <li><a href="pecas/comparador-publico/05-pagina-completa.html"><span class="num">05</span> Página completa</a></li>
-      <li><a href="pecas/comparador-publico/04-hero-produto.html"><span class="num">04</span> Hero do produto</a></li>
-      <li><a href="pecas/comparador-publico/03-estados-loading-indisponivel.html"><span class="num">03</span> Estados de loading/indisponível</a></li>
-      <li><a href="pecas/comparador-publico/02-pilha-canais.html"><span class="num">02</span> Pilha de canais</a></li>
-      <li><a href="pecas/comparador-publico/01-card-canal.html"><span class="num">01</span> Card de canal</a></li>
-    </ul>
+  <div class="layout">
+   <div class="col-left">
+  <section class="hero">
+    <h1 class="hero__title reveal d-0">Óleo de Mirra&nbsp;Reparador 90ml</h1>
+    <div class="hero__media reveal d-1">
+      <img src="pecas/comparador-publico/assets/produto-hero.jpg" alt="Óleo de Mirra Reparador 90ml">
+      <a class="hero__referral" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Ver perfil de Camila no Instagram">
+        <span class="hero__avatar" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor" stroke="none"/></svg></span>
+        <span>Indicação de Camila</span>
+      </a>
+    </div>
   </section>
 
-  <section class="group">
-    <h2>atualizacao-poc-referencia</h2>
-    <p class="path">pecas/atualizacao-poc-referencia/</p>
-    <ul>
-      <li><a href="pecas/atualizacao-poc-referencia/06-fluxo-completo.html"><span class="num">06</span> Fluxo completo</a></li>
-      <li><a href="pecas/atualizacao-poc-referencia/05-tela-a-completa.html"><span class="num">05</span> Tela A completa</a></li>
-      <li><a href="pecas/atualizacao-poc-referencia/04-modal-b-reautorizacao.html"><span class="num">04</span> Modal B — reautorização</a></li>
-      <li><a href="pecas/atualizacao-poc-referencia/03-modal-a-primeira-vinculacao.html"><span class="num">03</span> Modal A — primeira vinculação</a></li>
-      <li><a href="pecas/atualizacao-poc-referencia/02-painel-vinculos.html"><span class="num">02</span> Painel de vínculos</a></li>
-      <li><a href="pecas/atualizacao-poc-referencia/01-linha-canal.html"><span class="num">01</span> Linha de canal</a></li>
-    </ul>
-  </section>
+  <div class="cep-wrap reveal d-2"><div id="cepSlot"></div></div>
+   </div>
 
-  <footer>Gerado como índice de navegação — não é uma peça do processo de design.</footer>
+   <div class="col-right">
+  <section class="compare" aria-label="Comparação de preços entre lojas">
+    <header class="compare-head reveal d-2">
+      <div class="compare-head__title">
+        <h2>Onde comprar</h2>
+        <p class="compare-head__sub">Compare preço e frete e compre na loja que preferir.</p>
+      </div>
+      <span class="freshness">Preços atualizados há 6 min</span>
+    </header>
+    <div class="pilha" id="pilha"></div>
+  </section>
+   </div>
+  </div>
+
+  </div>
+
+<footer class="site-footer">
+ <div class="footer__inner">
+  <div class="footer__trust">
+    <div class="trust__item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 7.6 8 9 4.5-1.4 8-4 8-9V6l-8-3Z"/></svg>
+      Produto original nos canais oficiais
+    </div>
+    <div class="trust__item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      Pagamento seguro na plataforma do canal
+    </div>
+    <div class="trust__item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9.5 18 20 6.5"/></svg>
+      Você escolhe onde comprar, sem custo extra
+    </div>
+  </div>
+  <div class="footer__divider" aria-hidden="true"></div>
+  <img class="site-footer__logo" src="pecas/comparador-publico/assets/logo-white.svg" alt="Ybera">
+  <p class="site-footer__privacy">Você navega sem cadastro, nenhum dado pessoal é coletado nesta página. O CEP, quando informado, não é armazenado.</p>
+  <nav class="site-footer__links" aria-label="Rodapé">
+    <a href="#">Sobre</a>
+    <a href="#">Parceiros</a>
+    <a href="#">Política de privacidade</a>
+    <a href="#">Termos</a>
+  </nav>
+  <p class="site-footer__copy">© 2026 Ybera Group</p>
+ </div>
+</footer>
+
+<div class="exit" id="exit" role="status" aria-live="polite">
+  <div class="exit__logo"><img id="exit-logo" src="pecas/comparador-publico/assets/Shopee.svg" alt=""></div>
+  <h2 id="exit-title">Levando você para a Shopee</h2>
+  <p>Você conclui a compra direto na loja, do jeito de sempre.</p>
+  <div class="exit__dots" aria-hidden="true"><i></i><i></i><i></i></div>
 </div>
+
+<script>
+  // sempre carregar no topo (evita o navegador restaurar scroll / âncora após refresh)
+  if('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  const ARROW = '<svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>';
+  const PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+  const PIN_LEAD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+  const LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>';
+  const WARN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>';
+  const ALERT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>';
+
+  const CH = {
+    shopee:{name:'Shopee', logo:'pecas/comparador-publico/assets/Shopee.svg', cta:'Comprar na Shopee', artigo:'a', href:'https://shopee.com.br/', sub:'Marketplace parceiro', parcelamento:'até 12x com juros'},
+    tiktok:{name:'TikTok Shop', logo:'pecas/comparador-publico/assets/tiktok.svg', cta:'Comprar no TikTok Shop', artigo:'o', href:'https://www.tiktok.com/shop', sub:'Loja no TikTok Shop', parcelamento:'até 4x sem juros'},
+    ybera:{name:'Ybera.com', logo:'pecas/comparador-publico/assets/ybera.svg', cta:'Comprar na Ybera.com', artigo:'a', href:'https://www.ybera.com/produto/escova-progressiva-500g-fashion-gold-150264?parceiro=52154', sub:'Canal oficial Ybera', parcelamento:'até 6x sem juros'},
+  };
+
+  const STATE = {
+    ref:{ order:['shopee','tiktok','ybera'], best:'shopee', savings:'Economize R$ 2,10', src:'frete de referência',
+      d:{ shopee:{total:'R$ 204,80', price:'R$ 179,90', freight:'+ frete R$ 24,90', prazo:'5–8 dias úteis'},
+          tiktok:{total:'R$ 206,90', price:'R$ 184,90', freight:'+ frete R$ 22,00', prazo:'4–7 dias úteis'},
+          ybera:{total:'R$ 209,80', price:'R$ 189,90', freight:'+ frete R$ 19,90', prazo:'3–5 dias úteis'} } },
+    cepA:{ cep:'01310-100', city:'São Paulo, SP', order:['ybera','shopee','tiktok'], best:'ybera', savings:'Economize R$ 6,90', src:'frete para 01310-100',
+      d:{ ybera:{total:'R$ 189,90', price:'R$ 189,90', freight:'Frete grátis', free:true, prazo:'2–4 dias úteis'},
+          shopee:{total:'R$ 196,80', price:'R$ 179,90', freight:'+ frete R$ 16,90', prazo:'3–5 dias úteis'},
+          tiktok:{total:'R$ 202,90', price:'R$ 184,90', freight:'+ frete R$ 18,00', prazo:'3–6 dias úteis'} } },
+    cepB:{ cep:'69900-970', city:'Rio Branco, AC', order:['shopee','ybera','tiktok'], best:'shopee', savings:'Economize R$ 2,00', src:'frete para 69900-970',
+      d:{ shopee:{total:'R$ 222,80', price:'R$ 179,90', freight:'+ frete R$ 42,90', prazo:'8–12 dias úteis'},
+          ybera:{total:'R$ 224,80', price:'R$ 189,90', freight:'+ frete R$ 34,90', prazo:'6–9 dias úteis'},
+          tiktok:{noship:true} } },
+    // fallback do demo: qualquer CEP válido não-mapeado usa frete recalculado genérico
+    cepGen:{ order:['ybera','shopee','tiktok'], best:'ybera',
+      d:{ ybera:{total:'R$ 199,80', price:'R$ 189,90', freight:'+ frete R$ 9,90', prazo:'3–6 dias úteis'},
+          shopee:{total:'R$ 202,80', price:'R$ 179,90', freight:'+ frete R$ 22,90', prazo:'5–8 dias úteis'},
+          tiktok:{total:'R$ 203,90', price:'R$ 184,90', freight:'+ frete R$ 19,00', prazo:'4–7 dias úteis'} } },
+  };
+  const CEP_MAP = {'01310100':'cepA','69900970':'cepB'};
+
+  const pilha = document.getElementById('pilha');
+  const cepSlot = document.getElementById('cepSlot');
+  const srcLabel = document.getElementById('srcLabel');
+  const cards = {};
+  let current = null;
+  let lastCep = null; // CEP digitado (8 dígitos) p/ exibir no chip quando não-mapeado
+  let pendingRaf = null; // rAF do FLIP em voo — cancelado se um novo reorder começar antes
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function buildCard(id){
+    const el = document.createElement('article');
+    el.dataset.ch = id;
+    return el;
+  }
+  function fillCard(el, id, st){
+    const info = st.d[id]; const ch = CH[id];
+    const idBlock =
+      '<div class="channel__logo"><img src="'+ch.logo+'" alt="'+ch.name+'"></div>'+
+      '<div class="channel__id"><h3 class="channel__name">'+ch.name+'</h3><span class="channel__sub">'+ch.sub+'</span></div>';
+    if(info.noship){
+      el.className = 'channel channel--noship';
+      el.innerHTML = '<div class="channel__head">'+idBlock+'</div><div class="channel__notice">'+WARN+' A loja não entrega neste CEP</div>';
+      return;
+    }
+    const isBest = st.best === id;
+    el.className = 'channel' + (isBest ? ' channel--best' : '');
+    const badge = isBest ? '<span class="channel__badge"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg>Melhor custo total</span>' : '';
+    const cta = '<a class="channel__cta" href="#" data-ch="'+id+'"><span class="spinner" aria-hidden="true"></span><span class="label">'+ch.cta+'</span>'+ARROW+'</a>';
+    const freteVal = info.free ? '<dd class="free">Grátis</dd>' : '<dd>'+info.freight.replace('+ frete ','')+'</dd>';
+    el.innerHTML = badge +
+      '<div class="channel__head">'+idBlock+cta+'</div>'+
+      '<dl class="channel__rows">'+
+        '<div class="channel__row"><dt>Preço do produto</dt><dd>'+info.price+'</dd></div>'+
+        '<div class="channel__row"><dt>Frete</dt>'+freteVal+'</div>'+
+        '<div class="channel__row"><dt>Prazo de entrega</dt><dd>'+info.prazo+'</dd></div>'+
+        '<div class="channel__row"><dt>Parcelamento</dt><dd>'+ch.parcelamento+'</dd></div>'+
+      '</dl>'+
+      '<div class="channel__divider"></div>'+
+      '<div class="channel__total">'+
+        '<div class="channel__total-label"><b>Total</b></div>'+
+        '<span class="channel__total-val">'+info.total+'</span>'+
+      '</div>';
+  }
+
+  function renderCep(which){
+    const st = STATE[which];
+    if(which === 'ref'){
+      cepSlot.innerHTML =
+        '<div class="cep">'+
+          '<div class="cep__lead">'+PIN_LEAD+'Consultar valor do frete</div>'+
+          '<div class="cep__form"><input class="cep__input" inputmode="numeric" placeholder="00000-000" aria-label="Seu CEP" id="cepInput">'+
+          '<button class="cep__apply" id="cepApply">Ver frete</button></div>'+
+        '</div>';
+      document.getElementById('cepApply').addEventListener('click', applyFromInput);
+      document.getElementById('cepInput').addEventListener('keydown', e=>{ if(e.key==='Enter') applyFromInput(); });
+    } else {
+      const cepShown = st.cep || (lastCep ? lastCep.slice(0,5)+'-'+lastCep.slice(5) : '');
+      const cityShown = st.city ? ' <span class="muted">'+st.city+'</span>' : '';
+      cepSlot.innerHTML =
+        '<div class="cep cep--applied">'+
+          '<div class="cep__pin">'+PIN+'</div>'+
+          '<div class="cep__applied-body"><div class="cep__applied-label">Frete para</div>'+
+          '<div class="cep__applied-value">'+cepShown+cityShown+'</div></div>'+
+          '<button class="cep__change" id="cepChange">Trocar</button>'+
+        '</div>';
+      document.getElementById('cepChange').addEventListener('click', ()=>applyState('ref'));
+    }
+  }
+
+  function showCepError(msg){
+    const box = cepSlot.querySelector('.cep');
+    if(!box) return;
+    box.classList.add('cep--error');
+    let err = box.querySelector('.cep__error');
+    if(!err){ err = document.createElement('div'); err.className='cep__error'; err.setAttribute('role','alert'); box.appendChild(err); }
+    err.innerHTML = ALERT + msg;
+  }
+
+  function applyFromInput(){
+    const input = document.getElementById('cepInput');
+    const raw = (input.value || '').replace(/\D/g,'');
+    if(raw.length !== 8){ showCepError('CEP incompleto, precisa de 8 dígitos.'); return; }
+    lastCep = raw;
+    applyState(CEP_MAP[raw] || 'cepGen'); // qualquer CEP de 8 dígitos aplica (mapeado ou genérico)
+  }
+
+  function applyState(which){
+    const st = STATE[which];
+    const prevBest = current ? STATE[current].best : null;
+
+    // re-entrância-safe: cancela o FLIP pendente e zera transforms ANTES de medir
+    // 'first' — senão a medição pega uma posição no meio da animação anterior e os
+    // cards ficam com transform travado (bug de toggle rápido / duplo-clique).
+    if(pendingRaf){ cancelAnimationFrame(pendingRaf); pendingRaf = null; }
+    Object.keys(cards).forEach(id=>{ cards[id].style.transition='none'; cards[id].style.transform=''; });
+
+    const first = {};
+    Object.keys(cards).forEach(id=>{ first[id] = cards[id].getBoundingClientRect().top; });
+
+    st.order.forEach(id=>{
+      if(!cards[id]) cards[id] = buildCard(id);
+      fillCard(cards[id], id, st);
+      pilha.appendChild(cards[id]);
+    });
+    wireCtas();
+
+    Object.keys(cards).forEach(id=>{
+      const p = cards[id].querySelector('.channel__price');
+      if(p){ p.classList.remove('swap'); void p.offsetWidth; p.classList.add('swap'); }
+    });
+    if(st.best !== prevBest && cards[st.best]){
+      const b = cards[st.best]; b.classList.remove('channel--just-best'); void b.offsetWidth; b.classList.add('channel--just-best');
+    }
+
+    if(!reduceMotion && current !== null){
+      Object.keys(cards).forEach(id=>{
+        const last = cards[id].getBoundingClientRect().top;
+        const dy = first[id] - last;
+        cards[id].style.transition='none';
+        cards[id].style.transform = dy ? 'translateY('+dy+'px)' : '';
+      });
+      // double rAF: garante que o transform 'invertido' foi pintado antes de trocar
+      // pra transição animada (single rAF às vezes coalesce e pula a animação).
+      pendingRaf = requestAnimationFrame(()=>{
+        pendingRaf = requestAnimationFrame(()=>{
+          Object.keys(cards).forEach(id=>{ cards[id].style.transition='transform .42s cubic-bezier(.2,.7,.2,1)'; cards[id].style.transform=''; });
+          pendingRaf = null;
+        });
+      });
+    }
+
+    renderCep(which === 'ref' ? 'ref' : which);
+    if(srcLabel) srcLabel.textContent = st.src;
+    document.querySelectorAll('.devbar button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.s===(which)?'true':'false'));
+    current = which;
+  }
+
+  // fluxo de saída
+  const exit = document.getElementById('exit');
+  const exitLogo = document.getElementById('exit-logo');
+  const exitTitle = document.getElementById('exit-title');
+  function wireCtas(){
+    document.querySelectorAll('.channel__cta').forEach(a=>{
+      if(a.dataset.wired) return; a.dataset.wired = '1';
+      a.addEventListener('click', e=>{
+        e.preventDefault();
+        const id = a.dataset.ch; const info = CH[id];
+        a.setAttribute('data-state','loading');
+        a.querySelector('.label').textContent = 'Abrindo '+info.artigo+' '+info.name+'…';
+        exitLogo.src = info.logo;
+        exitTitle.textContent = 'Levando você para '+info.artigo+' '+info.name;
+        setTimeout(()=>exit.classList.add('on'), 550);
+        setTimeout(()=>{ window.location.href = info.href; }, 1400); // produção: link com vínculo RF-002/RF-007
+      });
+    });
+  }
+
+  document.querySelectorAll('.devbar button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const s = btn.dataset.s;
+      if(s === 'reload'){ window.location.reload(); return; }
+      applyState(s);
+    });
+  });
+
+  // Nenhum localStorage / sessionStorage / query string — CEP é transitório (LGPD).
+  // Recarregar volta ao estado sem CEP: prova do "não guardamos".
+  applyState('ref');
+  window.scrollTo(0, 0); // garante topo após montar os cards via JS
+</script>
 </body>
 </html>
