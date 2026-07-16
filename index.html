@@ -224,9 +224,19 @@
     .hero__lead{margin-top:0; max-width:none}
     .cep-wrap{padding:0; margin-top:var(--sp-500)}
     .compare{padding:0}
-    .channel__rows{grid-template-columns:repeat(4,1fr)}
-    .channel__total{flex:0 0 auto; order:0}
-    .channel__cta{width:auto}
+    /* desktop volta ao layout antigo: CTA no topo (à direita do nome), Total na base.
+       head/foot viram display:contents e o card é remontado via grid com áreas nomeadas. */
+    .channel{display:grid; grid-template-columns:auto 1fr auto; column-gap:var(--sp-300); align-items:center;
+      grid-template-areas:"logo id cta" "rows rows rows" "divider divider divider" "total total total"}
+    .channel__head,.channel__foot{display:contents}
+    .channel__logo{grid-area:logo}
+    .channel__id{grid-area:id}
+    .channel__cta{grid-area:cta; width:auto}
+    .channel__rows{grid-area:rows; grid-template-columns:repeat(4,1fr); margin-top:var(--sp-400)}
+    .channel__divider{grid-area:divider}
+    .channel__total{grid-area:total; justify-content:space-between}
+    .channel--noship{grid-template-columns:auto 1fr; grid-template-areas:"logo id" "notice notice"}
+    .channel__notice{grid-area:notice; margin-top:var(--sp-400)}
   }
 </style>
 </head>
