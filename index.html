@@ -138,10 +138,10 @@
   .channel__cta:hover .arrow{transform:translate(3px,-3px)}
   .channel:not(.channel--best) .channel__savings{display:none}
   .channel:hover{box-shadow:var(--shadow-sm); border-color:var(--neutral-400)}
-  /* melhor oferta — sofisticação, não promoção: borda preta, badge no tom verde do DS, sobre a borda superior direita */
-  .channel--best{border-color:var(--neutral-900); box-shadow:var(--shadow-sm); padding-top:var(--sp-600)}
+  /* melhor oferta — sofisticação, não promoção: borda preta, badge dentro do card no tom verde do DS */
+  .channel--best{border-color:var(--neutral-900); box-shadow:var(--shadow-sm)}
   .channel--best:hover{border-color:var(--neutral-900)}
-  .channel__badge{position:absolute; top:0; right:var(--sp-600); transform:translateY(-50%); display:inline-flex; align-items:center; gap:5px; background:var(--green-100); color:var(--green-800); border:1px solid var(--green-200); font-weight:700; font-size:12px; line-height:1; letter-spacing:.02em; padding:6px 12px; border-radius:var(--r-full); box-shadow:var(--shadow-sm)}
+  .channel__badge{display:inline-flex; align-items:center; gap:5px; margin-left:auto; background:var(--green-100); color:var(--green-800); border:1px solid var(--green-200); font-weight:700; font-size:12px; line-height:1; letter-spacing:.02em; padding:6px 12px; border-radius:var(--r-full)}
   .channel__badge svg{width:13px; height:13px; flex:none}
   /* não entrega neste CEP */
   .channel--noship{background:var(--neutral-100); border-color:var(--neutral-400); border-style:dashed}
@@ -151,7 +151,7 @@
   .channel__notice svg{width:16px; height:16px; flex:none}
 
   .channel--just-best .channel__badge{animation:badgePop .5s ease}
-  @keyframes badgePop{0%{transform:translateY(-50%) scale(.7); opacity:.4}60%{transform:translateY(-50%) scale(1.08)}100%{transform:translateY(-50%) scale(1)}}
+  @keyframes badgePop{0%{transform:scale(.7); opacity:.4}60%{transform:scale(1.08)}100%{transform:scale(1)}}
   .swap{animation:swap .42s ease}
   @keyframes swap{0%{opacity:.15}100%{opacity:1}}
   @media (prefers-reduced-motion: reduce){.channel{transition:none !important} .channel--just-best .channel__badge,.swap{animation:none !important}}
