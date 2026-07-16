@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub v6 — Índice de peças</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --neutral-50:#FFFFFF; --neutral-100:#FAF9FC; --neutral-200:#ECEBF0; --neutral-300:#E2E1E5;
+    --neutral-600:#6C6B6E; --neutral-700:#505052; --neutral-900:#1E1E1F;
+    --club-500:#ED1A57; --club-600:#C70F43;
+    --font-display:'Syne',system-ui,sans-serif;
+    --font-body:'Nunito Sans',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-body); background:var(--neutral-100); color:var(--neutral-900);
+    -webkit-font-smoothing:antialiased; padding:64px 24px 96px;
+  }
+  .page{max-width:760px; margin:0 auto}
+  h1{font-family:var(--font-display); font-weight:700; font-size:28px; letter-spacing:-.01em}
+  .lead{margin-top:8px; font-size:15px; color:var(--neutral-700); max-width:520px}
+  .group{margin-top:48px}
+  .group h2{font-family:var(--font-display); font-weight:600; font-size:18px}
+  .group .path{font-size:13px; color:var(--neutral-600); margin-top:2px; font-family:monospace}
+  ul{list-style:none; margin-top:20px; display:grid; gap:10px}
+  li a{
+    display:flex; align-items:center; gap:10px; background:var(--neutral-50);
+    border:1px solid var(--neutral-300); border-radius:12px; padding:14px 16px;
+    text-decoration:none; color:var(--neutral-900); font-size:14px; font-weight:600;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  li a:hover{border-color:var(--club-500); box-shadow:0 0 8px rgba(5,5,5,.08)}
+  li a .num{color:var(--club-600); font-family:var(--font-display); font-weight:700; min-width:22px}
+  footer{margin-top:64px; font-size:13px; color:var(--neutral-600)}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Hub v6 — Índice de peças</h1>
+  <p class="lead">Este repositório não tem uma página inicial de produto — é o processo de design AI-first em si. Esta página só lista as peças HTML pra navegação rápida no preview da Vercel.</p>
+
+  <section class="group">
+    <h2>comparador-publico</h2>
+    <p class="path">pecas/comparador-publico/</p>
+    <ul>
+      <li><a href="pecas/comparador-publico/10-elevada.html"><span class="num">10</span> Página elevada (craft dentro dos tokens)</a></li>
+      <li><a href="pecas/comparador-publico/10-pagina-completa-cep.html"><span class="num">10</span> Página completa com CEP</a></li>
+      <li><a href="pecas/comparador-publico/09-reordenacao-pilha.html"><span class="num">09</span> Reordenação da pilha</a></li>
+      <li><a href="pecas/comparador-publico/08-card-canal-cep.html"><span class="num">08</span> Card de canal com CEP</a></li>
+      <li><a href="pecas/comparador-publico/07-entrada-cep.html"><span class="num">07</span> Entrada de CEP</a></li>
+      <li><a href="pecas/comparador-publico/06-feedback-redirecionamento.html"><span class="num">06</span> Feedback de redirecionamento</a></li>
+      <li><a href="pecas/comparador-publico/05-pagina-completa.html"><span class="num">05</span> Página completa</a></li>
+      <li><a href="pecas/comparador-publico/04-hero-produto.html"><span class="num">04</span> Hero do produto</a></li>
+      <li><a href="pecas/comparador-publico/03-estados-loading-indisponivel.html"><span class="num">03</span> Estados de loading/indisponível</a></li>
+      <li><a href="pecas/comparador-publico/02-pilha-canais.html"><span class="num">02</span> Pilha de canais</a></li>
+      <li><a href="pecas/comparador-publico/01-card-canal.html"><span class="num">01</span> Card de canal</a></li>
+    </ul>
+  </section>
+
+  <section class="group">
+    <h2>atualizacao-poc-referencia</h2>
+    <p class="path">pecas/atualizacao-poc-referencia/</p>
+    <ul>
+      <li><a href="pecas/atualizacao-poc-referencia/06-fluxo-completo.html"><span class="num">06</span> Fluxo completo</a></li>
+      <li><a href="pecas/atualizacao-poc-referencia/05-tela-a-completa.html"><span class="num">05</span> Tela A completa</a></li>
+      <li><a href="pecas/atualizacao-poc-referencia/04-modal-b-reautorizacao.html"><span class="num">04</span> Modal B — reautorização</a></li>
+      <li><a href="pecas/atualizacao-poc-referencia/03-modal-a-primeira-vinculacao.html"><span class="num">03</span> Modal A — primeira vinculação</a></li>
+      <li><a href="pecas/atualizacao-poc-referencia/02-painel-vinculos.html"><span class="num">02</span> Painel de vínculos</a></li>
+      <li><a href="pecas/atualizacao-poc-referencia/01-linha-canal.html"><span class="num">01</span> Linha de canal</a></li>
+    </ul>
+  </section>
+
+  <footer>Gerado como índice de navegação — não é uma peça do processo de design.</footer>
+</div>
+</body>
+</html>
