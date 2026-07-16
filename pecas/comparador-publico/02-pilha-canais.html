@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peça 02 — Pilha de canais ordenada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --neutral-50:#FFFFFF; --neutral-100:#FAF9FC; --neutral-200:#ECEBF0;
+    --neutral-300:#E2E1E5; --neutral-400:#C9C8CC; --neutral-500:#B0AFB2;
+    --neutral-600:#6C6B6E; --neutral-700:#505052; --neutral-800:#373738;
+    --neutral-900:#1E1E1F;
+    --club-50:#FEF0F4; --club-100:#FEC8D8; --club-400:#FA4277;
+    --club-500:#ED1A57; --club-600:#C70F43; --club-700:#980B38;
+    --green-100:#E6F6E5; --green-600:#50AE47; --green-700:#33922A; --green-800:#2B6A25;
+    --sp-100:4px; --sp-200:8px; --sp-300:12px; --sp-400:16px;
+    --sp-500:20px; --sp-600:24px; --sp-800:32px;
+    --r-200:8px; --r-300:12px; --r-400:16px; --r-full:9999px;
+    --font-display:'Syne',system-ui,sans-serif;
+    --font-body:'Nunito Sans',system-ui,sans-serif;
+    --shadow-sm:0 0 8px rgba(5,5,5,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-body);
+    background:var(--neutral-200);
+    color:var(--neutral-900);
+    -webkit-font-smoothing:antialiased;
+    padding:var(--sp-800) var(--sp-400) 96px;
+    display:flex; flex-direction:column; align-items:center; gap:var(--sp-800);
+  }
+  .stage-label{
+    font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--neutral-600); max-width:390px; width:100%; margin:0 auto;
+  }
+  .scenario{width:100%; max-width:390px; display:flex; flex-direction:column; gap:var(--sp-400)}
+
+  /* ---------- CABEÇALHO DA PILHA ---------- */
+  .compare-head{display:flex; flex-direction:column; gap:2px; padding:0 var(--sp-100)}
+  .compare-head h2{
+    font-family:var(--font-display); font-weight:600; font-size:18px; line-height:24px;
+    color:var(--neutral-900);
+  }
+  .compare-head .freshness{
+    font-size:14px; line-height:18px; color:var(--neutral-700);
+    display:flex; align-items:center; gap:6px;
+  }
+  .compare-head .freshness::before{
+    content:""; width:6px; height:6px; border-radius:var(--r-full);
+    background:var(--green-600); flex:none;
+  }
+
+  /* ---------- CARD DE CANAL (peça 01) ---------- */
+  .channel{
+    position:relative; background:var(--neutral-50);
+    border:1px solid var(--neutral-300); border-radius:var(--r-400);
+    padding:var(--sp-500);
+    display:grid; grid-template-columns:48px 1fr auto;
+    grid-template-areas:"logo name price" "logo meta price" "cta cta cta";
+    column-gap:var(--sp-400); row-gap:var(--sp-100); align-items:center;
+  }
+  .channel__logo{
+    grid-area:logo; width:48px; height:48px; border-radius:var(--r-300);
+    background:var(--neutral-100); border:1px solid var(--neutral-200);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .channel__logo img{width:28px; height:28px; object-fit:contain}
+  .channel__name{
+    grid-area:name; font-family:var(--font-display); font-weight:600;
+    font-size:16px; line-height:22px; color:var(--neutral-900);
+    grid-row:1/3; align-self:center; white-space:nowrap;
+  }
+  .channel__price{grid-area:price; text-align:right; align-self:center}
+  .channel__price .total{
+    font-family:var(--font-display); font-weight:700; font-size:24px; line-height:32px;
+    color:var(--neutral-900); letter-spacing:-.01em; white-space:nowrap;
+  }
+  .channel__price .caption{
+    display:block; font-size:12px; line-height:16px; color:var(--neutral-600);
+    margin-top:2px; white-space:nowrap;
+  }
+  .channel__price .caption span{display:block}
+  .channel__cta{
+    grid-area:cta; margin-top:var(--sp-400);
+    display:flex; align-items:center; justify-content:center; gap:var(--sp-200);
+    height:48px; border-radius:var(--r-300); border:0; cursor:pointer;
+    font-family:var(--font-body); font-weight:700; font-size:16px;
+    background:var(--neutral-900); color:var(--neutral-50);
+    transition:background .2s ease, transform .08s ease; text-decoration:none;
+  }
+  .channel__cta:hover{background:var(--neutral-700)}
+  .channel__cta:active{transform:scale(.985)}
+  .channel__cta:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
+  .channel__cta svg{width:16px; height:16px}
+  .channel--best{border-color:var(--club-500); box-shadow:var(--shadow-sm); padding-top:var(--sp-600)}
+  .channel--best::before{
+    content:"★ Melhor custo total";
+    position:absolute; top:0; left:var(--sp-500); transform:translateY(-50%);
+    background:var(--club-600); color:var(--neutral-50);
+    font-weight:700; font-size:12px; line-height:1; letter-spacing:.02em;
+    padding:6px 12px; border-radius:var(--r-full);
+    box-shadow:var(--shadow-sm);
+  }
+  .channel--best .channel__cta{background:var(--club-600)}
+  .channel--best .channel__cta:hover{background:var(--club-700)}
+  .channel--best .channel__price .total{color:var(--club-600)}
+  .channel--best .channel__savings{
+    display:inline-flex; align-items:center;
+    font-size:12px; line-height:16px; font-weight:700; color:var(--green-800);
+    background:var(--green-100); border-radius:var(--r-full);
+    padding:2px 8px; white-space:nowrap; margin-top:4px;
+  }
+
+  /* ---------- RODAPÉ DE CONFIANÇA ---------- */
+  .trust-note{
+    font-size:12px; line-height:16px; color:var(--neutral-700);
+    text-align:center; padding:0 var(--sp-500);
+  }
+
+  .divider{width:100%; max-width:390px; border:0; border-top:1px solid var(--neutral-300)}
+</style>
+</head>
+<body>
+
+  <!-- ============ CENÁRIO A — 3 canais ============ -->
+  <div class="stage-label">Cenário A · 3 canais visíveis</div>
+  <section class="scenario" aria-label="Comparação de preços entre lojas">
+    <header class="compare-head">
+      <h2>Onde comprar</h2>
+      <span class="freshness">Preços atualizados há 12 min · 3 lojas</span>
+    </header>
+
+    <article class="channel channel--best">
+      <div class="channel__logo"><img src="assets/Shopee.svg" alt="Shopee"></div>
+      <h3 class="channel__name">Shopee</h3>
+            <div class="channel__price">
+        <span class="total">R$ 204,80</span>
+        <div class="channel__savings">Economize R$ 2,10</div>
+        <span class="caption"><span>R$ 179,90</span><span>+ frete R$ 24,90</span></span>
+      </div>
+      <a class="channel__cta" href="#">Comprar na Shopee
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+    </article>
+
+    <article class="channel">
+      <div class="channel__logo"><img src="assets/tiktok.svg" alt="TikTok Shop"></div>
+      <h3 class="channel__name">TikTok Shop</h3>
+      <div class="channel__price">
+        <span class="total">R$ 206,90</span>
+        <span class="caption"><span>R$ 184,90</span><span>+ frete R$ 22,00</span></span>
+      </div>
+      <a class="channel__cta" href="#">Comprar no TikTok Shop
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+    </article>
+
+    <article class="channel">
+      <div class="channel__logo"><img src="assets/ybera.svg" alt="Ybera.com"></div>
+      <h3 class="channel__name">Ybera.com</h3>
+      <div class="channel__price">
+        <span class="total">R$ 209,80</span>
+        <span class="caption"><span>R$ 189,90</span><span>+ frete R$ 19,90</span></span>
+      </div>
+      <a class="channel__cta" href="#">Comprar na Ybera.com
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+    </article>
+
+    <p class="trust-note">Sua compra é feita direto na loja escolhida, com toda a segurança do canal.</p>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ============ CENÁRIO B — 2 canais (TikTok oculto) ============ -->
+  <div class="stage-label">Cenário B · 2 canais (TikTok oculto — sem rastro)</div>
+  <section class="scenario" aria-label="Comparação de preços entre lojas">
+    <header class="compare-head">
+      <h2>Onde comprar</h2>
+      <span class="freshness">Preços atualizados há 12 min · 2 lojas</span>
+    </header>
+
+    <article class="channel channel--best">
+      <div class="channel__logo"><img src="assets/Shopee.svg" alt="Shopee"></div>
+      <h3 class="channel__name">Shopee</h3>
+            <div class="channel__price">
+        <span class="total">R$ 204,80</span>
+        <div class="channel__savings">Economize R$ 5,00</div>
+        <span class="caption"><span>R$ 179,90</span><span>+ frete R$ 24,90</span></span>
+      </div>
+      <a class="channel__cta" href="#">Comprar na Shopee
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+    </article>
+
+    <article class="channel">
+      <div class="channel__logo"><img src="assets/ybera.svg" alt="Ybera.com"></div>
+      <h3 class="channel__name">Ybera.com</h3>
+      <div class="channel__price">
+        <span class="total">R$ 209,80</span>
+        <span class="caption"><span>R$ 189,90</span><span>+ frete R$ 19,90</span></span>
+      </div>
+      <a class="channel__cta" href="#">Comprar na Ybera.com
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+    </article>
+
+    <p class="trust-note">Sua compra é feita direto na loja escolhida, com toda a segurança do canal.</p>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ============ CENÁRIO C — 1 canal (estado comum: só Wake) ============ -->
+  <div class="stage-label">Cenário C · 1 canal (só Wake — sem badge de comparação)</div>
+  <section class="scenario" aria-label="Loja disponível">
+    <header class="compare-head">
+      <h2>Onde comprar</h2>
+      <span class="freshness">Preço atualizado há 12 min</span>
+    </header>
+
+    <article class="channel">
+      <div class="channel__logo"><img src="assets/ybera.svg" alt="Ybera.com"></div>
+      <h3 class="channel__name">Ybera.com</h3>
+      <div class="channel__price">
+        <span class="total">R$ 209,80</span>
+        <span class="caption"><span>R$ 189,90</span><span>+ frete R$ 19,90</span></span>
+      </div>
+      <a class="channel__cta channel__cta--solo" href="#">Comprar na Ybera.com
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+    </article>
+
+    <p class="trust-note">Sua compra é feita direto na loja escolhida, com toda a segurança do canal.</p>
+  </section>
+
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peça 03 — Loading e indisponibilidade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --neutral-50:#FFFFFF; --neutral-100:#FAF9FC; --neutral-200:#ECEBF0;
+    --neutral-300:#E2E1E5; --neutral-400:#C9C8CC; --neutral-500:#B0AFB2;
+    --neutral-600:#6C6B6E; --neutral-700:#505052; --neutral-900:#1E1E1F;
+    --club-400:#FA4277; --club-500:#ED1A57; --club-600:#C70F43;
+    --amber-100:#FEF3C7; --amber-700:#B45309;
+    --sp-100:4px; --sp-200:8px; --sp-300:12px; --sp-400:16px;
+    --sp-500:20px; --sp-600:24px; --sp-800:32px; --sp-1000:40px;
+    --r-200:8px; --r-300:12px; --r-400:16px; --r-full:9999px;
+    --font-display:'Syne',system-ui,sans-serif;
+    --font-body:'Nunito Sans',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-body); background:var(--neutral-200); color:var(--neutral-900);
+    -webkit-font-smoothing:antialiased;
+    padding:var(--sp-800) var(--sp-400) 96px;
+    display:flex; flex-direction:column; align-items:center; gap:var(--sp-800);
+  }
+  .stage-label{
+    font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--neutral-600); max-width:390px; width:100%; margin:0 auto;
+  }
+  .scenario{width:100%; max-width:390px; display:flex; flex-direction:column; gap:var(--sp-400)}
+  .divider{width:100%; max-width:390px; border:0; border-top:1px solid var(--neutral-300)}
+
+  /* ============ SKELETON (loading) ============ */
+  .sk{position:relative; overflow:hidden; background:var(--neutral-300); border-radius:var(--r-200)}
+  .sk::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+    transform:translateX(-100%);
+    animation:shimmer 1.6s ease-in-out infinite;
+  }
+  @keyframes shimmer{to{transform:translateX(100%)}}
+  @media (prefers-reduced-motion: reduce){
+    .sk::after{animation:none}
+  }
+
+  .sk-head{display:flex; flex-direction:column; gap:8px; padding:0 var(--sp-100)}
+  .sk-title{width:132px; height:20px}
+  .sk-sub{width:196px; height:13px}
+
+  .sk-card{
+    background:var(--neutral-50); border:1px solid var(--neutral-300);
+    border-radius:var(--r-400); padding:var(--sp-500);
+    display:grid; grid-template-columns:48px 1fr auto;
+    grid-template-areas:"logo name price" "logo meta price" "cta cta cta";
+    column-gap:var(--sp-400); row-gap:6px; align-items:center;
+  }
+  .sk-logo{grid-area:logo; width:48px; height:48px; border-radius:var(--r-300)}
+  .sk-name{grid-area:name; width:96px; height:14px; align-self:end}
+  .sk-meta{grid-area:meta; width:72px; height:11px; align-self:start}
+  .sk-price{grid-area:price; justify-self:end; display:flex; flex-direction:column; align-items:flex-end; gap:6px}
+  .sk-total{width:104px; height:20px}
+  .sk-cap{width:80px; height:11px}
+  .sk-cta{grid-area:cta; height:48px; border-radius:var(--r-300); margin-top:var(--sp-400)}
+
+  /* ============ INDISPONIBILIDADE TOTAL ============ */
+  .empty{
+    background:var(--neutral-50); border:1px solid var(--neutral-300);
+    border-radius:var(--r-400);
+    padding:var(--sp-1000) var(--sp-600);
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    gap:var(--sp-300);
+  }
+  .empty__glyph{
+    width:56px; height:56px; border-radius:var(--r-full);
+    background:var(--amber-100); color:var(--amber-700);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:var(--sp-100);
+  }
+  .empty__glyph svg{width:26px; height:26px}
+  .empty h2{
+    font-family:var(--font-display); font-weight:600; font-size:18px; line-height:24px;
+  }
+  .empty p{
+    font-size:14px; line-height:20px; color:var(--neutral-600); max-width:280px;
+  }
+  .empty__retry{
+    margin-top:var(--sp-300);
+    display:inline-flex; align-items:center; gap:var(--sp-200);
+    height:48px; padding:0 var(--sp-600);
+    border-radius:var(--r-300); border:1px solid var(--neutral-400);
+    background:var(--neutral-50); color:var(--neutral-900);
+    font-family:var(--font-body); font-weight:700; font-size:16px;
+    cursor:pointer; text-decoration:none;
+    transition:background .2s ease, transform .08s ease;
+  }
+  .empty__retry:hover{background:var(--neutral-100)}
+  .empty__retry:active{transform:scale(.985)}
+  .empty__retry:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
+  .empty__retry svg{width:16px; height:16px}
+</style>
+</head>
+<body>
+
+  <!-- ============ CENÁRIO D — LOADING ============ -->
+  <div class="stage-label">Cenário D · Loading (skeleton da pilha)</div>
+  <section class="scenario" aria-label="Carregando comparação de preços" aria-busy="true">
+    <div class="sk-head">
+      <div class="sk sk-title"></div>
+      <div class="sk sk-sub"></div>
+    </div>
+
+    <div class="sk-card">
+      <div class="sk sk-logo"></div>
+      <div class="sk sk-name"></div>
+      <div class="sk sk-meta"></div>
+      <div class="sk-price"><div class="sk sk-total"></div><div class="sk sk-cap"></div></div>
+      <div class="sk sk-cta"></div>
+    </div>
+    <div class="sk-card">
+      <div class="sk sk-logo"></div>
+      <div class="sk sk-name"></div>
+      <div class="sk sk-meta"></div>
+      <div class="sk-price"><div class="sk sk-total"></div><div class="sk sk-cap"></div></div>
+      <div class="sk sk-cta"></div>
+    </div>
+    <div class="sk-card">
+      <div class="sk sk-logo"></div>
+      <div class="sk sk-name"></div>
+      <div class="sk sk-meta"></div>
+      <div class="sk-price"><div class="sk sk-total"></div><div class="sk sk-cap"></div></div>
+      <div class="sk sk-cta"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ============ CENÁRIO E — INDISPONIBILIDADE TOTAL ============ -->
+  <div class="stage-label">Cenário E · Indisponibilidade total (zero canais válidos)</div>
+  <section class="scenario" aria-label="Lojas indisponíveis">
+    <div class="empty">
+      <div class="empty__glyph">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>
+        </svg>
+      </div>
+      <h2>As lojas deram uma pausa</h2>
+      <p>Nenhuma loja está disponível para este produto agora. Os preços são atualizados a cada meia hora — volte em instantes.</p>
+      <a class="empty__retry" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/>
+        </svg>
+        Verificar de novo
+      </a>
+    </div>
+  </section>
+
+</body>
+</html>

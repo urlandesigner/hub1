@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peça 05 — Página completa do comparador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --neutral-50:#FFFFFF; --neutral-100:#FAF9FC; --neutral-200:#ECEBF0;
+    --neutral-300:#E2E1E5; --neutral-400:#C9C8CC; --neutral-500:#B0AFB2;
+    --neutral-600:#6C6B6E; --neutral-700:#505052; --neutral-900:#1E1E1F;
+    --club-50:#FEF0F4; --club-100:#FEC8D8; --club-400:#FA4277;
+    --club-500:#ED1A57; --club-600:#C70F43; --club-700:#980B38;
+    --green-100:#E6F6E5; --green-600:#50AE47; --green-700:#33922A; --green-800:#2B6A25;
+    --amber-100:#FEF3C7; --amber-700:#B45309;
+    --sp-100:4px; --sp-200:8px; --sp-300:12px; --sp-400:16px;
+    --sp-500:20px; --sp-600:24px; --sp-800:32px; --sp-1000:40px;
+    --r-200:8px; --r-300:12px; --r-400:16px; --r-500:20px; --r-full:9999px;
+    --font-display:'Syne',system-ui,sans-serif;
+    --font-body:'Nunito Sans',system-ui,sans-serif;
+    --shadow-sm:0 0 8px rgba(5,5,5,.10);
+    --ease-out:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-body); background:var(--neutral-200); color:var(--neutral-900);
+    -webkit-font-smoothing:antialiased;
+    display:flex; flex-direction:column; align-items:center;
+    padding-bottom:120px;
+  }
+  .page{width:100%; max-width:390px}
+
+  /* ---------- ENTRADA ORQUESTRADA ---------- */
+  .reveal{opacity:0; transform:translateY(12px); animation:reveal .6s var(--ease-out) forwards}
+  .d-0{animation-delay:0ms} .d-1{animation-delay:90ms} .d-2{animation-delay:180ms}
+  .d-3{animation-delay:260ms} .d-4{animation-delay:340ms} .d-5{animation-delay:420ms}
+  @keyframes reveal{to{opacity:1; transform:none}}
+  @media (prefers-reduced-motion: reduce){
+    .reveal{opacity:1; transform:none; animation:none}
+  }
+
+  /* ---------- TOP BAR + HERO (peça 04) ---------- */
+  .topbar{display:flex; align-items:center; justify-content:center; padding:var(--sp-400) var(--sp-400) var(--sp-300)}
+  .topbar img{height:18px; width:auto; opacity:.92}
+  .hero{display:flex; flex-direction:column; align-items:center; text-align:center; padding:0 var(--sp-400) var(--sp-600); gap:var(--sp-400)}
+  .hero__media{
+    width:100%; border-radius:var(--r-500); overflow:hidden;
+    background:var(--neutral-100); border:1px solid var(--neutral-300);
+    aspect-ratio:16/10; position:relative;
+  }
+  .hero__media img{width:100%; height:100%; object-fit:cover; display:block}
+  .hero__media::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 62%,rgba(5,5,5,.18)); pointer-events:none}
+  .hero__referral{
+    position:absolute; left:var(--sp-300); bottom:var(--sp-300); z-index:1;
+    display:inline-flex; align-items:center; gap:var(--sp-200);
+    background:rgba(255,255,255,.9);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    border-radius:var(--r-full); padding:6px 12px 6px 6px;
+  }
+  .hero__avatar{
+    width:24px; height:24px; border-radius:var(--r-full);
+    background:var(--club-100); color:var(--club-700);
+    font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center;
+  }
+  .hero__referral span:last-child{font-size:14px; line-height:18px; font-weight:700; color:var(--neutral-900)}
+  .hero__title{font-family:var(--font-display); font-weight:600; font-size:24px; line-height:32px; letter-spacing:-.01em; padding:0 var(--sp-200)}
+  .hero__lead{font-size:14px; line-height:20px; color:var(--neutral-600); max-width:280px; margin-top:calc(-1 * var(--sp-200))}
+
+  /* ---------- PILHA (peças 01+02) ---------- */
+  .compare{display:flex; flex-direction:column; gap:var(--sp-400); padding:0 var(--sp-400)}
+  .compare-head{display:flex; flex-direction:column; gap:2px; padding:0 var(--sp-100)}
+  .compare-head h2{font-family:var(--font-display); font-weight:600; font-size:18px; line-height:24px}
+  .compare-head .freshness{font-size:14px; line-height:18px; color:var(--neutral-700); display:flex; align-items:center; gap:6px}
+  .compare-head .freshness::before{content:""; width:6px; height:6px; border-radius:var(--r-full); background:var(--green-600); flex:none}
+
+  .channel{
+    position:relative; background:var(--neutral-50);
+    border:1px solid var(--neutral-300); border-radius:var(--r-400);
+    padding:var(--sp-500);
+    display:grid; grid-template-columns:48px 1fr auto;
+    grid-template-areas:"logo name price" "logo meta price" "cta cta cta";
+    column-gap:var(--sp-400); row-gap:var(--sp-100); align-items:center;
+  }
+  .channel__logo{grid-area:logo; width:48px; height:48px; border-radius:var(--r-300); background:var(--neutral-100); border:1px solid var(--neutral-200); display:flex; align-items:center; justify-content:center; overflow:hidden}
+  .channel__logo img{width:28px; height:28px; object-fit:contain}
+  .channel__name{grid-area:name; font-family:var(--font-display); font-weight:600; font-size:16px; line-height:22px; grid-row:1/3; align-self:center; white-space:nowrap}
+  .channel__price{grid-area:price; text-align:right; align-self:center}
+  .channel__price .total{font-family:var(--font-display); font-weight:700; font-size:24px; line-height:32px; letter-spacing:-.01em; white-space:nowrap}
+  .channel__price .caption{display:block; font-size:12px; line-height:16px; color:var(--neutral-600); margin-top:2px; white-space:nowrap}
+  .channel__price .caption span{display:block}
+  .channel__cta{
+    grid-area:cta; margin-top:var(--sp-400);
+    display:flex; align-items:center; justify-content:center; gap:var(--sp-200);
+    height:48px; border-radius:var(--r-300); border:0; cursor:pointer;
+    font-family:var(--font-body); font-weight:700; font-size:16px;
+    background:var(--neutral-900); color:var(--neutral-50);
+    transition:background .2s ease, transform .08s ease; text-decoration:none;
+  }
+  .channel__cta:hover{background:var(--neutral-700)}
+  .channel__cta:active{transform:scale(.985)}
+  .channel__cta:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
+  .channel__cta svg{width:16px; height:16px}
+  .channel--best{border-color:var(--club-500); box-shadow:var(--shadow-sm); padding-top:var(--sp-600)}
+  .channel--best::before{
+    content:"★ Melhor custo total";
+    position:absolute; top:0; left:var(--sp-500); transform:translateY(-50%);
+    background:var(--club-600); color:var(--neutral-50);
+    font-weight:700; font-size:12px; line-height:1; letter-spacing:.02em;
+    padding:6px 12px; border-radius:var(--r-full);
+    box-shadow:var(--shadow-sm);
+  }
+  .channel--best .channel__cta{background:var(--club-600)}
+  .channel--best .channel__cta:hover{background:var(--club-700)}
+  .channel--best .channel__price .total{color:var(--club-600)}
+  .channel--best .channel__savings{
+    display:inline-flex; align-items:center;
+    font-size:12px; line-height:16px; font-weight:700; color:var(--green-800);
+    background:var(--green-100); border-radius:var(--r-full);
+    padding:2px 8px; white-space:nowrap; margin-top:4px;
+  }
+  .trust-note{font-size:12px; line-height:16px; color:var(--neutral-700); text-align:center; padding:0 var(--sp-500)}
+
+  /* ---------- SKELETON (peça 03) ---------- */
+  .sk{position:relative; overflow:hidden; background:var(--neutral-300); border-radius:var(--r-200)}
+  .sk::after{content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent); transform:translateX(-100%); animation:shimmer 1.6s ease-in-out infinite}
+  @keyframes shimmer{to{transform:translateX(100%)}}
+  @media (prefers-reduced-motion: reduce){.sk::after{animation:none}}
+  .sk-head{display:flex; flex-direction:column; gap:8px; padding:0 var(--sp-100)}
+  .sk-title{width:132px; height:20px}
+  .sk-sub{width:196px; height:13px}
+  .sk-card{
+    background:var(--neutral-50); border:1px solid var(--neutral-300); border-radius:var(--r-400);
+    padding:var(--sp-500);
+    display:grid; grid-template-columns:48px 1fr auto;
+    grid-template-areas:"logo name price" "logo meta price" "cta cta cta";
+    column-gap:var(--sp-400); row-gap:6px; align-items:center;
+  }
+  .sk-logo{grid-area:logo; width:48px; height:48px; border-radius:var(--r-300)}
+  .sk-name{grid-area:name; width:96px; height:14px; align-self:end}
+  .sk-meta{grid-area:meta; width:72px; height:11px; align-self:start}
+  .sk-price{grid-area:price; justify-self:end; display:flex; flex-direction:column; align-items:flex-end; gap:6px}
+  .sk-total{width:104px; height:20px}
+  .sk-cap{width:80px; height:11px}
+  .sk-cta{grid-area:cta; height:48px; border-radius:var(--r-300); margin-top:var(--sp-400)}
+
+  /* ---------- EMPTY (peça 03) ---------- */
+  .empty{
+    background:var(--neutral-50); border:1px solid var(--neutral-300); border-radius:var(--r-400);
+    padding:var(--sp-1000) var(--sp-600);
+    display:flex; flex-direction:column; align-items:center; text-align:center; gap:var(--sp-300);
+  }
+  .empty__glyph{width:56px; height:56px; border-radius:var(--r-full); background:var(--amber-100); color:var(--amber-700); display:flex; align-items:center; justify-content:center; margin-bottom:var(--sp-100)}
+  .empty__glyph svg{width:26px; height:26px}
+  .empty h2{font-family:var(--font-display); font-weight:600; font-size:18px; line-height:24px}
+  .empty p{font-size:14px; line-height:20px; color:var(--neutral-600); max-width:280px}
+  .empty__retry{
+    margin-top:var(--sp-300); display:inline-flex; align-items:center; gap:var(--sp-200);
+    height:48px; padding:0 var(--sp-600); border-radius:var(--r-300);
+    border:1px solid var(--neutral-400); background:var(--neutral-50); color:var(--neutral-900);
+    font-weight:700; font-size:16px; cursor:pointer; text-decoration:none;
+    transition:background .2s ease, transform .08s ease;
+  }
+  .empty__retry:hover{background:var(--neutral-100)}
+  .empty__retry:active{transform:scale(.985)}
+  .empty__retry:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
+  .empty__retry svg{width:16px; height:16px}
+
+  /* ---------- BARRA DE CENÁRIOS (dev only — não vai pra produção) ---------- */
+  .devbar{
+    position:fixed; bottom:0; left:0; right:0; z-index:50;
+    display:flex; justify-content:center; gap:6px;
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+    background:rgba(30,30,31,.92);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  }
+  .devbar button{
+    font-family:var(--font-body); font-size:12px; font-weight:700;
+    padding:6px 12px; border-radius:var(--r-full); border:1px solid var(--neutral-600);
+    background:transparent; color:var(--neutral-400); cursor:pointer;
+    white-space:nowrap;
+  }
+  .devbar button[aria-pressed="true"]{background:var(--neutral-50); color:var(--neutral-900); border-color:var(--neutral-50)}
+
+  [hidden]{display:none !important}
+
+  /* ---------- FLUXO DE SAÍDA (peça 06 integrada) ---------- */
+  .channel__cta[data-state="loading"]{pointer-events:none}
+  .channel__cta[data-state="loading"] .arrow{display:none}
+  .spinner{
+    width:18px; height:18px; border-radius:var(--r-full);
+    border:2px solid rgba(255,255,255,.35); border-top-color:var(--neutral-50);
+    animation:spin .7s linear infinite; display:none;
+  }
+  .channel__cta[data-state="loading"] .spinner{display:block}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion: reduce){.spinner{animation-duration:1.4s}}
+  .exit{
+    position:fixed; inset:0; z-index:100;
+    background:rgba(255,255,255,.9);
+    -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:var(--sp-400); text-align:center; padding:var(--sp-600);
+    opacity:0; pointer-events:none; transition:opacity .35s var(--ease-out);
+  }
+  .exit.on{opacity:1; pointer-events:auto}
+  .exit__logo{
+    width:72px; height:72px; border-radius:var(--r-400);
+    background:var(--neutral-50); border:1px solid var(--neutral-300);
+    box-shadow:var(--shadow-sm);
+    display:flex; align-items:center; justify-content:center;
+    transform:scale(.8); transition:transform .45s var(--ease-out);
+  }
+  .exit.on .exit__logo{transform:scale(1)}
+  .exit__logo img{width:48px; height:48px; object-fit:contain}
+  .exit h2{font-family:var(--font-display); font-weight:600; font-size:24px; line-height:32px}
+  .exit p{font-size:14px; line-height:20px; color:var(--neutral-600); max-width:260px}
+  .exit__dots{display:flex; gap:6px}
+  .exit__dots i{
+    width:6px; height:6px; border-radius:var(--r-full); background:var(--club-500);
+    animation:pulse 1.2s ease-in-out infinite;
+  }
+  .exit__dots i:nth-child(2){animation-delay:.15s}
+  .exit__dots i:nth-child(3){animation-delay:.3s}
+  @keyframes pulse{0%,100%{opacity:.25; transform:scale(.9)} 50%{opacity:1; transform:scale(1.1)}}
+  @media (prefers-reduced-motion: reduce){.exit__dots i{animation:none; opacity:.7}}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header class="topbar reveal d-0">
+    <img src="assets/logo-black.svg" alt="Ybera">
+  </header>
+
+  <section class="hero">
+    <div class="hero__media reveal d-0">
+      <img src="assets/produto-hero.jpg" alt="Escova Progressiva Fashion Gold 500g">
+      <div class="hero__referral">
+        <span class="hero__avatar" aria-hidden="true">C</span>
+        <span>Indicação de Camila</span>
+      </div>
+    </div>
+    <h1 class="hero__title reveal d-1">Escova Progressiva Fashion&nbsp;Gold 500g</h1>
+    <p class="hero__lead reveal d-1">Compare preço e frete e compre na loja que preferir.</p>
+  </section>
+
+  <!-- ===== ESTADO: SUCESSO ===== -->
+  <section class="compare" id="state-success" aria-label="Comparação de preços entre lojas">
+    <header class="compare-head reveal d-2">
+      <h2>Onde comprar</h2>
+      <span class="freshness" id="freshness">Preços atualizados há 12 min · <span id="store-count">3 lojas</span></span>
+    </header>
+
+    <article class="channel channel--best reveal d-3" data-channel="shopee">
+      <div class="channel__logo"><img src="assets/Shopee.svg" alt=""></div>
+      <h3 class="channel__name">Shopee</h3>
+            <div class="channel__price">
+        <span class="total">R$ 204,80</span>
+        <div class="channel__savings">Economize R$ 2,10</div>
+        <span class="caption"><span>R$ 179,90</span><span>+ frete R$ 24,90</span></span>
+      </div>
+      <a class="channel__cta" href="#" data-dest="Shopee" data-artigo="a" data-logo="assets/Shopee.svg" data-href="https://shopee.com.br/"><span class="spinner" aria-hidden="true"></span><span class="label">Comprar na Shopee</span>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+    </article>
+
+    <article class="channel reveal d-4" data-channel="tiktok">
+      <div class="channel__logo"><img src="assets/tiktok.svg" alt=""></div>
+      <h3 class="channel__name">TikTok Shop</h3>
+      <div class="channel__price">
+        <span class="total">R$ 206,90</span>
+        <span class="caption"><span>R$ 184,90</span><span>+ frete R$ 22,00</span></span>
+      </div>
+      <a class="channel__cta" href="#" data-dest="TikTok Shop" data-artigo="o" data-logo="assets/tiktok.svg" data-href="https://www.tiktok.com/shop"><span class="spinner" aria-hidden="true"></span><span class="label">Comprar no TikTok Shop</span>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+    </article>
+
+    <article class="channel reveal d-5" data-channel="wake">
+      <div class="channel__logo"><img src="assets/ybera.svg" alt=""></div>
+      <h3 class="channel__name">Ybera.com</h3>
+      <div class="channel__price">
+        <span class="total">R$ 209,80</span>
+        <span class="caption"><span>R$ 189,90</span><span>+ frete R$ 19,90</span></span>
+      </div>
+      <a class="channel__cta" href="#" data-dest="Ybera.com" data-artigo="a" data-logo="assets/ybera.svg" data-href="https://www.ybera.com/produto/escova-progressiva-500g-fashion-gold-150264?parceiro=52154"><span class="spinner" aria-hidden="true"></span><span class="label">Comprar na Ybera.com</span>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+    </article>
+
+    <p class="trust-note reveal d-5">Sua compra é feita direto na loja escolhida, com toda a segurança do canal.</p>
+  </section>
+
+  <!-- ===== ESTADO: LOADING ===== -->
+  <section class="compare" id="state-loading" aria-label="Carregando comparação" aria-busy="true" hidden>
+    <div class="sk-head"><div class="sk sk-title"></div><div class="sk sk-sub"></div></div>
+    <div class="sk-card"><div class="sk sk-logo"></div><div class="sk sk-name"></div><div class="sk sk-meta"></div><div class="sk-price"><div class="sk sk-total"></div><div class="sk sk-cap"></div></div><div class="sk sk-cta"></div></div>
+    <div class="sk-card"><div class="sk sk-logo"></div><div class="sk sk-name"></div><div class="sk sk-meta"></div><div class="sk-price"><div class="sk sk-total"></div><div class="sk sk-cap"></div></div><div class="sk sk-cta"></div></div>
+    <div class="sk-card"><div class="sk sk-logo"></div><div class="sk sk-name"></div><div class="sk sk-meta"></div><div class="sk-price"><div class="sk sk-total"></div><div class="sk sk-cap"></div></div><div class="sk sk-cta"></div></div>
+  </section>
+
+  <!-- ===== ESTADO: INDISPONÍVEL ===== -->
+  <section class="compare" id="state-empty" aria-label="Lojas indisponíveis" hidden>
+    <div class="empty">
+      <div class="empty__glyph">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+      </div>
+      <h2>As lojas deram uma pausa</h2>
+      <p>Nenhuma loja está disponível para este produto agora. Os preços são atualizados a cada meia hora — volte em instantes.</p>
+      <a class="empty__retry" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
+        Verificar de novo
+      </a>
+    </div>
+  </section>
+</div>
+
+<!-- Overlay de saída (peça 06 integrada) -->
+<div class="exit" id="exit" role="status" aria-live="polite">
+  <div class="exit__logo"><img id="exit-logo" src="assets/Shopee.svg" alt=""></div>
+  <h2 id="exit-title">Levando você para a Shopee</h2>
+  <p>Você conclui a compra direto na loja, do jeito de sempre.</p>
+  <div class="exit__dots" aria-hidden="true"><i></i><i></i><i></i></div>
+</div>
+
+<!-- Barra de cenários — DEV ONLY, removida na entrega -->
+<nav class="devbar" aria-label="Cenários (dev)">
+  <button data-scenario="a" aria-pressed="true">A · 3 lojas</button>
+  <button data-scenario="b" aria-pressed="false">B · 2</button>
+  <button data-scenario="c" aria-pressed="false">C · 1</button>
+  <button data-scenario="d" aria-pressed="false">D · loading</button>
+  <button data-scenario="e" aria-pressed="false">E · vazio</button>
+</nav>
+
+<script>
+  const success = document.getElementById('state-success');
+  const loading = document.getElementById('state-loading');
+  const empty   = document.getElementById('state-empty');
+  const tiktok  = document.querySelector('[data-channel="tiktok"]');
+  const shopee  = document.querySelector('[data-channel="shopee"]');
+  const wake    = document.querySelector('[data-channel="wake"]');
+  const savings = shopee.querySelector('.channel__savings');
+  const count   = document.getElementById('store-count');
+  const fresh   = document.getElementById('freshness');
+
+  const scenarios = {
+    a(){ show(success); tiktok.hidden=false; shopee.hidden=false;
+         shopee.classList.add('channel--best');
+         savings.textContent='Economize R$ 2,10';
+         fresh.innerHTML='Preços atualizados há 12 min · <span id="store-count">3 lojas</span>'; },
+    b(){ show(success); tiktok.hidden=true; shopee.hidden=false;
+         shopee.classList.add('channel--best');
+         savings.textContent='Economize R$ 5,00';
+         fresh.innerHTML='Preços atualizados há 12 min · <span id="store-count">2 lojas</span>'; },
+    c(){ show(success); tiktok.hidden=true; shopee.hidden=true;
+         fresh.innerHTML='Preço atualizado há 12 min'; },
+    d(){ show(loading); },
+    e(){ show(empty); }
+  };
+  function show(el){ [success,loading,empty].forEach(s=>s.hidden = s!==el); }
+
+  document.querySelectorAll('.devbar button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.devbar button').forEach(b=>b.setAttribute('aria-pressed','false'));
+      btn.setAttribute('aria-pressed','true');
+      scenarios[btn.dataset.scenario]();
+    });
+  });
+
+  // fluxo de saída (peça 06 integrada): press → CTA loading → overlay → redirect
+  const exit = document.getElementById('exit');
+  const exitLogo = document.getElementById('exit-logo');
+  const exitTitle = document.getElementById('exit-title');
+  document.querySelectorAll('.channel__cta').forEach(a=>{
+    a.addEventListener('click', e=>{
+      e.preventDefault();
+      const {dest, artigo, logo, href} = a.dataset;
+      a.setAttribute('data-state','loading');
+      a.querySelector('.label').textContent = `Abrindo ${artigo === 'o' ? 'o' : 'a'} ${dest}…`;
+      exitLogo.src = logo;
+      exitTitle.textContent = `Levando você para ${artigo} ${dest}`;
+      setTimeout(()=>exit.classList.add('on'), 550);
+      setTimeout(()=>{ window.location.href = href; }, 1400); // produção: link de destino com vínculo (RF-002/RF-007)
+    });
+  });
+  document.querySelector('.empty__retry').addEventListener('click', e=>e.preventDefault());
+</script>
+
+</body>
+</html>

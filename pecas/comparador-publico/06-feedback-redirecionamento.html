@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peça 06 — Feedback de redirecionamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --neutral-50:#FFFFFF; --neutral-100:#FAF9FC; --neutral-200:#ECEBF0;
+    --neutral-300:#E2E1E5; --neutral-400:#C9C8CC; --neutral-500:#B0AFB2;
+    --neutral-600:#6C6B6E; --neutral-700:#505052; --neutral-900:#1E1E1F;
+    --club-100:#FEC8D8; --club-400:#FA4277; --club-500:#ED1A57;
+    --club-600:#C70F43; --club-700:#980B38;
+    --green-100:#E6F6E5; --green-700:#33922A; --green-800:#2B6A25;
+    --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-700:#B45309;
+    --sp-100:4px; --sp-200:8px; --sp-300:12px; --sp-400:16px;
+    --sp-500:20px; --sp-600:24px; --sp-800:32px;
+    --r-200:8px; --r-300:12px; --r-400:16px; --r-full:9999px;
+    --font-display:'Syne',system-ui,sans-serif;
+    --font-body:'Nunito Sans',system-ui,sans-serif;
+    --shadow-sm:0 0 8px rgba(5,5,5,.10);
+    --ease-out:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-body); background:var(--neutral-200); color:var(--neutral-900);
+    -webkit-font-smoothing:antialiased;
+    padding:var(--sp-800) var(--sp-400) 120px;
+    display:flex; flex-direction:column; align-items:center; gap:var(--sp-600);
+  }
+  .stage-label{
+    font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--neutral-600); max-width:390px; width:100%; margin:0 auto;
+  }
+  .stack{width:100%; max-width:390px; display:flex; flex-direction:column; gap:var(--sp-400)}
+
+  /* ---------- CARD (base peça 01) ---------- */
+  .channel{
+    position:relative; background:var(--neutral-50);
+    border:1px solid var(--neutral-300); border-radius:var(--r-400);
+    padding:var(--sp-500);
+    display:grid; grid-template-columns:48px 1fr auto;
+    grid-template-areas:"logo name price" "logo meta price" "cta cta cta" "note note note";
+    column-gap:var(--sp-400); row-gap:var(--sp-100); align-items:center;
+  }
+  .channel__logo{grid-area:logo; width:48px; height:48px; border-radius:var(--r-300); background:var(--neutral-100); border:1px solid var(--neutral-200); display:flex; align-items:center; justify-content:center; overflow:hidden}
+  .channel__logo img{width:28px; height:28px; object-fit:contain}
+  .channel__name{grid-area:name; font-family:var(--font-display); font-weight:600; font-size:16px; line-height:22px; grid-row:1/3; align-self:center; white-space:nowrap}
+  .channel__price{grid-area:price; text-align:right; align-self:center}
+  .channel__price .total{font-family:var(--font-display); font-weight:700; font-size:24px; line-height:32px; letter-spacing:-.01em; white-space:nowrap}
+  .channel__price .caption{display:block; font-size:12px; line-height:16px; color:var(--neutral-600); margin-top:2px; white-space:nowrap}
+  .channel__price .caption span{display:block}
+  .channel--best{border-color:var(--club-500); box-shadow:var(--shadow-sm); padding-top:var(--sp-600)}
+  .channel--best::before{
+    content:"★ Melhor custo total";
+    position:absolute; top:0; left:var(--sp-500); transform:translateY(-50%);
+    background:var(--club-600); color:var(--neutral-50);
+    font-weight:700; font-size:12px; line-height:1; letter-spacing:.02em;
+    padding:6px 12px; border-radius:var(--r-full);
+    box-shadow:var(--shadow-sm);
+  }
+  .channel--best .channel__savings{
+    display:inline-flex; align-items:center;
+    font-size:12px; line-height:16px; font-weight:700; color:var(--green-800);
+    background:var(--green-100); border-radius:var(--r-full);
+    padding:2px 8px; white-space:nowrap; margin-top:4px;
+  }
+  .channel--best .channel__price .total{color:var(--club-600)}
+  /* a pill de economia pertence à recomendação — some se o card perde o destaque */
+  .channel:not(.channel--best) .channel__savings{display:none}
+
+  /* ---------- CTA + ESTADOS ---------- */
+  .channel__cta{
+    grid-area:cta; margin-top:var(--sp-400);
+    display:flex; align-items:center; justify-content:center; gap:var(--sp-200);
+    height:48px; border-radius:var(--r-300); border:0; cursor:pointer;
+    font-family:var(--font-body); font-weight:700; font-size:16px;
+    background:var(--club-600); color:var(--neutral-50);
+    transition:background .2s ease, transform .08s ease, opacity .2s ease;
+  }
+  .channel__cta:hover{background:var(--club-700)}
+  .channel__cta:active{transform:scale(.985)}
+  .channel__cta:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
+  .channel__cta svg{width:16px; height:16px}
+  .channel__cta[data-state="loading"]{pointer-events:none}
+  .channel__cta[data-state="loading"] .arrow{display:none}
+  .channel__cta[disabled]{background:var(--neutral-300); color:var(--neutral-600); pointer-events:none}
+
+  .spinner{
+    width:18px; height:18px; border-radius:var(--r-full);
+    border:2px solid rgba(255,255,255,.35); border-top-color:var(--neutral-50);
+    animation:spin .7s linear infinite; display:none;
+  }
+  .channel__cta[data-state="loading"] .spinner{display:block}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion: reduce){.spinner{animation-duration:1.4s}}
+
+  /* ---------- AVISO INLINE (canal caiu no clique) ---------- */
+  .channel__note{
+    grid-area:note; margin-top:var(--sp-300);
+    display:none; align-items:flex-start; gap:var(--sp-200);
+    background:var(--amber-100); border:1px solid var(--amber-200);
+    border-radius:var(--r-200); padding:var(--sp-300);
+    font-size:14px; line-height:18px; color:var(--amber-700); font-weight:600;
+  }
+  .channel--unavailable .channel__note{display:flex}
+  .channel__note svg{width:16px; height:16px; flex:none; margin-top:1px}
+
+  /* ---------- OVERLAY DE SAÍDA ---------- */
+  .exit{
+    position:fixed; inset:0; z-index:100;
+    background:rgba(255,255,255,.9);
+    -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:var(--sp-400); text-align:center; padding:var(--sp-600);
+    opacity:0; pointer-events:none; transition:opacity .35s var(--ease-out);
+  }
+  .exit.on{opacity:1; pointer-events:auto}
+  .exit__logo{
+    width:72px; height:72px; border-radius:var(--r-400);
+    background:var(--neutral-50); border:1px solid var(--neutral-300);
+    box-shadow:0 0 8px rgba(5,5,5,.10);
+    display:flex; align-items:center; justify-content:center;
+    transform:scale(.8); transition:transform .45s var(--ease-out);
+  }
+  .exit.on .exit__logo{transform:scale(1)}
+  .exit__logo img{width:48px; height:48px; object-fit:contain}
+  .exit h2{font-family:var(--font-display); font-weight:600; font-size:24px; line-height:32px}
+  .exit p{font-size:14px; line-height:20px; color:var(--neutral-600); max-width:260px}
+  .exit__dots{display:flex; gap:6px}
+  .exit__dots i{
+    width:6px; height:6px; border-radius:var(--r-full); background:var(--club-500);
+    animation:pulse 1.2s ease-in-out infinite;
+  }
+  .exit__dots i:nth-child(2){animation-delay:.15s}
+  .exit__dots i:nth-child(3){animation-delay:.3s}
+  @keyframes pulse{0%,100%{opacity:.25; transform:scale(.9)} 50%{opacity:1; transform:scale(1.1)}}
+  @media (prefers-reduced-motion: reduce){.exit__dots i{animation:none; opacity:.7}}
+
+  /* ---------- DEVBAR ---------- */
+  .devbar{
+    position:fixed; bottom:0; left:0; right:0; z-index:200;
+    display:flex; justify-content:center; gap:6px;
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+    background:rgba(30,30,31,.92);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  }
+  .devbar button{
+    font-family:var(--font-body); font-size:12px; font-weight:700; white-space:nowrap;
+    padding:6px 12px; border-radius:var(--r-full); border:1px solid var(--neutral-600);
+    background:transparent; color:var(--neutral-400); cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+  <div class="stage-label">Peça 06 · Clique em “Comprar” → saída para o canal</div>
+  <div class="stack">
+    <article class="channel channel--best" id="card-shopee">
+      <div class="channel__logo"><img src="assets/Shopee.svg" alt=""></div>
+      <h3 class="channel__name">Shopee</h3>
+            <div class="channel__price">
+        <span class="total">R$ 204,80</span>
+        <div class="channel__savings">Economize R$ 2,10</div>
+        <span class="caption"><span>R$ 179,90</span><span>+ frete R$ 24,90</span></span>
+      </div>
+      <button class="channel__cta" id="cta-shopee">
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="label">Comprar na Shopee</span>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+      </button>
+      <div class="channel__note" role="status">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span>A Shopee ficou indisponível agora. Escolha outra loja abaixo — os preços continuam valendo.</span>
+      </div>
+    </article>
+  </div>
+
+  <!-- Overlay de saída -->
+  <div class="exit" id="exit" role="status" aria-live="polite">
+    <div class="exit__logo"><img src="assets/Shopee.svg" alt=""></div>
+    <h2>Levando você para a Shopee</h2>
+    <p>Você conclui a compra direto na loja, do jeito de sempre.</p>
+    <div class="exit__dots" aria-hidden="true"><i></i><i></i><i></i></div>
+  </div>
+
+  <!-- DEV ONLY -->
+  <nav class="devbar" aria-label="Simulações (dev)">
+    <button id="sim-ok">▶ simular clique OK</button>
+    <button id="sim-fail">▶ simular canal caiu</button>
+    <button id="sim-reset">↺ reset</button>
+  </nav>
+
+<script>
+  const cta = document.getElementById('cta-shopee');
+  const card = document.getElementById('card-shopee');
+  const exit = document.getElementById('exit');
+  const label = cta.querySelector('.label');
+
+  function reset(){
+    cta.removeAttribute('data-state'); cta.removeAttribute('disabled');
+    label.textContent = 'Comprar na Shopee';
+    card.classList.remove('channel--unavailable');
+    exit.classList.remove('on');
+  }
+
+  // Fluxo feliz: press → CTA loading (~500ms) → overlay de saída → redirect
+  function simOk(){
+    reset();
+    cta.setAttribute('data-state','loading');
+    label.textContent = 'Abrindo a Shopee…';
+    setTimeout(()=>{ exit.classList.add('on'); }, 550);
+    // produção: window.location.href = linkDestino (com vínculo) após o overlay pintar
+    setTimeout(()=>{ /* redirect real aqui */ }, 1400);
+  }
+
+  // Exceção RF-007: canal caiu entre renderização e clique
+  function simFail(){
+    reset();
+    cta.setAttribute('data-state','loading');
+    label.textContent = 'Abrindo a Shopee…';
+    setTimeout(()=>{
+      cta.removeAttribute('data-state');
+      cta.setAttribute('disabled','');
+      label.textContent = 'Indisponível agora';
+      card.classList.add('channel--unavailable');
+      // canal caído perde o destaque de recomendação — na página real,
+      // o rótulo "Melhor custo total" migra para o próximo canal válido (RF-006)
+      card.classList.remove('channel--best');
+    }, 700);
+  }
+
+  cta.addEventListener('click', simOk);
+  document.getElementById('sim-ok').addEventListener('click', simOk);
+  document.getElementById('sim-fail').addEventListener('click', simFail);
+  document.getElementById('sim-reset').addEventListener('click', reset);
+  exit.addEventListener('click', reset); // dev: clicar no overlay volta
+</script>
+
+</body>
+</html>

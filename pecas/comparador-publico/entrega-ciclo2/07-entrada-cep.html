@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peça 07 — Entrada de CEP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Foundation (kz) — Neutral */
+    --neutral-50:#FFFFFF; --neutral-100:#FAF9FC; --neutral-200:#ECEBF0;
+    --neutral-300:#E2E1E5; --neutral-400:#C9C8CC; --neutral-500:#B0AFB2;
+    --neutral-600:#6C6B6E; --neutral-700:#505052; --neutral-800:#373738;
+    --neutral-900:#1E1E1F;
+    /* Club (Brand Pink) */
+    --club-50:#FEF0F4; --club-100:#FEC8D8; --club-400:#FA4277;
+    --club-500:#ED1A57; --club-600:#C70F43; --club-700:#980B38;
+    /* Green (positive) */
+    --green-100:#E6F6E5; --green-600:#50AE47; --green-700:#33922A; --green-800:#2B6A25;
+    /* Red (error) */
+    --red-50:#FEF1F1; --red-600:#CF3030; --red-700:#A31F1F;
+    /* space-kz */
+    --sp-100:4px; --sp-200:8px; --sp-300:12px; --sp-400:16px;
+    --sp-500:20px; --sp-600:24px; --sp-800:32px;
+    /* radius */
+    --r-200:8px; --r-300:12px; --r-400:16px; --r-full:9999px;
+    /* type */
+    --font-display:'Syne',system-ui,sans-serif;
+    --font-body:'Nunito Sans',system-ui,sans-serif;
+    /* shadow-sm */
+    --shadow-sm:0 0 8px rgba(5,5,5,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-body);
+    background:var(--neutral-200);
+    color:var(--neutral-900);
+    -webkit-font-smoothing:antialiased;
+    padding:var(--sp-800) var(--sp-400);
+    display:flex; flex-direction:column; align-items:center; gap:var(--sp-600);
+  }
+  .stage-label{
+    font-family:var(--font-body); font-size:12px; font-weight:700;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--neutral-600);
+    align-self:flex-start; max-width:390px; width:100%; margin:0 auto;
+  }
+  .stack{width:100%; max-width:390px; display:flex; flex-direction:column; gap:var(--sp-200)}
+
+  /* ============ FAIXA DE CEP (componente atômico) ============ */
+  .cep{
+    background:var(--neutral-50);
+    border:1px solid var(--neutral-300);
+    border-radius:var(--r-400);
+    padding:var(--sp-400);
+  }
+  .cep__lead{
+    display:flex; align-items:center; gap:var(--sp-200);
+    font-size:14px; line-height:18px; font-weight:600; color:var(--neutral-900);
+    margin-bottom:var(--sp-300);
+  }
+  .cep__lead svg{width:18px; height:18px; color:var(--neutral-600); flex:none}
+  .cep__form{display:flex; gap:var(--sp-200); align-items:stretch}
+  .cep__field{position:relative; flex:1 1 auto}
+  .cep__input{
+    width:100%; height:48px; border-radius:var(--r-300);
+    border:1px solid var(--neutral-500); background:var(--neutral-50);
+    padding:0 var(--sp-400); font-family:var(--font-body); font-size:16px; font-weight:600;
+    color:var(--neutral-900); letter-spacing:.02em;
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  .cep__input::placeholder{color:var(--neutral-600); font-weight:400; letter-spacing:0}
+  .cep__input:focus{outline:none; border-color:var(--neutral-900);
+    box-shadow:0 0 0 3px rgba(30,30,31,.08)}
+  .cep__apply{
+    flex:none; min-width:96px; height:48px; padding:0 var(--sp-400);
+    border:0; border-radius:var(--r-300); cursor:pointer;
+    font-family:var(--font-body); font-weight:700; font-size:15px;
+    background:var(--club-600); color:var(--neutral-50);
+    display:inline-flex; align-items:center; justify-content:center; gap:var(--sp-200);
+    transition:background .2s ease, transform .08s ease;
+  }
+  .cep__apply:hover{background:var(--club-700)}
+  .cep__apply:active{transform:scale(.985)}
+  .cep__apply:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
+  .cep__apply:disabled{background:var(--neutral-300); color:var(--neutral-600); cursor:default; transform:none}
+  .cep__note{
+    display:flex; align-items:center; gap:6px;
+    margin-top:var(--sp-300); font-size:12px; line-height:16px; color:var(--neutral-600);
+  }
+  .cep__note svg{width:13px; height:13px; flex:none}
+
+  /* --- estado: digitando (mostra máscara viva, botão habilita) --- */
+
+  /* --- estado: calculando --- */
+  .cep__apply .spin{
+    width:16px; height:16px; border-radius:50%;
+    border:2px solid rgba(255,255,255,.45); border-top-color:#fff;
+    animation:spin .7s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* --- estado: inválido --- */
+  .cep--error .cep__input{border-color:var(--red-600); box-shadow:0 0 0 3px rgba(207,48,48,.10)}
+  .cep__error{
+    display:flex; align-items:center; gap:6px;
+    margin-top:var(--sp-300); font-size:13px; line-height:18px; font-weight:600; color:var(--red-700);
+  }
+  .cep__error svg{width:15px; height:15px; flex:none}
+
+  /* ============ ESTADO APLICADO (chip compacto) ============ */
+  .cep--applied{
+    display:flex; align-items:center; gap:var(--sp-300);
+    padding:var(--sp-300) var(--sp-400);
+  }
+  .cep__pin{
+    width:36px; height:36px; border-radius:var(--r-300); flex:none;
+    background:var(--green-100); color:var(--green-800);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .cep__pin svg{width:18px; height:18px}
+  .cep__applied-body{flex:1 1 auto; min-width:0}
+  .cep__applied-label{
+    font-size:12px; line-height:16px; color:var(--neutral-600); font-weight:600;
+    letter-spacing:.02em; text-transform:uppercase;
+  }
+  .cep__applied-value{
+    font-size:16px; line-height:20px; font-weight:700; color:var(--neutral-900);
+  }
+  .cep__applied-value .muted{
+    display:block; font-size:13px; line-height:18px; color:var(--neutral-700); font-weight:600;
+  }
+  .cep__change{
+    flex:none; border:1px solid var(--neutral-400); background:var(--neutral-50);
+    color:var(--neutral-900); font-family:var(--font-body); font-weight:700; font-size:14px;
+    min-height:44px; padding:0 18px; display:inline-flex; align-items:center;
+    border-radius:var(--r-full); cursor:pointer;
+    transition:background .2s ease, border-color .2s ease;
+  }
+  .cep__change:hover{background:var(--neutral-100); border-color:var(--neutral-500)}
+  .cep__change:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
+</style>
+</head>
+<body>
+
+  <!-- 1. VAZIO / CONVITE -->
+  <div class="stage-label">Peça 07 · Entrada de CEP — 1. vazio (convite)</div>
+  <div class="stack">
+    <div class="cep">
+      <div class="cep__lead">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        Ver o frete certo pro seu endereço
+      </div>
+      <div class="cep__form">
+        <div class="cep__field">
+          <input class="cep__input" type="text" inputmode="numeric" placeholder="00000-000" aria-label="Seu CEP">
+        </div>
+        <button class="cep__apply" disabled>Ver frete</button>
+      </div>
+      <div class="cep__note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        Usado só agora pra calcular o frete — não guardamos seu CEP.
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. DIGITANDO -->
+  <div class="stage-label">Peça 07 · Entrada de CEP — 2. digitando (máscara viva, botão habilita)</div>
+  <div class="stack">
+    <div class="cep">
+      <div class="cep__lead">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        Ver o frete certo pro seu endereço
+      </div>
+      <div class="cep__form">
+        <div class="cep__field">
+          <input class="cep__input" type="text" inputmode="numeric" value="01310-100" aria-label="Seu CEP">
+        </div>
+        <button class="cep__apply">Ver frete</button>
+      </div>
+      <div class="cep__note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        Usado só agora pra calcular o frete — não guardamos seu CEP.
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. CALCULANDO -->
+  <div class="stage-label">Peça 07 · Entrada de CEP — 3. calculando</div>
+  <div class="stack">
+    <div class="cep">
+      <div class="cep__lead">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        Ver o frete certo pro seu endereço
+      </div>
+      <div class="cep__form">
+        <div class="cep__field">
+          <input class="cep__input" type="text" inputmode="numeric" value="01310-100" aria-label="Seu CEP" disabled>
+        </div>
+        <button class="cep__apply" disabled aria-live="polite"><span class="spin" role="status" aria-label="Calculando frete"></span> Calculando</button>
+      </div>
+      <div class="cep__note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        Consultando o frete de cada loja pra 01310-100…
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. APLICADO -->
+  <div class="stage-label">Peça 07 · Entrada de CEP — 4. aplicado (CEP resolvido, controle devolvido)</div>
+  <div class="stack">
+    <div class="cep cep--applied">
+      <div class="cep__pin">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+      <div class="cep__applied-body">
+        <div class="cep__applied-label">Frete para</div>
+        <div class="cep__applied-value">01310-100 <span class="muted">São Paulo, SP</span></div>
+      </div>
+      <button class="cep__change">Trocar</button>
+    </div>
+  </div>
+
+  <!-- 5. INVÁLIDO -->
+  <div class="stage-label">Peça 07 · Entrada de CEP — 5. inválido (orienta, não culpa)</div>
+  <div class="stack">
+    <div class="cep cep--error">
+      <div class="cep__lead">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        Ver o frete certo pro seu endereço
+      </div>
+      <div class="cep__form">
+        <div class="cep__field">
+          <input class="cep__input" type="text" inputmode="numeric" value="00000-000" aria-label="Seu CEP" aria-invalid="true">
+        </div>
+        <button class="cep__apply">Ver frete</button>
+      </div>
+      <div class="cep__error" role="alert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        CEP não encontrado — confira os 8 dígitos.
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

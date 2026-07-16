@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peça 06 — Fluxo montado (link → modal → estado atualizado)</title>
+<!-- Fontes: Nunito via Google Fonts NA POC; produção usa o self-host do app (rubric 7.1). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --b2c-primary:hsl(345 71% 51%);
+    --b2c-primary-40:hsl(344 76% 41%);
+    --b2c-neutral:hsl(0 0% 100%);
+    --b2c-neutral-20:hsl(240 5% 96%);
+    --b2c-neutral-30:hsl(240 6% 90%);
+    --b2c-neutral-40:hsl(240 5% 84%);
+    --b2c-neutral-50:hsl(240 5% 65%);
+    --b2c-neutral-60:hsl(240 4% 46%);
+    --b2c-neutral-70:hsl(240 5% 34%);
+    --b2c-neutral-90:hsl(240 4% 16%);
+    --b2c-positive-10:hsl(136 65% 97%);
+    --b2c-positive-20:hsl(136 61% 85%);
+    --b2c-positive-40:hsl(137 56% 29%);
+    --b2c-warning-10:hsl(40 67% 96%);
+    --b2c-warning-20:hsl(39 67% 83%);
+    --b2c-warning-40:hsl(25 61% 40%);
+    --b2c-info-10:hsl(206 88% 97%);
+    --b2c-info-50:hsl(214 58% 33%);
+    --club-50:#FEF0F4; --club-100:#FEC8D8; --club-700:#980B38;
+    --radius:.5rem;
+    --font-ui:'Nunito','Open Sans',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-ui); background:var(--b2c-neutral-20); color:var(--b2c-neutral-60);
+    -webkit-font-smoothing:antialiased; font-size:14px;
+  }
+  .app{display:grid; grid-template-columns:240px 1fr; min-height:100vh}
+
+  /* ================= SIDEBAR (réplica do snippet real) ================= */
+  .sidebar{
+    background:var(--b2c-neutral); display:flex; flex-direction:column;
+  }
+  .sidebar__logo{padding:16px; }
+  .sidebar__logo img{height:16px; width:auto; object-fit:contain; display:block; margin:0 8px}
+  .sidebar__menu{flex:1; overflow-y:auto; padding:0 16px 16px}
+  .sidebar__section{margin-bottom:16px}
+  .sidebar__section > p{
+    margin:8px; font-size:12px; font-weight:600; line-height:16px; color:var(--b2c-neutral-60); /* app real usa tom mais claro — ajustado por AA (desvio consciente) */
+  }
+  .sidebar__item{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 8px; border-radius:8px; cursor:pointer;
+    color:var(--b2c-neutral-60); text-decoration:none;
+  }
+  .sidebar__item:hover{background:var(--b2c-neutral-20)}
+  .sidebar__item.is-active{background:var(--club-50); color:var(--b2c-primary-40); font-weight:700}
+  .sidebar__item .lbl{display:flex; align-items:center; gap:12px; font-size:14px}
+  .sidebar__item svg{width:18px; height:18px; flex:none}
+  .pill-novo{
+    background:var(--b2c-primary); color:#fff; font-size:10px; font-weight:800;
+    border-radius:12px; padding:2px 8px;
+  }
+  .sidebar__user{
+    border-top:1px solid var(--b2c-neutral-30); padding:12px 16px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .sidebar__avatar{
+    width:32px; height:32px; border-radius:9999px; flex:none;
+    background:var(--club-100); color:var(--club-700);
+    font-weight:800; font-size:13px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .sidebar__user b{display:block; font-size:13px; color:var(--b2c-neutral-70); line-height:16px}
+  .sidebar__user small{font-size:11px; color:var(--b2c-neutral-60)}
+
+  /* ================= COLUNA PRINCIPAL ================= */
+  .main{padding:16px; max-width:1160px; width:100%}
+
+  .topbar{
+    background:var(--b2c-neutral); border-radius:16px;
+    display:flex; align-items:center; justify-content:flex-end; gap:16px;
+    padding:12px 16px; margin-bottom:16px; min-height:48px;
+  }
+  .topbar__icon{position:relative; color:var(--b2c-neutral-60); cursor:pointer; background:none; border:0; padding:4px}
+  .topbar__icon:hover{color:var(--b2c-neutral-70)}
+  .topbar__icon svg{width:18px; height:18px; display:block}
+  .topbar__badge{
+    position:absolute; top:-6px; right:-8px;
+    background:var(--b2c-primary); color:#fff;
+    font-size:10px; font-weight:800; border-radius:9999px; padding:2px 5px;
+  }
+
+  .page-title{font-size:24px; font-weight:600; color:var(--b2c-neutral-70); margin:8px 4px 16px}
+
+  /* filtros (réplica compacta do card real) */
+  .filters{
+    background:var(--b2c-neutral); border-radius:16px; padding:16px;
+    display:flex; flex-direction:column; gap:12px; margin-bottom:16px;
+  }
+  .filters__search{
+    height:44px; border:1px solid var(--b2c-neutral-40); border-radius:var(--radius);
+    padding:0 12px; font-family:inherit; font-size:14px; color:var(--b2c-neutral-70);
+    width:100%;
+  }
+  .filters__search::placeholder{color:var(--b2c-neutral-60)}
+  .filters__brands{display:flex; gap:8px; flex-wrap:wrap}
+  .brand-thumb{
+    width:72px; height:56px; border:1px solid var(--b2c-neutral-30); border-radius:var(--radius);
+    background:var(--b2c-neutral); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; padding:8px;
+  }
+  .brand-thumb:hover{border-color:var(--b2c-neutral-60)}
+  .brand-thumb img{max-width:100%; max-height:100%; object-fit:contain; filter:grayscale(.2)}
+
+  /* ================= PAINEL DE VÍNCULOS (NOVO — adição desta POC) ================= */
+  .links-panel{
+    background:var(--b2c-neutral); border-radius:16px; padding:16px;
+    display:flex; flex-direction:column; gap:8px; margin-bottom:16px;
+  }
+  .links-panel__head{
+    display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+    padding:0 4px 8px; flex-wrap:wrap;
+  }
+  .links-panel__title{font-size:16px; font-weight:800; color:var(--b2c-neutral-70)}
+  .links-panel__meta{font-size:12px; font-weight:700; color:var(--b2c-neutral-60)}
+  .links-panel__meta b{color:var(--b2c-positive-40)}
+  .link-row{
+    display:flex; align-items:center; gap:12px;
+    border:1px solid var(--b2c-neutral-30); border-radius:calc(var(--radius) + 4px);
+    padding:10px 16px;
+  }
+  .link-row__logo{
+    width:32px; height:32px; border-radius:var(--radius); flex:none;
+    background:var(--b2c-neutral-20); border:1px solid var(--b2c-neutral-30);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .link-row__logo img{width:18px; height:18px; object-fit:contain}
+  .link-row__name{font-weight:700; color:var(--b2c-neutral-70); white-space:nowrap; min-width:96px}
+  .link-row__hint{color:var(--b2c-neutral-60); flex:1; min-width:0}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px;
+    border-radius:9999px; border:1px solid transparent;
+    padding:4px 10px; font-size:12px; font-weight:700; white-space:nowrap;
+  }
+  .chip svg{width:12px; height:12px; flex:none}
+  .chip--ok{background:var(--b2c-positive-10); color:var(--b2c-positive-40); border-color:var(--b2c-positive-20)}
+  .chip--off{background:var(--b2c-neutral-20); color:var(--b2c-neutral-70); border-color:var(--b2c-neutral-40)}
+  .chip--warn{background:var(--b2c-warning-10); color:var(--b2c-warning-40); border-color:var(--b2c-warning-20)}
+  .link-row__action{
+    font-weight:700; font-size:14px; color:var(--b2c-primary);
+    text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px;
+    white-space:nowrap; cursor:pointer; background:none; border:0; font-family:inherit;
+    padding:10px 4px;
+  }
+  .link-row__action:hover{color:var(--b2c-primary-40)}
+  .link-row__action:focus-visible{outline:2px solid var(--b2c-primary); outline-offset:2px; border-radius:4px}
+
+  /* ================= GRID DE PRODUTOS (réplica) ================= */
+  .grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:16px}
+  .product{
+    background:var(--b2c-neutral); border-radius:16px; padding:16px;
+    display:flex; flex-direction:column; gap:12px; position:relative;
+  }
+  .product__fav{
+    position:absolute; top:16px; right:16px; color:var(--b2c-neutral-60); cursor:pointer;
+    background:none; border:0; padding:4px;
+  }
+  .product__fav svg{width:18px; height:18px}
+  .product__photo{
+    height:150px; display:flex; align-items:center; justify-content:center;
+    background:var(--b2c-neutral-20); border-radius:12px; overflow:hidden;
+  }
+  .product__photo img{height:100%; object-fit:cover}
+  .product__name{
+    font-size:14px; line-height:20px; color:var(--b2c-neutral-70); text-align:center;
+    font-weight:600; min-height:40px;
+  }
+  .product__chips{display:flex; gap:8px; justify-content:center; flex-wrap:wrap}
+  .pchip{
+    font-size:12px; font-weight:700; border-radius:var(--radius); padding:6px 10px;
+  }
+  .pchip--info{background:var(--b2c-info-10); color:var(--b2c-info-50)}
+  .pchip--pink{background:var(--club-50); color:var(--club-700)}
+  .product__prices{
+    display:flex; justify-content:center; gap:16px;
+    font-size:14px; font-weight:800; color:var(--b2c-primary-40);
+  }
+  .product__prices small{font-weight:600; color:var(--b2c-neutral-60); margin-right:4px}
+  .product__actions{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+  .btn{
+    height:40px; border-radius:var(--radius); font-family:inherit;
+    font-size:14px; font-weight:700; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    transition:background .2s ease, transform .08s ease;
+  }
+  .btn:active{transform:scale(.985)}
+  .btn:focus-visible{outline:2px solid var(--b2c-primary); outline-offset:2px}
+  .btn svg{width:13px; height:13px}
+  .btn--outline{background:none; border:1px solid var(--b2c-neutral-40); color:var(--b2c-neutral-60)}
+  .btn--outline:hover{background:var(--b2c-neutral-20)}
+  .btn--primary{background:var(--b2c-primary); border:0; color:#fff}
+  .btn--primary:hover{background:var(--b2c-primary-40)}
+  /* CTA para o HUB — precedente "🔗 HUB Ybera" (rótulo em validação neste ciclo) */
+  .btn--hub{
+    grid-column:1 / -1;
+    background:none; border:1px solid var(--b2c-primary); color:var(--b2c-primary);
+  }
+  .btn--hub:hover{background:var(--club-50)}
+
+  /* ================= MODAIS (peças 03/04 integradas) ================= */
+  .modal{
+    position:fixed; inset:0; z-index:100;
+    background:hsl(240 4% 16% / .5);
+    display:flex; align-items:center; justify-content:center; padding:16px;
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .modal.on{opacity:1; pointer-events:auto}
+  .dialog{
+    width:100%; max-width:480px;
+    background:var(--b2c-neutral); border-radius:16px; padding:24px;
+    display:flex; flex-direction:column; gap:16px;
+    box-shadow:0 0 8px rgba(5,5,5,.10);
+    transform:scale(.96); transition:transform .25s ease;
+  }
+  .modal.on .dialog{transform:scale(1)}
+  @media (prefers-reduced-motion: reduce){
+    .modal,.dialog{transition:none}
+  }
+  .dialog__head{display:flex; align-items:flex-start; gap:12px}
+  .dialog__badge{
+    width:40px; height:40px; border-radius:9999px; flex:none;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .dialog__badge--new{background:var(--club-50); color:var(--club-700)}
+  .dialog__badge--renew{background:var(--b2c-warning-10); color:var(--b2c-warning-40); border:1px solid var(--b2c-warning-20)}
+  .dialog__badge svg{width:18px; height:18px}
+  .dialog__titles{flex:1}
+  .dialog__eyebrow{font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase}
+  .dialog__eyebrow--new{color:var(--b2c-primary)}
+  .dialog__eyebrow--renew{color:var(--b2c-warning-40)}
+  .dialog__title{font-size:18px; font-weight:800; color:var(--b2c-neutral-90); line-height:24px}
+  .dialog__close{
+    background:none; border:0; cursor:pointer; color:var(--b2c-neutral-60);
+    padding:8px; margin:-8px -8px 0 0; border-radius:var(--radius);
+  }
+  .dialog__close:hover{color:var(--b2c-neutral-70); background:var(--b2c-neutral-20)}
+  .dialog__close:focus-visible{outline:2px solid var(--b2c-primary); outline-offset:2px}
+  .dialog__close svg{width:16px; height:16px; display:block}
+  .dialog__intro{font-size:14px; line-height:20px}
+  .video-ph{
+    aspect-ratio:16/9; border-radius:12px; overflow:hidden; background:var(--b2c-neutral-90);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    color:var(--b2c-neutral-40);
+  }
+  .video-ph__play{
+    width:48px; height:48px; border-radius:9999px;
+    background:hsl(0 0% 100% / .9); color:var(--b2c-neutral-90);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .video-ph__play svg{width:16px; height:16px; margin-left:2px}
+  .video-ph small{font-size:12px; font-weight:700}
+  .steps{display:flex; flex-direction:column; gap:10px; font-size:14px; line-height:20px}
+  .steps li{display:flex; gap:10px; align-items:flex-start; list-style:none}
+  .steps .n{
+    width:22px; height:22px; border-radius:9999px; flex:none;
+    font-size:12px; font-weight:800;
+    display:flex; align-items:center; justify-content:center; margin-top:-1px;
+  }
+  .steps--new .n{background:var(--club-100); color:var(--club-700)}
+  .steps--renew .n{background:var(--b2c-warning-20); color:var(--b2c-warning-40)}
+  .steps b{color:var(--b2c-neutral-70)}
+  .dialog__note{
+    font-size:12px; line-height:16px; color:var(--b2c-neutral-60);
+    background:var(--b2c-neutral-20); border-radius:var(--radius); padding:10px 12px;
+  }
+  .dialog__actions{display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap}
+  .dialog .btn{height:44px; padding:0 20px}
+
+  /* ---------- ESTADOS DO PAINEL: loading + erro de leitura (portão #6) ---------- */
+  .sk{position:relative; overflow:hidden; background:var(--b2c-neutral-30); border-radius:8px}
+  .sk::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(90deg,transparent,hsl(0 0% 100% / .6),transparent);
+    transform:translateX(-100%); animation:shimmer 1.6s ease-in-out infinite;
+  }
+  @keyframes shimmer{to{transform:translateX(100%)}}
+  @media (prefers-reduced-motion: reduce){.sk::after{animation:none}}
+  .sk-row{
+    display:flex; align-items:center; gap:12px;
+    border:1px solid var(--b2c-neutral-30); border-radius:12px; padding:10px 16px;
+  }
+  .sk-logo{width:32px; height:32px; border-radius:8px; flex:none}
+  .sk-name{width:96px; height:14px}
+  .sk-hint{flex:1; height:12px; max-width:320px}
+  .sk-chip{width:88px; height:24px; border-radius:9999px; margin-left:auto}
+  .panel-notice{
+    display:flex; gap:10px; align-items:flex-start;
+    border:1px dashed var(--b2c-neutral-40); border-radius:12px;
+    padding:12px 16px; font-size:14px; line-height:20px; color:var(--b2c-neutral-60);
+  }
+  .panel-notice svg{width:16px; height:16px; flex:none; margin-top:2px}
+
+  .devbar{
+    position:fixed; bottom:0; left:0; right:0; z-index:200;
+    display:flex; justify-content:center; gap:6px;
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+    background:hsl(240 4% 16% / .92);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  }
+  .devbar button{
+    font-family:inherit; font-size:12px; font-weight:700; white-space:nowrap;
+    padding:6px 12px; border-radius:9999px; border:1px solid var(--b2c-neutral-60);
+    background:transparent; color:var(--b2c-neutral-40); cursor:pointer;
+  }
+  .devbar button[aria-pressed="true"]{background:#fff; color:var(--b2c-neutral-90); border-color:#fff}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="sidebar__logo"><img src="assets/logo-ybera-club.png" alt="Ybera Club"></div>
+    <nav class="sidebar__menu">
+      <div class="sidebar__section">
+        <p>Lojas</p>
+        <a class="sidebar__item is-active" href="#">
+          <span class="lbl">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M3 3h2l2.4 12.2a1.5 1.5 0 0 0 1.5 1.3h7.9a1.5 1.5 0 0 0 1.5-1.2L20 8H6"/></svg>
+            Ybera.com
+          </span>
+        </a>
+        <a class="sidebar__item" href="#">
+          <span class="lbl">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l2-3h12l2 3M4 7h16v13H4zM9 11h6"/></svg>
+            Loja Interna
+          </span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </a>
+      </div>
+      <div class="sidebar__section">
+        <p>Financeiro</p>
+        <a class="sidebar__item" href="#"><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/></svg>Desbloqueio</span></a>
+        <a class="sidebar__item" href="#"><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.4"/></svg>Sacar</span></a>
+        <a class="sidebar__item" href="#"><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Meus saques</span></a>
+        <a class="sidebar__item" href="#"><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10 3 14l4 4M17 14l4-4-4-4M3 14h11M21 10H10"/></svg>Transferir</span></a>
+        <a class="sidebar__item" href="#"><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"/></svg>Extrato</span></a>
+      </div>
+      <div class="sidebar__section">
+        <p>Rede</p>
+        <a class="sidebar__item" href="#"><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M4 20c0-3 2.2-5 5-5s5 2 5 5"/><circle cx="17" cy="9" r="2.2"/><path d="M15.5 15.2c2.6.2 4.5 2 4.5 4.8"/></svg>Equipe Direta</span></a>
+        <a class="sidebar__item" href="#"><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="6" r="2.4"/><circle cx="6" cy="17" r="2.4"/><circle cx="18" cy="17" r="2.4"/><path d="M12 9v3m0 0-4.5 3M12 12l4.5 3"/></svg>Equipe Completa</span></a>
+      </div>
+      <div class="sidebar__section">
+        <p>Performance</p>
+        <a class="sidebar__item" href="#"><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg>Insights do Instagram</span></a>
+        <a class="sidebar__item" href="#"><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>Dashboard BI</span></a>
+        <a class="sidebar__item" href="#">
+          <span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 8z"/></svg>Plano de Carreira</span>
+          <span class="pill-novo">Novo</span>
+        </a>
+        <a class="sidebar__item" href="#"><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg>Minhas metas</span></a>
+        <a class="sidebar__item" href="#"><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M5 3h14v6a7 7 0 0 1-14 0zM5 5H3v2a4 4 0 0 0 3 3.9M19 5h2v2a4 4 0 0 1-3 3.9"/></svg>Metas da equipe</span></a>
+      </div>
+    </nav>
+    <div class="sidebar__user">
+      <span class="sidebar__avatar" aria-hidden="true">C</span>
+      <div><b>Camila Duarte</b><small>camila@exemplo.com</small></div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="topbar">
+      <button class="topbar__icon" aria-label="Meu link de afiliada">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+      </button>
+      <button class="topbar__icon" aria-label="Notificações — 9 ou mais">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>
+        <span class="topbar__badge">9+</span>
+      </button>
+    </div>
+
+    <h1 class="page-title">Catálogo de Produtos</h1>
+
+    <div class="filters">
+      <input class="filters__search" type="text" placeholder="Nome do Produto" aria-label="Buscar produto">
+      <div class="filters__brands">
+        <span class="brand-thumb"><img src="assets/marca-brasil-influencer.png" alt="Brasil Influencer"></span>
+        <span class="brand-thumb"><img src="assets/marca-black-diva.png" alt="Black Diva"></span>
+        <span class="brand-thumb"><img src="assets/marca-spapet.png" alt="Spa Pet"></span>
+        <span class="brand-thumb"><img src="assets/marca-acquafit.png" alt="Acquafit"></span>
+        <span class="brand-thumb"><img src="assets/marca-fashion-gold.png" alt="Fashion Gold"></span>
+      </div>
+    </div>
+
+    <!-- ===== PAINEL DE VÍNCULOS (novo) — acima do grid, visível sem scroll ===== -->
+    <section class="links-panel" aria-label="Vínculos dos seus canais de venda">
+      <header class="links-panel__head">
+        <h2 class="links-panel__title">Meus canais de venda</h2>
+        <span class="links-panel__meta" id="panel-meta"><b>1 de 3</b> canais recebendo suas vendas pelo link do Hub</span>
+      </header>
+      <div id="panel-rows">
+      <div class="link-row">
+        <span class="link-row__logo"><img src="assets/ybera.svg" alt=""></span>
+        <span class="link-row__name">Ybera.com</span>
+        <span class="link-row__hint">Suas vendas neste canal já contam para a sua comissão.</span>
+        <span class="chip chip--ok"><svg viewBox="0 0 448 512" fill="currentColor" aria-hidden="true"><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg>Vinculado</span>
+      </div>
+      <div class="link-row" id="row-shopee">
+        <span class="link-row__logo"><img src="assets/Shopee.svg" alt=""></span>
+        <span class="link-row__name">Shopee</span>
+        <span class="link-row__hint">Sua conexão com a Shopee expirou — refaça a autorização para voltar a ganhar comissão.</span>
+        <span class="chip chip--warn"><svg viewBox="0 0 512 512" fill="currentColor" aria-hidden="true"><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>Conexão expirada</span>
+        <button class="link-row__action" type="button" id="act-shopee" aria-haspopup="dialog">Reconectar Shopee</button>
+      </div>
+      <div class="link-row" id="row-tiktok">
+        <span class="link-row__logo"><img src="assets/tiktok.svg" alt=""></span>
+        <span class="link-row__name">TikTok Shop</span>
+        <span class="link-row__hint">Vincule sua conta para ganhar comissão nas vendas do TikTok.</span>
+        <span class="chip chip--off">Não vinculado</span>
+        <button class="link-row__action" type="button" id="act-tiktok" aria-haspopup="dialog">Como vincular TikTok ao seu Hub</button>
+      </div>
+      </div>
+      <div id="panel-loading" hidden aria-busy="true">
+        <div class="sk-row" aria-hidden="true"><span class="sk sk-logo"></span><span class="sk sk-name"></span><span class="sk sk-hint"></span><span class="sk sk-chip"></span></div>
+        <div class="sk-row" aria-hidden="true"><span class="sk sk-logo"></span><span class="sk sk-name"></span><span class="sk sk-hint"></span><span class="sk sk-chip"></span></div>
+        <div class="sk-row" aria-hidden="true"><span class="sk sk-logo"></span><span class="sk sk-name"></span><span class="sk sk-hint"></span><span class="sk sk-chip"></span></div>
+      </div>
+      <div id="panel-error" hidden>
+        <div class="panel-notice" role="status">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+          <span>Não conseguimos carregar o status dos seus canais agora — recarregue a página.
+          Seus links e o catálogo continuam funcionando normalmente.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== GRID DE PRODUTOS ===== -->
+    <div class="grid">
+      <article class="product">
+        <button class="product__fav" aria-label="Favoritar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 8z"/></svg></button>
+        <div class="product__photo"><img src="assets/produto.jpg" alt="Escova Progressiva 500g Fashion Gold"></div>
+        <h3 class="product__name">336774 Escova Progressiva 500g - Fashion Gold</h3>
+        <div class="product__chips">
+          <span class="pchip pchip--info">Comissão: 15%</span>
+          <span class="pchip pchip--pink">Minhas Vendas: 0</span>
+        </div>
+        <div class="product__prices">
+          <span><small>Grupo</small>R$ 339,90</span>
+          <span><small>Você</small>R$ 297,90</span>
+        </div>
+        <div class="product__actions">
+          <button class="btn btn--outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar</button>
+          <button class="btn btn--primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M3 3h2l2.4 12.2a1.5 1.5 0 0 0 1.5 1.3h7.9a1.5 1.5 0 0 0 1.5-1.2L20 8H6"/></svg>Comprar</button>
+          <button class="btn btn--hub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>HUB Ybera</button>
+        </div>
+      </article>
+
+      <article class="product">
+        <button class="product__fav" aria-label="Favoritar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 8z"/></svg></button>
+        <div class="product__photo"><img src="assets/produto.jpg" alt="Escova Progressiva 150g Fashion Gold"></div>
+        <h3 class="product__name">337648 Escova Progressiva 150g - Fashion Gold</h3>
+        <div class="product__chips">
+          <span class="pchip pchip--info">Comissão: 15%</span>
+          <span class="pchip pchip--pink">Minhas Vendas: 0</span>
+        </div>
+        <div class="product__prices">
+          <span><small>Grupo</small>R$ 99,90</span>
+          <span><small>Você</small>R$ 89,90</span>
+        </div>
+        <div class="product__actions">
+          <button class="btn btn--outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar</button>
+          <button class="btn btn--primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M3 3h2l2.4 12.2a1.5 1.5 0 0 0 1.5 1.3h7.9a1.5 1.5 0 0 0 1.5-1.2L20 8H6"/></svg>Comprar</button>
+          <button class="btn btn--hub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>HUB Ybera</button>
+        </div>
+      </article>
+
+      <article class="product">
+        <button class="product__fav" aria-label="Favoritar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 8z"/></svg></button>
+        <div class="product__photo"><img src="assets/produto.jpg" alt="Escova Progressiva 300g Fashion Gold"></div>
+        <h3 class="product__name">337348 Escova Progressiva 300g - Fashion Gold</h3>
+        <div class="product__chips">
+          <span class="pchip pchip--info">Comissão: 15%</span>
+          <span class="pchip pchip--pink">Minhas Vendas: 0</span>
+        </div>
+        <div class="product__prices">
+          <span><small>Grupo</small>R$ 257,90</span>
+          <span><small>Você</small>R$ 227,90</span>
+        </div>
+        <div class="product__actions">
+          <button class="btn btn--outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar</button>
+          <button class="btn btn--primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M3 3h2l2.4 12.2a1.5 1.5 0 0 0 1.5 1.3h7.9a1.5 1.5 0 0 0 1.5-1.2L20 8H6"/></svg>Comprar</button>
+          <button class="btn btn--hub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>HUB Ybera</button>
+        </div>
+      </article>
+    </div>
+  </main>
+</div>
+
+
+<!-- ===== MODAL A — primeira vinculação (TikTok) ===== -->
+<div class="modal" id="modal-a" role="dialog" aria-modal="true" aria-labelledby="dlg-a-title">
+  <div class="dialog">
+    <div class="dialog__head">
+      <span class="dialog__badge dialog__badge--new" aria-hidden="true">
+        <svg viewBox="0 0 512 512" fill="currentColor"><path d="M240 0c8.8 0 16.6 5.7 19.2 14.1l25.9 84.2 84.2 25.9c8.4 2.6 14.1 10.4 14.1 19.2s-5.7 16.6-14.1 19.2l-84.2 25.9-25.9 84.2c-2.6 8.4-10.4 14.1-19.2 14.1s-16.6-5.7-19.2-14.1l-25.9-84.2-84.2-25.9C102.3 160.2 96.6 152.4 96.6 143.6s5.7-16.6 14.1-19.2l84.2-25.9 25.9-84.2C223.4 5.7 231.2 0 240 0zM416 256c7.2 0 13.5 4.8 15.4 11.7l14.6 53.3 53.3 14.6c6.9 1.9 11.7 8.2 11.7 15.4s-4.8 13.5-11.7 15.4l-53.3 14.6-14.6 53.3c-1.9 6.9-8.2 11.7-15.4 11.7s-13.5-4.8-15.4-11.7l-14.6-53.3-53.3-14.6c-6.9-1.9-11.7-8.2-11.7-15.4s4.8-13.5 11.7-15.4l53.3-14.6 14.6-53.3c1.9-6.9 8.2-11.7 15.4-11.7z"/></svg>
+      </span>
+      <div class="dialog__titles">
+        <div class="dialog__eyebrow dialog__eyebrow--new">Primeira vinculação</div>
+        <h2 class="dialog__title" id="dlg-a-title">Vincule seu TikTok ao Hub</h2>
+      </div>
+      <button class="dialog__close" type="button" aria-label="Fechar" data-close>
+        <svg viewBox="0 0 384 512" fill="currentColor"><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>
+      </button>
+    </div>
+    <p class="dialog__intro">É rapidinho e você só faz uma vez: a autorização acontece na
+    <b>sua conta do TikTok</b> — a Ybera nunca vê sua senha.</p>
+    <div class="video-ph" role="img" aria-label="Vídeo tutorial de vinculação (em produção)">
+      <span class="video-ph__play"><svg viewBox="0 0 384 512" fill="currentColor"><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span>
+      <small>Vídeo tutorial — em produção (Produto/Operação)</small>
+    </div>
+    <ul class="steps steps--new">
+      <li><span class="n">1</span><span>Tenha sua conta <b>TikTok</b> aberta no celular ou no navegador.</span></li>
+      <li><span class="n">2</span><span>Toque em <b>Iniciar vinculação</b> e autorize o acesso na tela do TikTok.</span></li>
+      <li><span class="n">3</span><span>Volte para cá — o status do canal atualiza sozinho.</span></li>
+    </ul>
+    <p class="dialog__note">A autorização permite que o Hub gere seus links comissionáveis
+    no TikTok. Você pode revogar quando quiser, direto na sua conta.</p>
+    <div class="dialog__actions">
+      <button class="btn btn--outline" type="button" data-close>Deixar para depois</button>
+      <button class="btn btn--primary" type="button" id="auth-tiktok">
+        Iniciar vinculação
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL B — reautorização (Shopee) ===== -->
+<div class="modal" id="modal-b" role="dialog" aria-modal="true" aria-labelledby="dlg-b-title">
+  <div class="dialog">
+    <div class="dialog__head">
+      <span class="dialog__badge dialog__badge--renew" aria-hidden="true">
+        <svg viewBox="0 0 512 512" fill="currentColor"><path d="M463.5 224l8.5 0c13.3 0 24-10.7 24-24l0-128c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1c-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8l119.5 0z"/></svg>
+      </span>
+      <div class="dialog__titles">
+        <div class="dialog__eyebrow dialog__eyebrow--renew">Reautorização</div>
+        <h2 class="dialog__title" id="dlg-b-title">Reconecte sua Shopee</h2>
+      </div>
+      <button class="dialog__close" type="button" aria-label="Fechar" data-close>
+        <svg viewBox="0 0 384 512" fill="currentColor"><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>
+      </button>
+    </div>
+    <p class="dialog__intro"><b>Você já fez essa autorização antes</b> — ela só expirou,
+    como acontece de tempos em tempos por segurança. Nada mudou na sua conta:
+    refazer leva menos de um minuto.</p>
+    <div class="video-ph" role="img" aria-label="Vídeo de reautorização (em produção)">
+      <span class="video-ph__play"><svg viewBox="0 0 384 512" fill="currentColor"><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span>
+      <small>Vídeo de reautorização — em produção (Produto/Operação)</small>
+    </div>
+    <ul class="steps steps--renew">
+      <li><span class="n">1</span><span>Toque em <b>Reautorizar agora</b> e confirme na tela da Shopee — o caminho é o mesmo da primeira vez.</span></li>
+      <li><span class="n">2</span><span>Volte para cá — o canal volta a ficar <b>Vinculado</b> e seus links seguem valendo.</span></li>
+    </ul>
+    <p class="dialog__note">Enquanto a conexão estiver expirada, a Shopee fica fora do seu
+    link do Hub — suas vendas nos outros canais não são afetadas.</p>
+    <div class="dialog__actions">
+      <button class="btn btn--outline" type="button" data-close>Deixar para depois</button>
+      <button class="btn btn--primary" type="button" id="auth-shopee">
+        Reautorizar agora
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ===== Fluxo: link contextual -> modal -> autorizacao (simulada) -> estado atualizado =====
+  const modalA = document.getElementById('modal-a');
+  const modalB = document.getElementById('modal-b');
+  let lastTrigger = null;
+  let linked = 1;
+
+  function open(m, trigger){
+    lastTrigger = trigger;
+    m.classList.add('on');
+    m.querySelector('.dialog__close').focus();
+  }
+  function close(m){
+    m.classList.remove('on');
+    if (lastTrigger && document.contains(lastTrigger)) lastTrigger.focus();
+  }
+  document.getElementById('act-tiktok').addEventListener('click', e=>open(modalA, e.currentTarget));
+  document.getElementById('act-shopee').addEventListener('click', e=>open(modalB, e.currentTarget));
+  document.querySelectorAll('[data-close]').forEach(b=>
+    b.addEventListener('click', ()=>close(b.closest('.modal'))));
+  [modalA, modalB].forEach(m=>{
+    m.addEventListener('click', e=>{ if(e.target===m) close(m); });
+  });
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Escape'){ [modalA,modalB].forEach(close); }
+  });
+
+  const CHECK = '<svg viewBox="0 0 448 512" fill="currentColor" aria-hidden="true"><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg>';
+  function setLinked(rowId){
+    const row = document.getElementById(rowId);
+    row.querySelector('.link-row__hint').textContent = 'Suas vendas neste canal já contam para a sua comissão.';
+    const chip = row.querySelector('.chip');
+    chip.className = 'chip chip--ok';
+    chip.innerHTML = CHECK + 'Vinculado';
+    const act = row.querySelector('.link-row__action');
+    if (act) act.remove();
+    linked += 1;
+    document.getElementById('panel-meta').innerHTML =
+      '<b>' + linked + ' de 3</b> canais recebendo suas vendas pelo link do Hub';
+  }
+  // Na producao, os botoes abaixo abrem a URL de autorizacao OAuth do canal (RF-008);
+  // aqui a concessao externa e simulada para demonstrar o retorno de estado.
+  document.getElementById('auth-tiktok').addEventListener('click', ()=>{
+    close(modalA); setLinked('row-tiktok');
+  });
+  document.getElementById('auth-shopee').addEventListener('click', ()=>{
+    close(modalB); setLinked('row-shopee');
+  });
+</script>
+
+
+<!-- Barra de estados — DEV ONLY, removida na entrega -->
+<nav class="devbar" aria-label="Estados do painel (dev)">
+  <button data-pstate="rows" aria-pressed="true">▶ status carregado</button>
+  <button data-pstate="loading" aria-pressed="false">▶ loading</button>
+  <button data-pstate="error" aria-pressed="false">▶ erro de leitura</button>
+</nav>
+<script>
+  const pStates = {rows:document.getElementById('panel-rows'),
+                   loading:document.getElementById('panel-loading'),
+                   error:document.getElementById('panel-error')};
+  const pMeta = document.getElementById('panel-meta');
+  document.querySelectorAll('.devbar button').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('.devbar button').forEach(x=>x.setAttribute('aria-pressed','false'));
+      b.setAttribute('aria-pressed','true');
+      const k=b.dataset.pstate;
+      Object.entries(pStates).forEach(([n,el])=>el.hidden = n!==k);
+      pMeta.hidden = (k!=='rows'); // contador só faz sentido com status carregado
+    });
+  });
+</script>
+</body>
+</html>

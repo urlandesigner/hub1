@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peça 04 — Hero do produto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --neutral-50:#FFFFFF; --neutral-100:#FAF9FC; --neutral-200:#ECEBF0;
+    --neutral-300:#E2E1E5; --neutral-400:#C9C8CC; --neutral-500:#B0AFB2;
+    --neutral-600:#6C6B6E; --neutral-700:#505052; --neutral-900:#1E1E1F;
+    --club-50:#FEF0F4; --club-100:#FEC8D8; --club-500:#ED1A57;
+    --club-600:#C70F43; --club-700:#980B38;
+    --sp-100:4px; --sp-200:8px; --sp-300:12px; --sp-400:16px;
+    --sp-500:20px; --sp-600:24px; --sp-800:32px;
+    --r-200:8px; --r-300:12px; --r-400:16px; --r-500:20px; --r-full:9999px;
+    --font-display:'Syne',system-ui,sans-serif;
+    --font-body:'Nunito Sans',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-body); background:var(--neutral-200); color:var(--neutral-900);
+    -webkit-font-smoothing:antialiased;
+    display:flex; flex-direction:column; align-items:center;
+    padding-bottom:96px;
+  }
+  .stage-label{
+    font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--neutral-600); max-width:390px; width:100%;
+    margin:var(--sp-800) auto var(--sp-400); padding:0 var(--sp-400);
+  }
+  .frame{width:100%; max-width:390px}
+
+  /* ---------- TOP BAR ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:center;
+    padding:var(--sp-400) var(--sp-400) var(--sp-300);
+  }
+  .topbar img{height:18px; width:auto; opacity:.92}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    padding:0 var(--sp-400) var(--sp-600);
+    gap:var(--sp-400);
+  }
+  .hero__media{
+    width:100%;
+    border-radius:var(--r-500);
+    overflow:hidden;
+    background:var(--neutral-100);
+    border:1px solid var(--neutral-300);
+    aspect-ratio:16/10;
+    position:relative;
+  }
+  .hero__media img{width:100%; height:100%; object-fit:cover; display:block}
+  .hero__media::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(180deg, transparent 62%, rgba(5,5,5,.18));
+    pointer-events:none;
+  }
+  .hero__referral{
+    position:absolute; left:var(--sp-300); bottom:var(--sp-300);
+    display:inline-flex; align-items:center; gap:var(--sp-200);
+    background:rgba(255,255,255,.9);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    border-radius:var(--r-full);
+    padding:6px 12px 6px 6px;
+  }
+  .hero__avatar{
+    width:24px; height:24px; border-radius:var(--r-full);
+    background:var(--club-100); color:var(--club-700);
+    font-size:12px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .hero__referral span{
+    font-size:14px; line-height:18px; font-weight:700; color:var(--neutral-900);
+  }
+  .hero__title{
+    font-family:var(--font-display); font-weight:600;
+    font-size:24px; line-height:32px; letter-spacing:-.01em;
+    color:var(--neutral-900);
+    padding:0 var(--sp-200);
+  }
+  .hero__lead{
+    font-size:14px; line-height:20px; color:var(--neutral-600);
+    max-width:280px; margin-top:calc(-1 * var(--sp-200));
+  }
+</style>
+</head>
+<body>
+
+  <div class="stage-label">Peça 04 · Hero do produto</div>
+  <div class="frame">
+    <header class="topbar">
+      <img src="assets/logo-black.svg" alt="Ybera">
+    </header>
+
+    <section class="hero">
+      <div class="hero__media">
+        <img src="assets/produto-hero.jpg" alt="Escova Progressiva Fashion Gold 500g">
+        <div class="hero__referral">
+          <span class="hero__avatar" aria-hidden="true">C</span>
+          <span>Indicação de Camila</span>
+        </div>
+      </div>
+      <h1 class="hero__title">Escova Progressiva Fashion&nbsp;Gold 500g</h1>
+      <p class="hero__lead">Compare preço e frete e compre na loja que preferir.</p>
+    </section>
+  </div>
+
+</body>
+</html>

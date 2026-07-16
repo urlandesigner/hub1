@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peça 10 · Página completa com frete por CEP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --neutral-50:#FFFFFF; --neutral-100:#FAF9FC; --neutral-200:#ECEBF0;
+    --neutral-300:#E2E1E5; --neutral-400:#C9C8CC; --neutral-500:#B0AFB2;
+    --neutral-600:#6C6B6E; --neutral-700:#505052; --neutral-900:#1E1E1F;
+    --club-50:#FEF0F4; --club-100:#FEC8D8; --club-400:#FA4277;
+    --club-500:#ED1A57; --club-600:#C70F43; --club-700:#980B38;
+    --green-100:#E6F6E5; --green-600:#50AE47; --green-700:#33922A; --green-800:#2B6A25;
+    --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-700:#B45309; --amber-800:#92400E;
+    --red-600:#CF3030; --red-700:#A31F1F;
+    --sp-100:4px; --sp-200:8px; --sp-300:12px; --sp-400:16px;
+    --sp-500:20px; --sp-600:24px; --sp-800:32px; --sp-1000:40px;
+    --r-200:8px; --r-300:12px; --r-400:16px; --r-500:20px; --r-full:9999px;
+    --font-display:'Syne',system-ui,sans-serif;
+    --font-body:'Nunito Sans',system-ui,sans-serif;
+    --shadow-sm:0 0 8px rgba(5,5,5,.10);
+    --ease-out:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-body); background:var(--neutral-200); color:var(--neutral-900);
+    -webkit-font-smoothing:antialiased; display:flex; flex-direction:column; align-items:center; padding-bottom:120px;
+  }
+  .page{width:100%; max-width:390px}
+
+  .reveal{opacity:0; transform:translateY(12px); animation:reveal .6s var(--ease-out) forwards}
+  .d-0{animation-delay:0ms} .d-1{animation-delay:90ms} .d-2{animation-delay:180ms}
+  .d-3{animation-delay:260ms} .d-4{animation-delay:340ms} .d-5{animation-delay:420ms}
+  @keyframes reveal{to{opacity:1; transform:none}}
+  @media (prefers-reduced-motion: reduce){.reveal{opacity:1; transform:none; animation:none}}
+
+  /* topbar + hero */
+  .topbar{display:flex; align-items:center; justify-content:center; padding:var(--sp-400) var(--sp-400) var(--sp-600)}
+  .topbar img{height:24px; width:auto; opacity:.92}
+  .hero{display:flex; flex-direction:column; align-items:center; text-align:center; padding:0 var(--sp-400) var(--sp-500); gap:var(--sp-400)}
+  .hero__media{width:100%; border-radius:var(--r-500); overflow:hidden; background:var(--neutral-100); border:1px solid var(--neutral-300); aspect-ratio:16/10; position:relative}
+  .hero__media img{width:100%; height:100%; object-fit:cover; display:block}
+  .hero__media::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 62%,rgba(5,5,5,.18)); pointer-events:none}
+  .hero__referral{position:absolute; left:var(--sp-300); bottom:var(--sp-300); z-index:1; display:inline-flex; align-items:center; gap:var(--sp-200); background:rgba(255,255,255,.9); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); border-radius:var(--r-full); padding:6px 12px 6px 6px}
+  .hero__avatar{width:24px; height:24px; border-radius:var(--r-full); background:var(--club-100); color:var(--club-700); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center}
+  .hero__referral span:last-child{font-size:14px; line-height:18px; font-weight:700; color:var(--neutral-900)}
+  .hero__title{font-family:var(--font-display); font-weight:600; font-size:24px; line-height:32px; letter-spacing:-.01em; padding:0 var(--sp-200)}
+  .hero__lead{font-size:14px; line-height:20px; color:var(--neutral-600); max-width:280px; margin-top:calc(-1 * var(--sp-200))}
+
+  /* CEP */
+  .cep-wrap{padding:0 var(--sp-400) var(--sp-500)}
+  .cep{background:var(--neutral-50); border:1px solid var(--neutral-300); border-radius:var(--r-400); padding:var(--sp-400)}
+  .cep__lead{display:flex; align-items:center; gap:var(--sp-200); font-size:14px; line-height:18px; font-weight:600; color:var(--neutral-900); margin-bottom:var(--sp-300)}
+  .cep__lead svg{width:18px; height:18px; color:var(--neutral-600); flex:none}
+  .cep__form{display:flex; gap:var(--sp-200)}
+  .cep__input{flex:1 1 auto; min-width:0; height:44px; border-radius:var(--r-300); border:1px solid var(--neutral-500); padding:0 var(--sp-400); font-family:var(--font-body); font-size:16px; font-weight:600; color:var(--neutral-900); background:var(--neutral-50)}
+  .cep__input::placeholder{color:var(--neutral-600); font-weight:400}
+  .cep__input:focus{outline:none; border-color:var(--neutral-900); box-shadow:0 0 0 3px rgba(30,30,31,.08)}
+  .cep__apply{flex:none; min-width:92px; height:44px; border:0; border-radius:var(--r-300); cursor:pointer; font-family:var(--font-body); font-weight:700; font-size:15px; background:var(--club-600); color:#fff; display:inline-flex; align-items:center; justify-content:center; gap:6px}
+  .cep__apply:hover{background:var(--club-700)}
+  .cep__apply:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
+  .cep__note{display:flex; align-items:center; gap:6px; margin-top:var(--sp-300); font-size:12px; line-height:16px; color:var(--neutral-600)}
+  .cep__note svg{width:13px; height:13px; flex:none}
+  .cep--error .cep__input{border-color:var(--red-600); box-shadow:0 0 0 3px rgba(207,48,48,.10)}
+  .cep__error{display:flex; align-items:center; gap:6px; margin-top:var(--sp-300); font-size:13px; line-height:18px; font-weight:600; color:var(--red-700)}
+  .cep__error svg{width:15px; height:15px; flex:none}
+  .cep--applied{display:flex; align-items:center; gap:var(--sp-300); padding:var(--sp-300) var(--sp-400)}
+  .cep__pin{width:36px; height:36px; border-radius:var(--r-300); flex:none; background:var(--green-100); color:var(--green-800); display:flex; align-items:center; justify-content:center}
+  .cep__pin svg{width:18px; height:18px}
+  .cep__applied-body{flex:1 1 auto; min-width:0}
+  .cep__applied-label{font-size:12px; line-height:16px; color:var(--neutral-600); font-weight:600; letter-spacing:.02em; text-transform:uppercase}
+  .cep__applied-value{font-size:16px; line-height:20px; font-weight:700; color:var(--neutral-900)}
+  .cep__applied-value .muted{display:block; font-size:13px; line-height:18px; color:var(--neutral-700); font-weight:600}
+  .cep__change{flex:none; border:1px solid var(--neutral-400); background:var(--neutral-50); color:var(--neutral-900); font-family:var(--font-body); font-weight:700; font-size:14px; min-height:44px; padding:0 18px; display:inline-flex; align-items:center; border-radius:var(--r-full); cursor:pointer}
+  .cep__change:hover{background:var(--neutral-100)}
+  .cep__change:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
+  .cep__spin{width:16px; height:16px; border-radius:50%; border:2px solid rgba(255,255,255,.45); border-top-color:#fff; animation:spin .7s linear infinite}
+
+  /* pilha */
+  .compare{display:flex; flex-direction:column; gap:var(--sp-400); padding:0 var(--sp-400)}
+  .compare-head{display:flex; align-items:baseline; justify-content:space-between; gap:var(--sp-300) var(--sp-400); flex-wrap:wrap; padding:0 var(--sp-100)}
+  .compare-head h2{font-family:var(--font-display); font-weight:600; font-size:18px; line-height:24px}
+  .compare-head .freshness{font-size:14px; line-height:18px; color:var(--neutral-700); font-weight:600; display:flex; align-items:center; gap:6px}
+  .compare-head .freshness::before{content:""; width:6px; height:6px; border-radius:var(--r-full); background:var(--green-600); flex:none}
+  .compare-head .freshness .src{color:var(--neutral-900)}
+
+  .pilha{display:flex; flex-direction:column; gap:var(--sp-400); margin-top:var(--sp-500)}
+  .channel{position:relative; background:var(--neutral-50); border:1px solid var(--neutral-300); border-radius:var(--r-400); padding:var(--sp-500); display:grid; grid-template-columns:48px 1fr auto; grid-template-areas:"logo name price" "logo meta price" "cta cta cta"; column-gap:var(--sp-400); row-gap:var(--sp-100); align-items:center; transition:box-shadow .3s ease, border-color .3s ease; will-change:transform}
+  .channel__logo{grid-area:logo; width:48px; height:48px; border-radius:var(--r-300); background:var(--neutral-100); border:1px solid var(--neutral-200); display:flex; align-items:center; justify-content:center; overflow:hidden}
+  .channel__logo img{width:28px; height:28px; object-fit:contain}
+  .channel__name{grid-area:name; font-family:var(--font-display); font-weight:600; font-size:16px; line-height:22px; grid-row:1/3; align-self:center; white-space:nowrap}
+  .channel__price{grid-area:price; text-align:right; align-self:center}
+  .channel__price .total{font-family:var(--font-display); font-weight:700; font-size:24px; line-height:32px; letter-spacing:-.01em; white-space:nowrap; display:block}
+  .channel__savings{display:inline-flex; align-items:center; font-size:12px; line-height:16px; font-weight:700; color:var(--green-800); background:var(--green-100); border-radius:var(--r-full); padding:2px 8px; white-space:nowrap; margin-top:4px}
+  .channel__price .caption{display:block; font-size:12px; line-height:16px; color:var(--neutral-600); margin-top:2px; white-space:nowrap}
+  .channel__price .caption span{display:inline}
+  .channel__price .caption .dot{color:var(--neutral-400); margin:0 2px}
+  .channel__price .caption .free{color:var(--green-800); font-weight:700}
+  .channel__cta{grid-area:cta; margin-top:var(--sp-400); display:flex; align-items:center; justify-content:center; gap:var(--sp-200); height:48px; border-radius:var(--r-300); border:0; cursor:pointer; font-family:var(--font-body); font-weight:700; font-size:16px; background:var(--neutral-900); color:#fff; text-decoration:none; transition:background .2s ease, transform .08s ease}
+  .channel__cta:hover{background:var(--neutral-700)}
+  .channel__cta:active{transform:scale(.985)}
+  .channel__cta:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
+  .channel__cta svg{width:16px; height:16px}
+  .channel--best{border-color:var(--club-500); box-shadow:var(--shadow-sm); padding-top:var(--sp-600)}
+  .channel--best::before{content:"★ Melhor custo total"; position:absolute; top:0; left:var(--sp-500); transform:translateY(-50%); background:var(--club-600); color:#fff; font-weight:700; font-size:12px; line-height:1; letter-spacing:.02em; padding:6px 12px; border-radius:var(--r-full); box-shadow:var(--shadow-sm)}
+  .channel--best .channel__cta{background:var(--club-600)}
+  .channel--best .channel__cta:hover{background:var(--club-700)}
+  .channel--best .channel__price .total{color:var(--club-600)}
+  .channel:not(.channel--best) .channel__savings{display:none}
+
+  /* não entrega neste CEP */
+  .channel--noship{grid-template-columns:48px 1fr; grid-template-areas:"logo name" "logo meta" "notice notice"; background:var(--neutral-100); border-color:var(--neutral-400); border-style:dashed}
+  .channel--noship .channel__name{color:var(--neutral-700)}
+  .channel--noship .channel__notice{grid-area:notice; margin-top:var(--sp-400); display:flex; align-items:center; gap:var(--sp-200); background:var(--amber-100); border:1px solid var(--amber-200); color:var(--amber-800); border-radius:var(--r-300); padding:10px var(--sp-400); font-size:14px; line-height:18px; font-weight:700}
+  .channel--noship .channel__notice svg{width:16px; height:16px; flex:none}
+  .channel__src{grid-area:meta; align-self:start; display:none}
+
+  .channel--just-best::before{animation:badgePop .5s ease}
+  @keyframes badgePop{0%{transform:translateY(-50%) scale(.7); opacity:.4}60%{transform:translateY(-50%) scale(1.08)}100%{transform:translateY(-50%) scale(1)}}
+  .swap{animation:swap .42s ease}
+  @keyframes swap{0%{opacity:.15}100%{opacity:1}}
+  @media (prefers-reduced-motion: reduce){.channel{transition:none !important} .channel--just-best::before,.swap{animation:none !important}}
+
+  /* barra de garantias */
+  .trust{display:flex; flex-wrap:wrap; gap:var(--sp-400) var(--sp-600); align-items:center;
+    margin-top:var(--sp-800); padding:var(--sp-600) var(--sp-400); border-top:1px solid var(--neutral-300)}
+  .trust__item{flex:1 1 240px; display:flex; align-items:center; gap:var(--sp-300);
+    font-size:15px; line-height:20px; font-weight:600; color:var(--neutral-800)}
+  .trust__item svg{width:22px; height:22px; color:var(--club-600); flex:none}
+  /* footer */
+  .site-footer{width:100%; background:var(--neutral-900); color:var(--neutral-400);
+    display:flex; flex-direction:column; align-items:center; text-align:center; gap:var(--sp-500);
+    padding:var(--sp-1000) var(--sp-400)}
+  .site-footer__logo{height:22px; width:auto; filter:brightness(0) invert(1); opacity:.95}
+  .site-footer__privacy{font-size:14px; line-height:22px; color:var(--neutral-400); max-width:440px}
+  .site-footer__links{display:flex; flex-wrap:wrap; justify-content:center; gap:var(--sp-400) var(--sp-600)}
+  .site-footer__links a{color:var(--neutral-200); text-decoration:none; font-size:14px; font-weight:600}
+  .site-footer__links a:hover{color:#fff}
+  .site-footer__copy{font-size:13px; line-height:18px; color:var(--neutral-500)}
+
+  /* fluxo de saída */
+  .channel__cta[data-state="loading"]{pointer-events:none}
+  .channel__cta[data-state="loading"] .arrow{display:none}
+  .spinner{width:18px; height:18px; border-radius:var(--r-full); border:2px solid rgba(255,255,255,.35); border-top-color:#fff; animation:spin .7s linear infinite; display:none}
+  .channel__cta[data-state="loading"] .spinner{display:block}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .exit{position:fixed; inset:0; z-index:100; background:rgba(255,255,255,.9); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--sp-400); text-align:center; padding:var(--sp-600); opacity:0; pointer-events:none; transition:opacity .35s var(--ease-out)}
+  .exit.on{opacity:1; pointer-events:auto}
+  .exit__logo{width:72px; height:72px; border-radius:var(--r-400); background:var(--neutral-50); border:1px solid var(--neutral-300); box-shadow:var(--shadow-sm); display:flex; align-items:center; justify-content:center; transform:scale(.8); transition:transform .45s var(--ease-out)}
+  .exit.on .exit__logo{transform:scale(1)}
+  .exit__logo img{width:48px; height:48px; object-fit:contain}
+  .exit h2{font-family:var(--font-display); font-weight:600; font-size:24px; line-height:32px}
+  .exit p{font-size:14px; line-height:20px; color:var(--neutral-600); max-width:260px}
+  .exit__dots{display:flex; gap:6px}
+  .exit__dots i{width:6px; height:6px; border-radius:var(--r-full); background:var(--club-500); animation:pulse 1.2s ease-in-out infinite}
+  .exit__dots i:nth-child(2){animation-delay:.15s} .exit__dots i:nth-child(3){animation-delay:.3s}
+  @keyframes pulse{0%,100%{opacity:.25; transform:scale(.9)} 50%{opacity:1; transform:scale(1.1)}}
+  @media (prefers-reduced-motion: reduce){.exit__dots i,.spinner{animation-duration:1.4s}}
+
+  /* barra dev */
+  .devbar{position:fixed; bottom:0; left:0; right:0; z-index:50; display:flex; justify-content:center; gap:6px; flex-wrap:wrap; padding:10px 16px calc(10px + env(safe-area-inset-bottom)); background:rgba(30,30,31,.92); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+  .devbar .tag{align-self:center; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--neutral-500)}
+  .devbar button{font-family:var(--font-body); font-size:12px; font-weight:700; padding:6px 12px; border-radius:var(--r-full); border:1px solid var(--neutral-600); background:transparent; color:var(--neutral-400); cursor:pointer; white-space:nowrap}
+  .devbar button[aria-pressed="true"]{background:var(--neutral-50); color:var(--neutral-900); border-color:var(--neutral-50)}
+
+  /* ===== DESKTOP — mobile-first é mobile primeiro, não mobile só (correção de escopo) =====
+     Breakpoint em 1080px (= largura máxima da página): abaixo disso a coluna direita fica
+     estreita demais e o card horizontal (logo+nome+preço+botão) não tem folga — o botão
+     raspa/vaza da borda. Só a partir de 1080px a coluna direita tem os 656px cheios, com
+     espaçador ~56px de folga. Até 1079px = coluna única empilhada (sempre segura). */
+  @media (min-width:1080px){
+    body{padding-bottom:140px}
+    .page{max-width:1160px; padding:0 var(--sp-800)}
+    .topbar{justify-content:center; padding:var(--sp-800) 0 var(--sp-1000)}
+    .layout{
+      display:grid; grid-template-columns:minmax(0,300px) minmax(0,1fr);
+      gap:var(--sp-1000); align-items:start;
+    }
+    .col-left{position:sticky; top:var(--sp-800)}
+    .hero{padding:0; align-items:flex-start; text-align:left; gap:var(--sp-500)}
+    .hero__title{font-size:28px; line-height:36px; padding:0}
+    .hero__lead{margin-top:0; max-width:none}
+    .cep-wrap{padding:0; margin-top:var(--sp-500)}
+    .compare{padding:0}
+    .trust{padding-left:0; padding-right:0}
+
+    /* card HORIZONTAL no desktop: uma linha só — logo + nome ···· preço + CTA inline.
+       Usa a largura (o card empilhado do mobile só criava vão morto ao esticar). */
+    .channel{
+      grid-template-columns:48px auto 1fr auto 1fr auto;
+      grid-template-areas:"logo name . price . cta";
+      column-gap:var(--sp-500); row-gap:0;
+      padding:var(--sp-500) var(--sp-600); align-items:center;
+    }
+    .channel--best{padding-top:var(--sp-400)}
+    .channel__name{grid-row:auto; align-self:center}
+    .channel__price{align-self:center}
+    .channel__cta{margin-top:0; align-self:center; height:52px; padding:0 var(--sp-500); white-space:nowrap}
+    .channel--noship{
+      grid-template-columns:48px auto 1fr; grid-template-areas:"logo name notice";
+      align-items:center; padding:var(--sp-400) var(--sp-500);
+    }
+    .channel--noship .channel__notice{grid-area:notice; margin-top:0; justify-self:end}
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header class="topbar reveal d-0"><img src="assets/logo-black.svg" alt="Ybera"></header>
+
+  <div class="layout">
+   <div class="col-left">
+  <section class="hero">
+    <div class="hero__media reveal d-0">
+      <img src="assets/produto-hero.jpg" alt="Escova Progressiva Fashion Gold 500g">
+      <div class="hero__referral"><span class="hero__avatar" aria-hidden="true">C</span><span>Indicação de Camila</span></div>
+    </div>
+    <h1 class="hero__title reveal d-1">Escova Progressiva Fashion&nbsp;Gold 500g</h1>
+    <p class="hero__lead reveal d-1">Compare preço e frete e compre na loja que preferir.</p>
+  </section>
+
+  <div class="cep-wrap reveal d-2"><div id="cepSlot"></div></div>
+   </div>
+
+   <div class="col-right">
+  <section class="compare" aria-label="Comparação de preços entre lojas">
+    <header class="compare-head reveal d-2">
+      <h2>Onde comprar</h2>
+      <span class="freshness">Preços atualizados há 6 min</span>
+    </header>
+    <div class="pilha" id="pilha"></div>
+  </section>
+   </div>
+  </div>
+
+  <section class="trust reveal d-5" aria-label="Garantias da compra">
+    <div class="trust__item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 7.6 8 9 4.5-1.4 8-4 8-9V6l-8-3Z"/></svg>
+      Produto original nos canais oficiais
+    </div>
+    <div class="trust__item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      Pagamento seguro na plataforma do canal
+    </div>
+    <div class="trust__item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9.5 18 20 6.5"/></svg>
+      Você escolhe onde comprar — sem custo extra
+    </div>
+  </section>
+</div>
+
+<footer class="site-footer">
+  <img class="site-footer__logo" src="assets/logo-black.svg" alt="Ybera">
+  <p class="site-footer__privacy">Você navega sem cadastro — nenhum dado pessoal é coletado nesta página. O CEP, quando informado, não é armazenado.</p>
+  <nav class="site-footer__links" aria-label="Rodapé">
+    <a href="#">Sobre</a>
+    <a href="#">Parceiros</a>
+    <a href="#">Política de privacidade</a>
+    <a href="#">Termos</a>
+  </nav>
+  <p class="site-footer__copy">© 2026 Ybera Group</p>
+</footer>
+
+<div class="exit" id="exit" role="status" aria-live="polite">
+  <div class="exit__logo"><img id="exit-logo" src="assets/Shopee.svg" alt=""></div>
+  <h2 id="exit-title">Levando você para a Shopee</h2>
+  <p>Você conclui a compra direto na loja, do jeito de sempre.</p>
+  <div class="exit__dots" aria-hidden="true"><i></i><i></i><i></i></div>
+</div>
+
+<nav class="devbar" aria-label="Cenários (dev)">
+  <span class="tag">Dev</span>
+  <button data-s="ref" aria-pressed="true">Sem CEP</button>
+  <button data-s="cepA" aria-pressed="false">CEP SP · reordena</button>
+  <button data-s="cepB" aria-pressed="false">CEP AC · não entrega</button>
+  <button data-s="reload" aria-pressed="false">Recarregar (CEP some)</button>
+</nav>
+
+<script>
+  const ARROW = '<svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>';
+  const PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+  const PIN_LEAD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+  const LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>';
+  const WARN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>';
+  const ALERT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>';
+
+  const CH = {
+    shopee:{name:'Shopee', logo:'assets/Shopee.svg', cta:'Comprar na Shopee', artigo:'a', href:'https://shopee.com.br/'},
+    tiktok:{name:'TikTok Shop', logo:'assets/tiktok.svg', cta:'Comprar no TikTok Shop', artigo:'o', href:'https://www.tiktok.com/shop'},
+    ybera:{name:'Ybera.com', logo:'assets/ybera.svg', cta:'Comprar na Ybera.com', artigo:'a', href:'https://www.ybera.com/produto/escova-progressiva-500g-fashion-gold-150264?parceiro=52154'},
+  };
+
+  const STATE = {
+    ref:{ order:['shopee','tiktok','ybera'], best:'shopee', savings:'Economize R$ 2,10', src:'frete de referência',
+      d:{ shopee:{total:'R$ 204,80', price:'R$ 179,90', freight:'+ frete R$ 24,90'},
+          tiktok:{total:'R$ 206,90', price:'R$ 184,90', freight:'+ frete R$ 22,00'},
+          ybera:{total:'R$ 209,80', price:'R$ 189,90', freight:'+ frete R$ 19,90'} } },
+    cepA:{ cep:'01310-100', city:'São Paulo, SP', order:['ybera','shopee','tiktok'], best:'ybera', savings:'Economize R$ 6,90', src:'frete para 01310-100',
+      d:{ ybera:{total:'R$ 189,90', price:'R$ 189,90', freight:'Frete grátis', free:true},
+          shopee:{total:'R$ 196,80', price:'R$ 179,90', freight:'+ frete R$ 16,90'},
+          tiktok:{total:'R$ 202,90', price:'R$ 184,90', freight:'+ frete R$ 18,00'} } },
+    cepB:{ cep:'69900-970', city:'Rio Branco, AC', order:['shopee','ybera','tiktok'], best:'shopee', savings:'Economize R$ 2,00', src:'frete para 69900-970',
+      d:{ shopee:{total:'R$ 222,80', price:'R$ 179,90', freight:'+ frete R$ 42,90'},
+          ybera:{total:'R$ 224,80', price:'R$ 189,90', freight:'+ frete R$ 34,90'},
+          tiktok:{noship:true} } },
+  };
+  const CEP_MAP = {'01310100':'cepA','69900970':'cepB'};
+
+  const pilha = document.getElementById('pilha');
+  const cepSlot = document.getElementById('cepSlot');
+  const srcLabel = document.getElementById('srcLabel');
+  const cards = {};
+  let current = null;
+  let pendingRaf = null; // rAF do FLIP em voo — cancelado se um novo reorder começar antes
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function buildCard(id){
+    const el = document.createElement('article');
+    el.dataset.ch = id;
+    return el;
+  }
+  function fillCard(el, id, st){
+    const info = st.d[id];
+    if(info.noship){
+      el.className = 'channel channel--noship';
+      el.innerHTML =
+        '<div class="channel__logo"><img src="'+CH[id].logo+'" alt="'+CH[id].name+'"></div>'+
+        '<h3 class="channel__name">'+CH[id].name+'</h3>'+
+        '<div class="channel__notice">'+WARN+' A loja não entrega neste CEP</div>';
+      return;
+    }
+    const isBest = st.best === id;
+    el.className = 'channel' + (isBest ? ' channel--best' : '');
+    const freightHtml = info.free ? ' <span class="dot">·</span> <span class="free">'+info.freight+'</span>' : ' <span>'+info.freight+'</span>';
+    el.innerHTML =
+      '<div class="channel__logo"><img src="'+CH[id].logo+'" alt="'+CH[id].name+'"></div>'+
+      '<h3 class="channel__name">'+CH[id].name+'</h3>'+
+      '<div class="channel__price">'+
+        '<span class="total">'+info.total+'</span>'+
+        '<div class="channel__savings">'+(isBest?st.savings:'')+'</div>'+
+        '<span class="caption"><span>'+info.price+'</span>'+freightHtml+'</span>'+
+      '</div>'+
+      '<a class="channel__cta" href="#" data-ch="'+id+'"><span class="spinner" aria-hidden="true"></span><span class="label">'+CH[id].cta+'</span>'+ARROW+'</a>';
+  }
+
+  function renderCep(which){
+    const st = STATE[which];
+    if(which === 'ref'){
+      cepSlot.innerHTML =
+        '<div class="cep">'+
+          '<div class="cep__lead">'+PIN_LEAD+'Ver o frete certo pro seu endereço</div>'+
+          '<div class="cep__form"><input class="cep__input" inputmode="numeric" placeholder="00000-000" aria-label="Seu CEP" id="cepInput">'+
+          '<button class="cep__apply" id="cepApply">Ver frete</button></div>'+
+          '<div class="cep__note">'+LOCK+'Usado só agora pra calcular o frete — não guardamos seu CEP.</div>'+
+        '</div>';
+      document.getElementById('cepApply').addEventListener('click', applyFromInput);
+      document.getElementById('cepInput').addEventListener('keydown', e=>{ if(e.key==='Enter') applyFromInput(); });
+    } else {
+      cepSlot.innerHTML =
+        '<div class="cep cep--applied">'+
+          '<div class="cep__pin">'+PIN+'</div>'+
+          '<div class="cep__applied-body"><div class="cep__applied-label">Frete para</div>'+
+          '<div class="cep__applied-value">'+st.cep+' <span class="muted">'+st.city+'</span></div></div>'+
+          '<button class="cep__change" id="cepChange">Trocar</button>'+
+        '</div>';
+      document.getElementById('cepChange').addEventListener('click', ()=>applyState('ref'));
+    }
+  }
+
+  function showCepError(msg){
+    const box = cepSlot.querySelector('.cep');
+    if(!box) return;
+    box.classList.add('cep--error');
+    let err = box.querySelector('.cep__error');
+    if(!err){ err = document.createElement('div'); err.className='cep__error'; err.setAttribute('role','alert'); box.appendChild(err); }
+    err.innerHTML = ALERT + msg;
+  }
+
+  function applyFromInput(){
+    const input = document.getElementById('cepInput');
+    const raw = (input.value || '').replace(/\D/g,'');
+    if(raw.length !== 8){ showCepError('CEP incompleto — precisa de 8 dígitos.'); return; }
+    const which = CEP_MAP[raw];
+    if(!which){ showCepError('CEP não encontrado — confira os 8 dígitos.'); return; }
+    applyState(which);
+  }
+
+  function applyState(which){
+    const st = STATE[which];
+    const prevBest = current ? STATE[current].best : null;
+
+    // re-entrância-safe: cancela o FLIP pendente e zera transforms ANTES de medir
+    // 'first' — senão a medição pega uma posição no meio da animação anterior e os
+    // cards ficam com transform travado (bug de toggle rápido / duplo-clique).
+    if(pendingRaf){ cancelAnimationFrame(pendingRaf); pendingRaf = null; }
+    Object.keys(cards).forEach(id=>{ cards[id].style.transition='none'; cards[id].style.transform=''; });
+
+    const first = {};
+    Object.keys(cards).forEach(id=>{ first[id] = cards[id].getBoundingClientRect().top; });
+
+    st.order.forEach(id=>{
+      if(!cards[id]) cards[id] = buildCard(id);
+      fillCard(cards[id], id, st);
+      pilha.appendChild(cards[id]);
+    });
+    wireCtas();
+
+    Object.keys(cards).forEach(id=>{
+      const p = cards[id].querySelector('.channel__price');
+      if(p){ p.classList.remove('swap'); void p.offsetWidth; p.classList.add('swap'); }
+    });
+    if(st.best !== prevBest && cards[st.best]){
+      const b = cards[st.best]; b.classList.remove('channel--just-best'); void b.offsetWidth; b.classList.add('channel--just-best');
+    }
+
+    if(!reduceMotion && current !== null){
+      Object.keys(cards).forEach(id=>{
+        const last = cards[id].getBoundingClientRect().top;
+        const dy = first[id] - last;
+        cards[id].style.transition='none';
+        cards[id].style.transform = dy ? 'translateY('+dy+'px)' : '';
+      });
+      // double rAF: garante que o transform 'invertido' foi pintado antes de trocar
+      // pra transição animada (single rAF às vezes coalesce e pula a animação).
+      pendingRaf = requestAnimationFrame(()=>{
+        pendingRaf = requestAnimationFrame(()=>{
+          Object.keys(cards).forEach(id=>{ cards[id].style.transition='transform .42s cubic-bezier(.2,.7,.2,1)'; cards[id].style.transform=''; });
+          pendingRaf = null;
+        });
+      });
+    }
+
+    renderCep(which === 'ref' ? 'ref' : which);
+    if(srcLabel) srcLabel.textContent = st.src;
+    document.querySelectorAll('.devbar button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.s===(which)?'true':'false'));
+    current = which;
+  }
+
+  // fluxo de saída
+  const exit = document.getElementById('exit');
+  const exitLogo = document.getElementById('exit-logo');
+  const exitTitle = document.getElementById('exit-title');
+  function wireCtas(){
+    document.querySelectorAll('.channel__cta').forEach(a=>{
+      if(a.dataset.wired) return; a.dataset.wired = '1';
+      a.addEventListener('click', e=>{
+        e.preventDefault();
+        const id = a.dataset.ch; const info = CH[id];
+        a.setAttribute('data-state','loading');
+        a.querySelector('.label').textContent = 'Abrindo '+info.artigo+' '+info.name+'…';
+        exitLogo.src = info.logo;
+        exitTitle.textContent = 'Levando você para '+info.artigo+' '+info.name;
+        setTimeout(()=>exit.classList.add('on'), 550);
+        setTimeout(()=>{ window.location.href = info.href; }, 1400); // produção: link com vínculo RF-002/RF-007
+      });
+    });
+  }
+
+  document.querySelectorAll('.devbar button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const s = btn.dataset.s;
+      if(s === 'reload'){ window.location.reload(); return; }
+      applyState(s);
+    });
+  });
+
+  // Nenhum localStorage / sessionStorage / query string — CEP é transitório (LGPD).
+  // Recarregar volta ao estado sem CEP: prova do "não guardamos".
+  applyState('ref');
+</script>
+</body>
+</html>

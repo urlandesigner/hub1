@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peça 02 — Painel de vínculos completo</title>
+<!-- Fontes: Nunito via Google Fonts NA POC; produção usa o self-host do app (rubric 7.1). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --b2c-primary:hsl(345 71% 51%);
+    --b2c-primary-40:hsl(344 76% 41%);
+    --b2c-neutral:hsl(0 0% 100%);
+    --b2c-neutral-20:hsl(240 5% 96%);
+    --b2c-neutral-30:hsl(240 6% 90%);
+    --b2c-neutral-40:hsl(240 5% 84%);
+    --b2c-neutral-50:hsl(240 5% 65%);
+    --b2c-neutral-60:hsl(240 4% 46%);
+    --b2c-neutral-70:hsl(240 5% 34%);
+    --b2c-neutral-90:hsl(240 4% 16%);
+    --b2c-positive-10:hsl(136 65% 97%);
+    --b2c-positive-20:hsl(136 61% 85%);
+    --b2c-positive-40:hsl(137 56% 29%);
+    --b2c-warning-10:hsl(40 67% 96%);
+    --b2c-warning-20:hsl(39 67% 83%);
+    --b2c-warning-40:hsl(25 61% 40%);
+    --radius:.5rem;
+    --font-ui:'Nunito','Open Sans',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-ui); background:var(--b2c-neutral-20); color:var(--b2c-neutral-60);
+    -webkit-font-smoothing:antialiased;
+    padding:32px 16px 96px; display:flex; flex-direction:column; align-items:center; gap:24px;
+  }
+  .stage-label{
+    font-size:12px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--b2c-neutral-60); width:100%; max-width:880px;
+  }
+  .frame{width:100%; max-width:880px}
+
+  /* ---------- PAINEL DE VÍNCULOS (card no padrão do app: bg-card rounded-2xl) ---------- */
+  .links-panel{
+    background:var(--b2c-neutral); border-radius:16px;
+    padding:16px;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .links-panel__head{
+    display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+    padding:0 4px 8px;
+    flex-wrap:wrap;
+  }
+  .links-panel__title{
+    font-size:16px; font-weight:800; color:var(--b2c-neutral-70);
+  }
+  .links-panel__meta{
+    font-size:12px; font-weight:700; color:var(--b2c-neutral-60);
+  }
+  .links-panel__meta b{color:var(--b2c-positive-40)}
+
+  .link-row{
+    display:flex; align-items:center; gap:12px;
+    background:var(--b2c-neutral); border:1px solid var(--b2c-neutral-30);
+    border-radius:calc(var(--radius) + 4px);
+    padding:10px 16px; font-size:14px;
+  }
+  .link-row__logo{
+    width:32px; height:32px; border-radius:var(--radius);
+    background:var(--b2c-neutral-20); border:1px solid var(--b2c-neutral-30);
+    display:flex; align-items:center; justify-content:center; flex:none;
+  }
+  .link-row__logo img{width:18px; height:18px; object-fit:contain}
+  .link-row__name{font-weight:700; color:var(--b2c-neutral-70); white-space:nowrap; min-width:96px}
+  .link-row__hint{color:var(--b2c-neutral-60); flex:1; min-width:0}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px;
+    border-radius:9999px; border:1px solid transparent;
+    padding:4px 10px; font-size:12px; font-weight:700; white-space:nowrap;
+  }
+  .chip svg{width:12px; height:12px; flex:none}
+  .chip--ok{background:var(--b2c-positive-10); color:var(--b2c-positive-40); border-color:var(--b2c-positive-20)}
+  .chip--off{background:var(--b2c-neutral-20); color:var(--b2c-neutral-70); border-color:var(--b2c-neutral-40)}
+  .chip--warn{background:var(--b2c-warning-10); color:var(--b2c-warning-40); border-color:var(--b2c-warning-20)}
+  .link-row__action{
+    font-weight:700; font-size:14px; color:var(--b2c-primary);
+    text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px;
+    white-space:nowrap; cursor:pointer; background:none; border:0; font-family:inherit;
+    padding:10px 4px;
+  }
+  .link-row__action:hover{color:var(--b2c-primary-40)}
+  .link-row__action:focus-visible{outline:2px solid var(--b2c-primary); outline-offset:2px; border-radius:4px}
+
+  @media (max-width:560px){
+    .link-row{flex-wrap:wrap; row-gap:6px}
+    .link-row__hint{flex-basis:100%; order:4}
+    .link-row__action{padding-left:0}
+  }
+
+  /* ---------- ESTADOS DO PAINEL: loading + erro de leitura (portão #6) ---------- */
+  .sk{position:relative; overflow:hidden; background:var(--b2c-neutral-30); border-radius:8px}
+  .sk::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(90deg,transparent,hsl(0 0% 100% / .6),transparent);
+    transform:translateX(-100%); animation:shimmer 1.6s ease-in-out infinite;
+  }
+  @keyframes shimmer{to{transform:translateX(100%)}}
+  @media (prefers-reduced-motion: reduce){.sk::after{animation:none}}
+  .sk-row{
+    display:flex; align-items:center; gap:12px;
+    border:1px solid var(--b2c-neutral-30); border-radius:12px; padding:10px 16px;
+  }
+  .sk-logo{width:32px; height:32px; border-radius:8px; flex:none}
+  .sk-name{width:96px; height:14px}
+  .sk-hint{flex:1; height:12px; max-width:320px}
+  .sk-chip{width:88px; height:24px; border-radius:9999px; margin-left:auto}
+  .panel-notice{
+    display:flex; gap:10px; align-items:flex-start;
+    border:1px dashed var(--b2c-neutral-40); border-radius:12px;
+    padding:12px 16px; font-size:14px; line-height:20px; color:var(--b2c-neutral-60);
+  }
+  .panel-notice svg{width:16px; height:16px; flex:none; margin-top:2px}
+</style>
+</head>
+<body>
+
+  <div class="stage-label">Peça 02 · Painel de vínculos — cenário didático (1 de 3 ativos)</div>
+  <div class="frame">
+    <section class="links-panel" aria-label="Vínculos dos seus canais de venda">
+      <header class="links-panel__head">
+        <h2 class="links-panel__title">Meus canais de venda</h2>
+        <span class="links-panel__meta"><b>1 de 3</b> canais recebendo suas vendas pelo link do Hub</span>
+      </header>
+
+      <!-- Wake / Ybera.com — vinculado -->
+      <div class="link-row">
+        <span class="link-row__logo"><img src="assets/ybera.svg" alt=""></span>
+        <span class="link-row__name">Ybera.com</span>
+        <span class="link-row__hint">Suas vendas neste canal já contam para a sua comissão.</span>
+        <span class="chip chip--ok">
+          <svg viewBox="0 0 448 512" fill="currentColor" aria-hidden="true"><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg>
+          Vinculado
+        </span>
+      </div>
+
+      <!-- Shopee — vínculo expirado -->
+      <div class="link-row">
+        <span class="link-row__logo"><img src="assets/Shopee.svg" alt=""></span>
+        <span class="link-row__name">Shopee</span>
+        <span class="link-row__hint">Sua conexão com a Shopee expirou — refaça a autorização para voltar a ganhar comissão.</span>
+        <span class="chip chip--warn">
+          <svg viewBox="0 0 512 512" fill="currentColor" aria-hidden="true"><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>
+          Conexão expirada
+        </span>
+        <button class="link-row__action" type="button">Reconectar Shopee</button>
+      </div>
+
+      <!-- TikTok — nunca vinculou -->
+      <div class="link-row">
+        <span class="link-row__logo"><img src="assets/tiktok.svg" alt=""></span>
+        <span class="link-row__name">TikTok Shop</span>
+        <span class="link-row__hint">Vincule sua conta para ganhar comissão nas vendas do TikTok.</span>
+        <span class="chip chip--off">Não vinculado</span>
+        <button class="link-row__action" type="button">Como vincular TikTok ao seu Hub</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="stage-label">Variação · Todos vinculados (estado-alvo)</div>
+  <div class="frame">
+    <section class="links-panel" aria-label="Vínculos dos seus canais de venda">
+      <header class="links-panel__head">
+        <h2 class="links-panel__title">Meus canais de venda</h2>
+        <span class="links-panel__meta"><b>3 de 3</b> canais recebendo suas vendas pelo link do Hub</span>
+      </header>
+      <div class="link-row">
+        <span class="link-row__logo"><img src="assets/ybera.svg" alt=""></span>
+        <span class="link-row__name">Ybera.com</span>
+        <span class="link-row__hint">Suas vendas neste canal já contam para a sua comissão.</span>
+        <span class="chip chip--ok"><svg viewBox="0 0 448 512" fill="currentColor" aria-hidden="true"><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg>Vinculado</span>
+      </div>
+      <div class="link-row">
+        <span class="link-row__logo"><img src="assets/Shopee.svg" alt=""></span>
+        <span class="link-row__name">Shopee</span>
+        <span class="link-row__hint">Suas vendas neste canal já contam para a sua comissão.</span>
+        <span class="chip chip--ok"><svg viewBox="0 0 448 512" fill="currentColor" aria-hidden="true"><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg>Vinculado</span>
+      </div>
+      <div class="link-row">
+        <span class="link-row__logo"><img src="assets/tiktok.svg" alt=""></span>
+        <span class="link-row__name">TikTok Shop</span>
+        <span class="link-row__hint">Suas vendas neste canal já contam para a sua comissão.</span>
+        <span class="chip chip--ok"><svg viewBox="0 0 448 512" fill="currentColor" aria-hidden="true"><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg>Vinculado</span>
+      </div>
+    </section>
+  </div>
+
+
+  <div class="stage-label">Variação · Loading (consultando status — RF-009)</div>
+  <div class="frame">
+    <section class="links-panel" aria-label="Carregando vínculos" aria-busy="true">
+      <header class="links-panel__head">
+        <h2 class="links-panel__title">Meus canais de venda</h2>
+      </header>
+        <div class="sk-row" aria-hidden="true"><span class="sk sk-logo"></span><span class="sk sk-name"></span><span class="sk sk-hint"></span><span class="sk sk-chip"></span></div>
+        <div class="sk-row" aria-hidden="true"><span class="sk sk-logo"></span><span class="sk sk-name"></span><span class="sk sk-hint"></span><span class="sk sk-chip"></span></div>
+        <div class="sk-row" aria-hidden="true"><span class="sk sk-logo"></span><span class="sk sk-name"></span><span class="sk sk-hint"></span><span class="sk sk-chip"></span></div>
+    </section>
+  </div>
+
+  <div class="stage-label">Variação · Erro de leitura de status (degradação graciosa)</div>
+  <div class="frame">
+    <section class="links-panel" aria-label="Vínculos indisponíveis">
+      <header class="links-panel__head">
+        <h2 class="links-panel__title">Meus canais de venda</h2>
+      </header>
+        <div class="panel-notice" role="status">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+          <span>Não conseguimos carregar o status dos seus canais agora — recarregue a página.
+          Seus links e o catálogo continuam funcionando normalmente.</span>
+        </div>
+    </section>
+  </div>
+
+</body>
+</html>

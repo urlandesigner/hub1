@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peça 04 — Modal B · Reautorização (Shopee)</title>
+<!-- Fontes: Nunito via Google Fonts NA POC; produção usa o self-host do app (rubric 7.1). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --b2c-primary:hsl(345 71% 51%);
+    --b2c-primary-40:hsl(344 76% 41%);
+    --b2c-neutral:hsl(0 0% 100%);
+    --b2c-neutral-20:hsl(240 5% 96%);
+    --b2c-neutral-30:hsl(240 6% 90%);
+    --b2c-neutral-40:hsl(240 5% 84%);
+    --b2c-neutral-50:hsl(240 5% 65%);
+    --b2c-neutral-60:hsl(240 4% 46%);
+    --b2c-neutral-70:hsl(240 5% 34%);
+    --b2c-neutral-90:hsl(240 4% 16%);
+    --b2c-warning-10:hsl(40 67% 96%);
+    --b2c-warning-20:hsl(39 67% 83%);
+    --b2c-warning-40:hsl(25 61% 40%);
+    --radius:.5rem;
+    --font-ui:'Nunito','Open Sans',system-ui,sans-serif;
+    --overlay:hsl(240 4% 16% / .5);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-ui); background:var(--b2c-neutral-20); color:var(--b2c-neutral-60);
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+    display:flex; align-items:center; justify-content:center; padding:32px 16px;
+  }
+  .overlay{
+    position:fixed; inset:0; background:var(--overlay);
+    display:flex; align-items:center; justify-content:center; padding:16px;
+  }
+  .dialog{
+    width:100%; max-width:480px;
+    background:var(--b2c-neutral); border-radius:16px;
+    padding:24px;
+    display:flex; flex-direction:column; gap:16px;
+    box-shadow:0 0 8px rgba(5,5,5,.10);
+  }
+  .dialog__head{display:flex; align-items:flex-start; gap:12px}
+  /* Diferenciação do Modal A: badge ÂMBAR de alerta (não rosa de novidade) */
+  .dialog__badge{
+    width:40px; height:40px; border-radius:9999px; flex:none;
+    background:var(--b2c-warning-10); color:var(--b2c-warning-40);
+    border:1px solid var(--b2c-warning-20);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .dialog__badge svg{width:18px; height:18px}
+  .dialog__titles{flex:1}
+  .dialog__eyebrow{
+    font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--b2c-warning-40);
+  }
+  .dialog__title{
+    font-size:18px; font-weight:800; color:var(--b2c-neutral-90); line-height:24px;
+  }
+  .dialog__close{
+    background:none; border:0; cursor:pointer; color:var(--b2c-neutral-60);
+    padding:8px; margin:-8px -8px 0 0; border-radius:var(--radius);
+  }
+  .dialog__close:hover{color:var(--b2c-neutral-70); background:var(--b2c-neutral-20)}
+  .dialog__close:focus-visible{outline:2px solid var(--b2c-primary); outline-offset:2px}
+  .dialog__close svg{width:16px; height:16px; display:block}
+
+  .dialog__intro{font-size:14px; line-height:20px}
+
+  .video-ph{
+    aspect-ratio:16/9; border-radius:12px; overflow:hidden;
+    background:var(--b2c-neutral-90);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    color:var(--b2c-neutral-40);
+  }
+  .video-ph__play{
+    width:48px; height:48px; border-radius:9999px;
+    background:hsl(0 0% 100% / .9); color:var(--b2c-neutral-90);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .video-ph__play svg{width:16px; height:16px; margin-left:2px}
+  .video-ph small{font-size:12px; font-weight:700}
+
+  .steps{display:flex; flex-direction:column; gap:10px; font-size:14px; line-height:20px}
+  .steps li{display:flex; gap:10px; align-items:flex-start; list-style:none}
+  .steps .n{
+    width:22px; height:22px; border-radius:9999px; flex:none;
+    background:var(--b2c-warning-20); color:var(--b2c-warning-40);
+    font-size:12px; font-weight:800;
+    display:flex; align-items:center; justify-content:center; margin-top:-1px;
+  }
+  .steps b{color:var(--b2c-neutral-70)}
+
+  .dialog__note{
+    font-size:12px; line-height:16px; color:var(--b2c-neutral-60);
+    background:var(--b2c-neutral-20); border-radius:var(--radius); padding:10px 12px;
+  }
+
+  .dialog__actions{display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap}
+  .btn{
+    height:44px; padding:0 20px; border-radius:var(--radius);
+    font-family:inherit; font-size:14px; font-weight:700; cursor:pointer;
+    display:inline-flex; align-items:center; gap:8px;
+    transition:background .2s ease, transform .08s ease;
+  }
+  .btn:active{transform:scale(.985)}
+  .btn:focus-visible{outline:2px solid var(--b2c-primary); outline-offset:2px}
+  .btn--ghost{background:none; border:1px solid var(--b2c-neutral-40); color:var(--b2c-neutral-60)}
+  .btn--ghost:hover{background:var(--b2c-neutral-20)}
+  .btn--primary{background:var(--b2c-primary); border:0; color:#fff}
+  .btn--primary:hover{background:var(--b2c-primary-40)}
+  .btn svg{width:14px; height:14px}
+</style>
+</head>
+<body>
+
+  <div class="overlay" role="dialog" aria-modal="true" aria-labelledby="dlg-title">
+    <div class="dialog">
+      <div class="dialog__head">
+        <span class="dialog__badge" aria-hidden="true">
+          <!-- ícone de rotação/renovar — reconexão, não novidade -->
+          <svg viewBox="0 0 512 512" fill="currentColor"><path d="M463.5 224l8.5 0c13.3 0 24-10.7 24-24l0-128c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1c-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8l119.5 0z"/></svg>
+        </span>
+        <div class="dialog__titles">
+          <div class="dialog__eyebrow">Reautorização</div>
+          <h2 class="dialog__title" id="dlg-title">Reconecte sua Shopee</h2>
+        </div>
+        <button class="dialog__close" type="button" aria-label="Fechar">
+          <svg viewBox="0 0 384 512" fill="currentColor"><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>
+        </button>
+      </div>
+
+      <p class="dialog__intro"><b>Você já fez essa autorização antes</b> — ela só expirou,
+      como acontece de tempos em tempos por segurança. Nada mudou na sua conta:
+      refazer leva menos de um minuto.</p>
+
+      <div class="video-ph" role="img" aria-label="Vídeo de reautorização (em produção)">
+        <span class="video-ph__play"><svg viewBox="0 0 384 512" fill="currentColor"><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span>
+        <small>Vídeo de reautorização — em produção (Produto/Operação)</small>
+      </div>
+
+      <ul class="steps">
+        <li><span class="n">1</span><span>Toque em <b>Reautorizar agora</b> e confirme na tela da Shopee — o caminho é o mesmo da primeira vez.</span></li>
+        <li><span class="n">2</span><span>Volte para cá — o canal volta a ficar <b>Vinculado</b> e seus links seguem valendo.</span></li>
+      </ul>
+
+      <p class="dialog__note">Enquanto a conexão estiver expirada, a Shopee fica fora do seu
+      link do Hub — suas vendas nos outros canais não são afetadas.</p>
+
+      <div class="dialog__actions">
+        <button class="btn btn--ghost" type="button">Deixar para depois</button>
+        <button class="btn btn--primary" type="button">
+          Reautorizar agora
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

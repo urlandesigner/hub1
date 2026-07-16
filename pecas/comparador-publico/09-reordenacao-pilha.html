@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peça 09 — Reordenação da pilha por CEP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --neutral-50:#FFFFFF; --neutral-100:#FAF9FC; --neutral-200:#ECEBF0;
+    --neutral-300:#E2E1E5; --neutral-400:#C9C8CC; --neutral-500:#B0AFB2;
+    --neutral-600:#6C6B6E; --neutral-700:#505052; --neutral-800:#373738;
+    --neutral-900:#1E1E1F;
+    --club-50:#FEF0F4; --club-100:#FEC8D8; --club-400:#FA4277;
+    --club-500:#ED1A57; --club-600:#C70F43; --club-700:#980B38;
+    --green-100:#E6F6E5; --green-600:#50AE47; --green-700:#33922A; --green-800:#2B6A25;
+    --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-600:#D97706; --amber-700:#B45309; --amber-800:#92400E;
+    --sp-100:4px; --sp-200:8px; --sp-300:12px; --sp-400:16px;
+    --sp-500:20px; --sp-600:24px; --sp-800:32px;
+    --r-200:8px; --r-300:12px; --r-400:16px; --r-full:9999px;
+    --font-display:'Syne',system-ui,sans-serif;
+    --font-body:'Nunito Sans',system-ui,sans-serif;
+    --shadow-sm:0 0 8px rgba(5,5,5,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-body);
+    background:var(--neutral-200);
+    color:var(--neutral-900);
+    -webkit-font-smoothing:antialiased;
+    padding:var(--sp-600) var(--sp-400) 120px;
+    display:flex; flex-direction:column; align-items:center; gap:var(--sp-400);
+  }
+  .frame{width:100%; max-width:390px; display:flex; flex-direction:column; gap:var(--sp-400)}
+
+  /* ---- CEP chip (reflete o estado) ---- */
+  .cep{
+    background:var(--neutral-50); border:1px solid var(--neutral-300);
+    border-radius:var(--r-400); padding:var(--sp-400);
+  }
+  .cep__lead{
+    display:flex; align-items:center; gap:var(--sp-200);
+    font-size:14px; line-height:18px; font-weight:600; color:var(--neutral-900); margin-bottom:var(--sp-300);
+  }
+  .cep__lead svg{width:18px; height:18px; color:var(--neutral-600); flex:none}
+  .cep__form{display:flex; gap:var(--sp-200)}
+  .cep__input{
+    flex:1 1 auto; height:44px; border-radius:var(--r-300); border:1px solid var(--neutral-500);
+    padding:0 var(--sp-400); font-family:var(--font-body); font-size:16px; font-weight:600;
+    color:var(--neutral-900); background:var(--neutral-50);
+  }
+  .cep__input::placeholder{color:var(--neutral-600); font-weight:400}
+  .cep__apply{
+    flex:none; min-width:92px; height:44px; border:0; border-radius:var(--r-300); cursor:pointer;
+    font-family:var(--font-body); font-weight:700; font-size:15px; background:var(--club-600); color:#fff;
+  }
+  .cep--applied{display:flex; align-items:center; gap:var(--sp-300); padding:var(--sp-300) var(--sp-400)}
+  .cep__pin{
+    width:36px; height:36px; border-radius:var(--r-300); flex:none;
+    background:var(--green-100); color:var(--green-800);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .cep__pin svg{width:18px; height:18px}
+  .cep__applied-body{flex:1 1 auto; min-width:0}
+  .cep__applied-label{font-size:12px; line-height:16px; color:var(--neutral-600); font-weight:600; letter-spacing:.02em; text-transform:uppercase}
+  .cep__applied-value{font-size:16px; line-height:20px; font-weight:700; color:var(--neutral-900)}
+  .cep__applied-value .muted{display:block; font-size:13px; line-height:18px; color:var(--neutral-700); font-weight:600}
+  .cep__change{
+    flex:none; border:1px solid var(--neutral-400); background:var(--neutral-50); color:var(--neutral-900);
+    font-family:var(--font-body); font-weight:700; font-size:14px; min-height:44px; padding:0 18px;
+    display:inline-flex; align-items:center; border-radius:var(--r-full); cursor:pointer;
+  }
+
+  /* ---- cabeçalho da pilha ---- */
+  .pilha-head{padding:0 var(--sp-100)}
+  .pilha-head h2{font-family:var(--font-display); font-weight:600; font-size:18px; line-height:24px; color:var(--neutral-900)}
+  .pilha-head .sub{
+    display:flex; align-items:center; gap:6px; margin-top:var(--sp-100);
+    font-size:13px; line-height:18px; color:var(--neutral-700); font-weight:600;
+  }
+  .pilha-head .dot{width:7px; height:7px; border-radius:50%; background:var(--green-600); flex:none}
+  .pilha-head .sub .src{color:var(--neutral-900)}
+
+  /* ---- pilha ---- */
+  .pilha{display:flex; flex-direction:column; gap:var(--sp-400)}
+
+  .channel{
+    position:relative; background:var(--neutral-50); border:1px solid var(--neutral-300);
+    border-radius:var(--r-400); padding:var(--sp-500);
+    display:grid; grid-template-columns:48px 1fr auto;
+    grid-template-areas:"logo name price" "logo meta price" "cta cta cta";
+    column-gap:var(--sp-400); row-gap:var(--sp-100); align-items:center;
+    transition:box-shadow .3s ease, border-color .3s ease;
+    will-change:transform;
+  }
+  .channel__logo{
+    grid-area:logo; width:48px; height:48px; border-radius:var(--r-300);
+    background:var(--neutral-100); border:1px solid var(--neutral-200);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .channel__logo img{width:28px; height:28px; object-fit:contain}
+  .channel__name{grid-area:name; font-family:var(--font-display); font-weight:600; font-size:16px; line-height:22px; color:var(--neutral-900); grid-row:1/3; align-self:center; white-space:nowrap}
+  .channel__price{grid-area:price; text-align:right; align-self:center}
+  .channel__price .total{font-family:var(--font-display); font-weight:700; font-size:24px; line-height:32px; color:var(--neutral-900); letter-spacing:-.01em; white-space:nowrap; display:block}
+  .channel__savings{
+    display:inline-flex; align-items:center; font-size:12px; line-height:16px; font-weight:700;
+    color:var(--green-800); background:var(--green-100); border-radius:var(--r-full);
+    padding:2px 8px; white-space:nowrap; margin-top:4px;
+  }
+  .channel__price .caption{display:block; font-size:12px; line-height:16px; color:var(--neutral-600); margin-top:2px; white-space:nowrap}
+  .channel__price .caption span{display:block}
+  .channel__price .caption .free{color:var(--green-800); font-weight:700}
+  .channel__cta{
+    grid-area:cta; margin-top:var(--sp-400); display:flex; align-items:center; justify-content:center; gap:var(--sp-200);
+    height:48px; border-radius:var(--r-300); border:0; cursor:pointer;
+    font-family:var(--font-body); font-weight:700; font-size:16px; background:var(--neutral-900); color:#fff; text-decoration:none;
+    transition:background .2s ease;
+  }
+  .channel__cta svg{width:16px; height:16px}
+  .channel__cta:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
+
+  .channel--best{border-color:var(--club-500); box-shadow:var(--shadow-sm); padding-top:var(--sp-600)}
+  .channel--best::before{
+    content:"★ Melhor custo total"; position:absolute; top:0; left:var(--sp-500); transform:translateY(-50%);
+    background:var(--club-600); color:#fff; font-family:var(--font-body); font-weight:700; font-size:12px; line-height:1;
+    letter-spacing:.02em; padding:6px 12px; border-radius:var(--r-full); box-shadow:var(--shadow-sm);
+  }
+  .channel--best .channel__cta{background:var(--club-600)}
+  .channel--best .channel__price .total{color:var(--club-600)}
+  .channel:not(.channel--best) .channel__savings{display:none}
+
+  /* selo migrando ganha um pulso momentâneo */
+  .channel--just-best::before{animation:badgePop .5s ease}
+  @keyframes badgePop{0%{transform:translateY(-50%) scale(.7); opacity:.4}60%{transform:translateY(-50%) scale(1.08)}100%{transform:translateY(-50%) scale(1)}}
+  /* conteúdo que mudou faz crossfade */
+  .swap{animation:swap .42s ease}
+  @keyframes swap{0%{opacity:.15}100%{opacity:1}}
+
+  @media (prefers-reduced-motion: reduce){
+    .channel{transition:none !important}
+    .channel--just-best::before, .swap{animation:none !important}
+  }
+
+  /* ---- barra dev ---- */
+  .devbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:50;
+    background:var(--neutral-900); color:#fff; padding:var(--sp-300) var(--sp-400);
+    display:flex; align-items:center; gap:var(--sp-300); justify-content:center; flex-wrap:wrap;
+  }
+  .devbar .tag{font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--neutral-500)}
+  .devbar button{
+    font-family:var(--font-body); font-weight:700; font-size:13px; cursor:pointer;
+    border-radius:var(--r-200); border:1px solid var(--neutral-700); background:var(--neutral-800); color:#fff; padding:8px 14px;
+  }
+  .devbar button.on{background:#fff; color:var(--neutral-900); border-color:#fff}
+</style>
+</head>
+<body>
+
+  <div class="frame">
+    <!-- CEP: reflete o estado atual -->
+    <div id="cepSlot"></div>
+
+    <div class="pilha-head">
+      <h2>Onde comprar</h2>
+      <div class="sub"><span class="dot"></span> <span id="freshness">Preços atualizados há 6 min</span> · <span class="src" id="srcLabel">frete de referência</span></div>
+    </div>
+
+    <div class="pilha" id="pilha">
+      <!-- cards inseridos/reordenados via JS, com identidade estável data-ch -->
+    </div>
+  </div>
+
+  <div class="devbar">
+    <span class="tag">Dev</span>
+    <button id="btnRef" class="on">Sem CEP (referência)</button>
+    <button id="btnCep">Aplicar 01310-100</button>
+  </div>
+
+<script>
+  const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>';
+  const PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+
+  const CH = {
+    shopee:{name:'Shopee', logo:'assets/Shopee.svg', cta:'Comprar na Shopee'},
+    tiktok:{name:'TikTok Shop', logo:'assets/tiktok.svg', cta:'Comprar no TikTok Shop'},
+    ybera:{name:'Ybera.com', logo:'assets/ybera.svg', cta:'Comprar na Ybera.com'},
+  };
+
+  const STATE = {
+    ref:{
+      order:['shopee','tiktok','ybera'], best:'shopee', savings:'Economize R$ 2,10',
+      src:'frete de referência',
+      d:{
+        shopee:{total:'R$ 204,80', price:'R$ 179,90', freight:'+ frete R$ 24,90', free:false},
+        tiktok:{total:'R$ 206,90', price:'R$ 184,90', freight:'+ frete R$ 22,00', free:false},
+        ybera:{total:'R$ 209,80', price:'R$ 189,90', freight:'+ frete R$ 19,90', free:false},
+      }
+    },
+    cep:{
+      order:['ybera','shopee','tiktok'], best:'ybera', savings:'Economize R$ 6,90',
+      src:'frete para 01310-100',
+      d:{
+        ybera:{total:'R$ 189,90', price:'R$ 189,90', freight:'Frete grátis', free:true},
+        shopee:{total:'R$ 196,80', price:'R$ 179,90', freight:'+ frete R$ 16,90', free:false},
+        tiktok:{total:'R$ 202,90', price:'R$ 184,90', freight:'+ frete R$ 18,00', free:false},
+      }
+    }
+  };
+
+  const pilha = document.getElementById('pilha');
+  const cepSlot = document.getElementById('cepSlot');
+  const srcLabel = document.getElementById('srcLabel');
+  const cards = {}; // id -> element
+  let current = null;
+  let pendingRaf = null; // rAF do FLIP em voo — cancelado se um novo reorder começar antes
+
+  function buildCard(id){
+    const el = document.createElement('article');
+    el.className = 'channel';
+    el.dataset.ch = id;
+    el.innerHTML =
+      '<div class="channel__logo"><img src="'+CH[id].logo+'" alt="'+CH[id].name+'"></div>'+
+      '<h3 class="channel__name">'+CH[id].name+'</h3>'+
+      '<div class="channel__price">'+
+        '<span class="total"></span>'+
+        '<div class="channel__savings"></div>'+
+        '<span class="caption"><span class="price"></span><span class="freight"></span></span>'+
+      '</div>'+
+      '<a class="channel__cta" href="#">'+CH[id].cta+' '+ARROW+'</a>';
+    return el;
+  }
+
+  function fillCard(el, id, st){
+    const info = st.d[id];
+    const isBest = st.best === id;
+    el.classList.toggle('channel--best', isBest);
+    el.querySelector('.total').textContent = info.total;
+    el.querySelector('.price').textContent = info.price;
+    const fr = el.querySelector('.freight');
+    fr.textContent = info.freight;
+    fr.classList.toggle('free', info.free);
+    const sv = el.querySelector('.channel__savings');
+    sv.textContent = isBest ? st.savings : '';
+  }
+
+  function renderCep(applied){
+    if(applied){
+      cepSlot.innerHTML =
+        '<div class="cep cep--applied">'+
+          '<div class="cep__pin">'+PIN+'</div>'+
+          '<div class="cep__applied-body"><div class="cep__applied-label">Frete para</div>'+
+          '<div class="cep__applied-value">01310-100 <span class="muted">São Paulo, SP</span></div></div>'+
+          '<button class="cep__change" id="cepChange">Trocar</button>'+
+        '</div>';
+      document.getElementById('cepChange').addEventListener('click', ()=>apply('ref'));
+    } else {
+      cepSlot.innerHTML =
+        '<div class="cep">'+
+          '<div class="cep__lead">'+
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>'+
+            'Ver o frete certo pro seu endereço</div>'+
+          '<div class="cep__form"><input class="cep__input" inputmode="numeric" placeholder="00000-000" aria-label="Seu CEP">'+
+          '<button class="cep__apply" id="cepApply">Ver frete</button></div>'+
+        '</div>';
+      document.getElementById('cepApply').addEventListener('click', ()=>apply('cep'));
+    }
+  }
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function apply(which){
+    const st = STATE[which];
+    const prevBest = current ? STATE[current].best : null;
+
+    // 0. re-entrância-safe: cancela FLIP pendente e zera transforms ANTES de medir 'first'
+    // (senão a medição pega uma posição no meio da animação anterior).
+    if(pendingRaf){ cancelAnimationFrame(pendingRaf); pendingRaf = null; }
+    Object.keys(cards).forEach(id=>{ cards[id].style.transition='none'; cards[id].style.transform=''; });
+
+    // 1. FIRST: posições atuais
+    const first = {};
+    Object.keys(cards).forEach(id=>{ first[id] = cards[id].getBoundingClientRect().top; });
+
+    // 2. reordena o DOM + atualiza conteúdo
+    st.order.forEach(id=>{
+      if(!cards[id]){ cards[id] = buildCard(id); }
+      fillCard(cards[id], id, st);
+      pilha.appendChild(cards[id]); // reancora na nova ordem
+    });
+
+    // marca o crossfade no conteúdo (total/frete) e o selo que migrou
+    Object.keys(cards).forEach(id=>{
+      const price = cards[id].querySelector('.channel__price');
+      price.classList.remove('swap'); void price.offsetWidth; price.classList.add('swap');
+    });
+    if(st.best !== prevBest){
+      const b = cards[st.best];
+      b.classList.remove('channel--just-best'); void b.offsetWidth; b.classList.add('channel--just-best');
+    }
+
+    // 3. LAST + 4. INVERT + 5. PLAY (FLIP)
+    if(!reduceMotion && current !== null){
+      Object.keys(cards).forEach(id=>{
+        const last = cards[id].getBoundingClientRect().top;
+        const dy = first[id] - last;
+        cards[id].style.transition = 'none';
+        cards[id].style.transform = dy ? 'translateY('+dy+'px)' : '';
+      });
+      // double rAF: garante o commit do transform invertido antes de animar
+      pendingRaf = requestAnimationFrame(()=>{
+        pendingRaf = requestAnimationFrame(()=>{
+          Object.keys(cards).forEach(id=>{
+            cards[id].style.transition = 'transform .42s cubic-bezier(.2,.7,.2,1)';
+            cards[id].style.transform = '';
+          });
+          pendingRaf = null;
+        });
+      });
+    }
+
+    // CEP chip + rótulo de proveniência + botões
+    renderCep(which === 'cep');
+    srcLabel.textContent = st.src;
+    document.getElementById('btnRef').classList.toggle('on', which==='ref');
+    document.getElementById('btnCep').classList.toggle('on', which==='cep');
+    current = which;
+  }
+
+  document.getElementById('btnRef').addEventListener('click', ()=>apply('ref'));
+  document.getElementById('btnCep').addEventListener('click', ()=>apply('cep'));
+
+  // estado inicial: sem CEP (referência)
+  apply('ref');
+</script>
+</body>
+</html>
