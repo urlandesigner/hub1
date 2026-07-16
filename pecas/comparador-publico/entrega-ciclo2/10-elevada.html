@@ -123,7 +123,7 @@
   .channel__row dd{font-size:15px; line-height:20px; color:var(--neutral-900); font-weight:700}
   .channel__row dd.free{color:var(--green-800)}
   .channel__divider{height:1px; background:var(--neutral-200); margin:var(--sp-300) 0}
-  .channel__total{display:flex; align-items:baseline; justify-content:space-between; width:100%; gap:var(--sp-300)}
+  .channel__total{display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:2px}
   .channel__total-label{display:flex; flex-direction:column; align-items:flex-start; gap:6px}
   .channel__total-label b{font-size:12px; line-height:16px; font-weight:600; color:var(--neutral-600)}
   .channel__savings{display:inline-flex; font-size:12px; line-height:16px; font-weight:700; color:var(--green-800); background:var(--green-100); border-radius:var(--r-full); padding:2px 8px; white-space:nowrap}
@@ -138,14 +138,11 @@
   .channel__cta:hover .arrow{transform:translate(3px,-3px)}
   .channel:not(.channel--best) .channel__savings{display:none}
   .channel:hover{box-shadow:var(--shadow-sm); border-color:var(--neutral-400)}
-  /* melhor custo */
-  .channel--best{border-color:var(--club-500); box-shadow:var(--shadow-sm); padding-top:var(--sp-600)}
-  .channel--best:hover{border-color:var(--club-600)}
-  .channel__badge{position:absolute; top:0; left:var(--sp-600); transform:translateY(-50%); display:inline-flex; align-items:center; gap:5px; background:var(--green-100); color:var(--green-800); border:1px solid var(--green-200); font-weight:700; font-size:12px; line-height:1; letter-spacing:.02em; padding:6px 12px; border-radius:var(--r-full); box-shadow:var(--shadow-sm)}
+  /* melhor oferta — sofisticação, não promoção: borda preta, badge no tom verde do DS, sobre a borda superior direita */
+  .channel--best{border-color:var(--neutral-900); box-shadow:var(--shadow-sm); padding-top:var(--sp-600)}
+  .channel--best:hover{border-color:var(--neutral-900)}
+  .channel__badge{position:absolute; top:0; right:var(--sp-600); transform:translateY(-50%); display:inline-flex; align-items:center; gap:5px; background:var(--green-100); color:var(--green-800); border:1px solid var(--green-200); font-weight:700; font-size:12px; line-height:1; letter-spacing:.02em; padding:6px 12px; border-radius:var(--r-full); box-shadow:var(--shadow-sm)}
   .channel__badge svg{width:13px; height:13px; flex:none}
-  .channel--best .channel__cta{background:var(--club-600)}
-  .channel--best .channel__cta:hover{background:var(--club-700)}
-  .channel--best .channel__total-val{color:var(--club-600)}
   /* não entrega neste CEP */
   .channel--noship{background:var(--neutral-100); border-color:var(--neutral-400); border-style:dashed}
   .channel--noship .channel__head{margin-bottom:var(--sp-400)}
@@ -227,7 +224,6 @@
     /* desktop: mesmo card, só a grade de detalhes vira 4 colunas e o CTA não estica */
     .channel__rows{grid-template-columns:repeat(4,1fr)}
     .channel__cta{flex:0 0 auto; width:auto}
-    .channel__total{width:auto; justify-content:flex-start}
   }
 </style>
 </head>
@@ -358,26 +354,27 @@
   }
   function fillCard(el, id, st){
     const info = st.d[id]; const ch = CH[id];
+    const isBest = !info.noship && st.best === id;
+    const subText = isBest ? 'Canal verificado' : ch.sub;
     const idBlock =
       '<div class="channel__logo"><img src="'+ch.logo+'" alt="'+ch.name+'"></div>'+
-      '<div class="channel__id"><h3 class="channel__name">'+ch.name+'</h3><span class="channel__sub">'+ch.sub+'</span></div>';
+      '<div class="channel__id"><h3 class="channel__name">'+ch.name+'</h3><span class="channel__sub">'+subText+'</span></div>';
     if(info.noship){
       el.className = 'channel channel--noship';
       el.innerHTML = '<div class="channel__head">'+idBlock+'</div><div class="channel__notice">'+WARN+' A loja não entrega neste CEP</div>';
       return;
     }
-    const isBest = st.best === id;
     el.className = 'channel' + (isBest ? ' channel--best' : '');
-    const badge = isBest ? '<span class="channel__badge"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg>Melhor custo total</span>' : '';
+    const badge = isBest ? '<span class="channel__badge"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg>Melhor oferta</span>' : '';
     const cta = '<a class="channel__cta" href="#" data-ch="'+id+'"><span class="spinner" aria-hidden="true"></span><span class="label">'+ch.cta+'</span>'+ARROW+'</a>';
     const total =
       '<div class="channel__total">'+
-        '<div class="channel__total-label"><b>Total</b></div>'+
+        '<div class="channel__total-label"><b>'+(isBest ? 'Total da compra' : 'Total')+'</b></div>'+
         '<span class="channel__total-val">'+info.total+'</span>'+
       '</div>';
     const freteVal = info.free ? '<dd class="free">Grátis</dd>' : '<dd>'+info.freight.replace('+ frete ','')+'</dd>';
-    el.innerHTML = badge +
-      '<div class="channel__head">'+idBlock+'</div>'+
+    el.innerHTML =
+      '<div class="channel__head">'+idBlock+badge+'</div>'+
       '<dl class="channel__rows">'+
         '<div class="channel__row"><dt>Preço do produto</dt><dd>'+info.price+'</dd></div>'+
         '<div class="channel__row"><dt>Frete</dt>'+freteVal+'</div>'+
