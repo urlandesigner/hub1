@@ -123,13 +123,13 @@
   .channel__row dd{font-size:15px; line-height:20px; color:var(--neutral-900); font-weight:700}
   .channel__row dd.free{color:var(--green-800)}
   .channel__divider{height:1px; background:var(--neutral-200); margin:var(--sp-300) 0}
-  .channel__total{flex:1 1 100%; order:3; display:flex; align-items:center; justify-content:flex-end; gap:var(--sp-400)}
+  .channel__total{display:flex; align-items:baseline; justify-content:space-between; width:100%; gap:var(--sp-300)}
   .channel__total-label{display:flex; flex-direction:column; align-items:flex-start; gap:6px}
   .channel__total-label b{font-size:12px; line-height:16px; font-weight:600; color:var(--neutral-600)}
   .channel__savings{display:inline-flex; font-size:12px; line-height:16px; font-weight:700; color:var(--green-800); background:var(--green-100); border-radius:var(--r-full); padding:2px 8px; white-space:nowrap}
   .channel__total-val{font-family:var(--font-display); font-weight:700; font-size:26px; line-height:30px; letter-spacing:-.01em; color:var(--neutral-900); white-space:nowrap}
-  .channel__foot{display:flex; justify-content:flex-end}
-  .channel__cta{width:100%; display:flex; align-items:center; justify-content:center; gap:var(--sp-200); height:46px; padding:0 var(--sp-500); border-radius:var(--r-300); border:0; cursor:pointer; font-family:var(--font-body); font-weight:700; font-size:15px; background:var(--neutral-900); color:#fff; text-decoration:none; transition:background .2s ease, transform .08s ease}
+  .channel__foot{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:var(--sp-300) var(--sp-400)}
+  .channel__cta{flex:1 1 auto; min-width:0; max-width:100%; display:flex; align-items:center; justify-content:center; gap:var(--sp-200); height:46px; padding:0 var(--sp-500); border-radius:var(--r-300); border:0; cursor:pointer; font-family:var(--font-body); font-weight:700; font-size:15px; background:var(--neutral-900); color:#fff; text-decoration:none; transition:background .2s ease, transform .08s ease; white-space:nowrap; overflow:hidden}
   .channel__cta:hover{background:var(--neutral-700)}
   .channel__cta:active{transform:scale(.985)}
   .channel__cta:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
@@ -224,19 +224,10 @@
     .hero__lead{margin-top:0; max-width:none}
     .cep-wrap{padding:0; margin-top:var(--sp-500)}
     .compare{padding:0}
-    /* desktop volta ao layout antigo: CTA no topo (à direita do nome), Total na base.
-       head/foot viram display:contents e o card é remontado via grid com áreas nomeadas. */
-    .channel{display:grid; grid-template-columns:auto 1fr auto; column-gap:var(--sp-300); align-items:center;
-      grid-template-areas:"logo id cta" "rows rows rows" "divider divider divider" "total total total"}
-    .channel__head,.channel__foot{display:contents}
-    .channel__logo{grid-area:logo}
-    .channel__id{grid-area:id}
-    .channel__cta{grid-area:cta; width:auto}
-    .channel__rows{grid-area:rows; grid-template-columns:repeat(4,1fr); margin-top:var(--sp-400)}
-    .channel__divider{grid-area:divider}
-    .channel__total{grid-area:total; justify-content:space-between}
-    .channel--noship{grid-template-columns:auto 1fr; grid-template-areas:"logo id" "notice notice"}
-    .channel__notice{grid-area:notice; margin-top:var(--sp-400)}
+    /* desktop: mesmo card, só a grade de detalhes vira 4 colunas e o CTA não estica */
+    .channel__rows{grid-template-columns:repeat(4,1fr)}
+    .channel__cta{flex:0 0 auto; width:auto}
+    .channel__total{width:auto; justify-content:flex-start}
   }
 </style>
 </head>
@@ -386,7 +377,7 @@
       '</div>';
     const freteVal = info.free ? '<dd class="free">Grátis</dd>' : '<dd>'+info.freight.replace('+ frete ','')+'</dd>';
     el.innerHTML = badge +
-      '<div class="channel__head">'+idBlock+total+'</div>'+
+      '<div class="channel__head">'+idBlock+'</div>'+
       '<dl class="channel__rows">'+
         '<div class="channel__row"><dt>Preço do produto</dt><dd>'+info.price+'</dd></div>'+
         '<div class="channel__row"><dt>Frete</dt>'+freteVal+'</div>'+
@@ -394,7 +385,7 @@
         '<div class="channel__row"><dt>Parcelamento</dt><dd>'+ch.parcelamento+'</dd></div>'+
       '</dl>'+
       '<div class="channel__divider"></div>'+
-      '<div class="channel__foot">'+cta+'</div>';
+      '<div class="channel__foot">'+total+cta+'</div>';
   }
 
   function renderCep(which){
