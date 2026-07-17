@@ -15,7 +15,7 @@
     --club-50:#FEF0F4; --club-100:#FEC8D8; --club-400:#FA4277;
     --club-500:#ED1A57; --club-600:#C70F43; --club-700:#980B38;
     --green-100:#E6F6E5; --green-200:#D1EECE; --green-600:#50AE47; --green-700:#33922A; --green-800:#2B6A25;
-    --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-700:#B45309; --amber-800:#92400E;
+    --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-600:#D97706; --amber-700:#B45309; --amber-800:#92400E;
     --red-600:#CF3030; --red-700:#A31F1F;
     --alfa-10-light:rgba(255,255,255,.1);
     --sp-100:4px; --sp-200:8px; --sp-300:12px; --sp-400:16px;
@@ -105,23 +105,28 @@
   .compare-head h2{font-family:var(--font-display); font-weight:600; font-size:18px; line-height:24px}
   .compare-head .freshness{font-size:14px; line-height:18px; color:var(--neutral-600); font-weight:500; display:flex; align-items:center; gap:6px}
   .compare-head .freshness::before{content:""; width:6px; height:6px; border-radius:var(--r-full); background:var(--green-600); flex:none}
-  .compare-head .freshness .src{color:var(--neutral-900)}
 
   .pilha{display:flex; flex-direction:column; gap:var(--sp-400); margin-top:var(--sp-500)}
   /* ===== card DETALHADO (por canal) ===== */
   .channel{position:relative; background:var(--neutral-50); border:1px solid var(--neutral-300); border-radius:var(--r-400); padding:var(--sp-500); transition:box-shadow .3s ease, border-color .3s ease; will-change:transform}
-  .channel__head{display:flex; flex-wrap:wrap; align-items:center; column-gap:var(--sp-300); row-gap:var(--sp-300); margin-bottom:var(--sp-400)}
+  .channel__head{display:flex; flex-wrap:wrap; align-items:flex-start; column-gap:var(--sp-300); row-gap:var(--sp-300); margin-bottom:var(--sp-400)}
   .channel__id{flex:1 1 auto; min-width:0}
   .channel__logo{width:44px; height:44px; border-radius:var(--r-300); background:var(--neutral-100); border:1px solid var(--neutral-200); display:flex; align-items:center; justify-content:center; overflow:hidden; flex:none}
   .channel__logo img{width:26px; height:26px; object-fit:contain}
+  .channel__toprow{display:flex; align-items:center; flex-wrap:wrap; column-gap:var(--sp-300); row-gap:6px}
   .channel__name{font-family:var(--font-display); font-weight:600; font-size:16px; line-height:22px; color:var(--neutral-900)}
-  .channel__sub{display:block; font-size:13px; line-height:16px; color:var(--neutral-600); font-weight:600}
+  .channel__meta{display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:2px}
+  .channel__sub{font-size:13px; line-height:16px; color:var(--neutral-600); font-weight:600}
+  .channel__rating{display:inline-flex; align-items:center; gap:4px}
+  .channel__rating .channel__star{width:14px; height:14px; flex:none; fill:var(--amber-600)}
+  .channel__rating-val{font-size:13px; line-height:16px; font-weight:700; color:var(--neutral-900)}
   /* 4 blocos em colunas: rótulo em cima, valor embaixo (2×2 no mobile, 4 col no desktop) */
   .channel__rows{display:grid; grid-template-columns:repeat(2,1fr); gap:var(--sp-400) var(--sp-300); margin:0}
   .channel__row{display:flex; flex-direction:column; gap:3px; min-width:0}
   .channel__row dt{font-size:12px; line-height:16px; color:var(--neutral-600); font-weight:600}
   .channel__row dd{font-size:15px; line-height:20px; color:var(--neutral-900); font-weight:700}
   .channel__row dd.free{color:var(--green-800)}
+  .channel__row dd.pending{color:var(--neutral-500); font-weight:600}
   .channel__divider{height:1px; background:var(--neutral-200); margin:var(--sp-300) 0}
   .channel__total{display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:2px}
   .channel__total-label{display:flex; flex-direction:column; align-items:flex-start; gap:6px}
@@ -312,21 +317,21 @@
   const ALERT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>';
 
   const CH = {
-    shopee:{name:'Shopee', logo:'assets/Shopee.svg', cta:'Comprar na Shopee', artigo:'a', href:'https://shopee.com.br/', sub:'Marketplace parceiro', parcelamento:'até 12x com juros'},
-    tiktok:{name:'TikTok Shop', logo:'assets/tiktok.svg', cta:'Comprar no TikTok Shop', artigo:'o', href:'https://www.tiktok.com/shop', sub:'Loja no TikTok Shop', parcelamento:'até 4x sem juros'},
-    ybera:{name:'Ybera.com', logo:'assets/ybera.svg', cta:'Comprar na Ybera.com', artigo:'a', href:'https://www.ybera.com/produto/escova-progressiva-500g-fashion-gold-150264?parceiro=52154', sub:'Canal oficial Ybera', parcelamento:'até 6x sem juros'},
+    shopee:{name:'Shopee', logo:'assets/Shopee.svg', cta:'Comprar na Shopee', artigo:'a', href:'https://shopee.com.br/', sub:'Marketplace parceiro', parcelamento:'até 12x com juros', rating:4.6},
+    tiktok:{name:'TikTok Shop', logo:'assets/tiktok.svg', cta:'Comprar no TikTok Shop', artigo:'o', href:'https://www.tiktok.com/shop', sub:'Loja no TikTok Shop', parcelamento:'até 4x sem juros', rating:4.3},
+    ybera:{name:'Ybera.com', logo:'assets/ybera.svg', cta:'Comprar na Ybera.com', artigo:'a', href:'https://www.ybera.com/produto/escova-progressiva-500g-fashion-gold-150264?parceiro=52154', sub:'Canal oficial Ybera', parcelamento:'até 6x sem juros', rating:4.8},
   };
 
   const STATE = {
-    ref:{ order:['shopee','tiktok','ybera'], best:'shopee', savings:'Economize R$ 2,10', src:'frete de referência',
+    ref:{ isRef:true, order:['shopee','tiktok','ybera'], best:'shopee', savings:'Economize R$ 2,10',
       d:{ shopee:{total:'R$ 204,80', price:'R$ 179,90', freight:'+ frete R$ 24,90', prazo:'5–8 dias úteis'},
           tiktok:{total:'R$ 206,90', price:'R$ 184,90', freight:'+ frete R$ 22,00', prazo:'4–7 dias úteis'},
           ybera:{total:'R$ 209,80', price:'R$ 189,90', freight:'+ frete R$ 19,90', prazo:'3–5 dias úteis'} } },
-    cepA:{ cep:'01310-100', city:'São Paulo, SP', order:['ybera','shopee','tiktok'], best:'ybera', savings:'Economize R$ 6,90', src:'frete para 01310-100',
+    cepA:{ cep:'01310-100', city:'São Paulo, SP', order:['ybera','shopee','tiktok'], best:'ybera', savings:'Economize R$ 6,90',
       d:{ ybera:{total:'R$ 189,90', price:'R$ 189,90', freight:'Frete grátis', free:true, prazo:'2–4 dias úteis'},
           shopee:{total:'R$ 196,80', price:'R$ 179,90', freight:'+ frete R$ 16,90', prazo:'3–5 dias úteis'},
           tiktok:{total:'R$ 202,90', price:'R$ 184,90', freight:'+ frete R$ 18,00', prazo:'3–6 dias úteis'} } },
-    cepB:{ cep:'69900-970', city:'Rio Branco, AC', order:['shopee','ybera','tiktok'], best:'shopee', savings:'Economize R$ 2,00', src:'frete para 69900-970',
+    cepB:{ cep:'69900-970', city:'Rio Branco, AC', order:['shopee','ybera','tiktok'], best:'shopee', savings:'Economize R$ 2,00',
       d:{ shopee:{total:'R$ 222,80', price:'R$ 179,90', freight:'+ frete R$ 42,90', prazo:'8–12 dias úteis'},
           ybera:{total:'R$ 224,80', price:'R$ 189,90', freight:'+ frete R$ 34,90', prazo:'6–9 dias úteis'},
           tiktok:{noship:true} } },
@@ -340,7 +345,6 @@
 
   const pilha = document.getElementById('pilha');
   const cepSlot = document.getElementById('cepSlot');
-  const srcLabel = document.getElementById('srcLabel');
   const cards = {};
   let current = null;
   let lastCep = null; // CEP digitado (8 dígitos) p/ exibir no chip quando não-mapeado
@@ -352,33 +356,50 @@
     el.dataset.ch = id;
     return el;
   }
+  const STAR_PATH = 'M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z';
+  function renderRating(score){
+    const scoreStr = score.toFixed(1).replace('.', ',');
+    return '<span class="channel__rating" aria-label="Avaliação '+scoreStr+' de 5">'+
+      '<svg viewBox="0 0 24 24" class="channel__star" aria-hidden="true"><path d="'+STAR_PATH+'"/></svg>'+
+      '<span class="channel__rating-val">'+scoreStr+'</span>'+
+    '</span>';
+  }
   function fillCard(el, id, st){
     const info = st.d[id]; const ch = CH[id];
-    const isBest = !info.noship && st.best === id;
+    const hasCep = !st.isRef;
+    const isBest = hasCep && !info.noship && st.best === id;
     const subText = isBest ? 'Canal verificado' : ch.sub;
+    const badge = isBest ? '<span class="channel__badge"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="'+STAR_PATH+'"/></svg>Melhor oferta</span>' : '';
     const idBlock =
       '<div class="channel__logo"><img src="'+ch.logo+'" alt="'+ch.name+'"></div>'+
-      '<div class="channel__id"><h3 class="channel__name">'+ch.name+'</h3><span class="channel__sub">'+subText+'</span></div>';
+      '<div class="channel__id">'+
+        '<div class="channel__toprow"><h3 class="channel__name">'+ch.name+'</h3>'+badge+'</div>'+
+        '<div class="channel__meta"><span class="channel__sub">'+subText+'</span>'+renderRating(ch.rating)+'</div>'+
+      '</div>';
     if(info.noship){
       el.className = 'channel channel--noship';
       el.innerHTML = '<div class="channel__head">'+idBlock+'</div><div class="channel__notice">'+WARN+' A loja não entrega neste CEP</div>';
       return;
     }
     el.className = 'channel' + (isBest ? ' channel--best' : '');
-    const badge = isBest ? '<span class="channel__badge"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg>Melhor oferta</span>' : '';
     const cta = '<a class="channel__cta" href="#" data-ch="'+id+'"><span class="spinner" aria-hidden="true"></span><span class="label">'+ch.cta+'</span>'+ARROW+'</a>';
-    const total =
-      '<div class="channel__total">'+
-        '<div class="channel__total-label"><b>'+(isBest ? 'Total da compra' : 'Total')+'</b></div>'+
-        '<span class="channel__total-val">'+info.total+'</span>'+
-      '</div>';
-    const freteVal = info.free ? '<dd class="free">Grátis</dd>' : '<dd>'+info.freight.replace('+ frete ','')+'</dd>';
+    const total = hasCep
+      ? ('<div class="channel__total">'+
+          '<div class="channel__total-label"><b>'+(isBest ? 'Total da compra' : 'Total')+'</b></div>'+
+          '<span class="channel__total-val">'+info.total+'</span>'+
+        '</div>')
+      : ('<div class="channel__total">'+
+          '<div class="channel__total-label"><b>A partir de</b></div>'+
+          '<span class="channel__total-val">'+info.price+'</span>'+
+        '</div>');
+    const freteVal = !hasCep ? '<dd class="pending">A calcular</dd>' : (info.free ? '<dd class="free">Grátis</dd>' : '<dd>'+info.freight.replace('+ frete ','')+'</dd>');
+    const prazoVal = !hasCep ? '<dd class="pending">A calcular</dd>' : '<dd>'+info.prazo+'</dd>';
     el.innerHTML =
-      '<div class="channel__head">'+idBlock+badge+'</div>'+
+      '<div class="channel__head">'+idBlock+'</div>'+
       '<dl class="channel__rows">'+
         '<div class="channel__row"><dt>Preço do produto</dt><dd>'+info.price+'</dd></div>'+
         '<div class="channel__row"><dt>Frete</dt>'+freteVal+'</div>'+
-        '<div class="channel__row"><dt>Prazo de entrega</dt><dd>'+info.prazo+'</dd></div>'+
+        '<div class="channel__row"><dt>Prazo de entrega</dt>'+prazoVal+'</div>'+
         '<div class="channel__row"><dt>Parcelamento</dt><dd>'+ch.parcelamento+'</dd></div>'+
       '</dl>'+
       '<div class="channel__divider"></div>'+
@@ -473,7 +494,6 @@
     }
 
     renderCep(which === 'ref' ? 'ref' : which);
-    if(srcLabel) srcLabel.textContent = st.src;
     document.querySelectorAll('.devbar button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.s===(which)?'true':'false'));
     current = which;
   }

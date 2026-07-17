@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "static-preview",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8347"],
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["-y", "serve", "-l", "8347", "."],
       "port": 8347
     }
   ]

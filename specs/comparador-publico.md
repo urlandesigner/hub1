@@ -16,11 +16,14 @@ da influenciadora preservado.
 
 **Ciclo 2 — frete por CEP (recorte deste ciclo):** o cliente informa o CEP (opcional,
 transitório) e o comparador passa a exibir o frete real de cada canal para aquele CEP,
-reordenando por menor custo total. Critério de sucesso observável do ciclo: sem CEP a
-página funciona exatamente como a entrega do ciclo 1 (frete de referência do cache);
-informado um CEP válido, os fretes atualizam, a ordenação recalcula visivelmente (o
-"melhor" pode trocar de canal sem quebrar a página) e nenhum dado do cliente persiste —
-recarregou, o CEP sumiu.
+reordenando por menor custo total. Critério de sucesso observável do ciclo: sem CEP,
+Frete e Prazo de entrega ficam sinalizados como "A calcular" (nenhum valor é mostrado
+antes do cliente informar o CEP — decisão revisada em 2026-07-16, ver Rastro) e o Total
+exibe só o preço do produto ("A partir de R$ X"), sem badge de melhor oferta nem
+ordenação por custo (ordem neutra, a de cadastro dos canais); informado um CEP válido,
+os fretes e prazos aparecem, a ordenação recalcula visivelmente (o "melhor" pode trocar
+de canal sem quebrar a página) e nenhum dado do cliente persiste — recarregou, o CEP
+sumiu.
 
 ## Usuário primário
 Cliente Final — consumidor anônimo que recebe o link via redes sociais, WhatsApp ou lives.
@@ -36,12 +39,15 @@ performance).
   - Tratamento visual do caso "sem vínculo" como estado comum, não exceção (ver premissa 1)
 - Dentro (ciclo 2 — frete por CEP):
   - Entrada de CEP do cliente: opcional, transitória, sem persistência — a página nunca
-    condiciona a comparação ao CEP (sem CEP = frete de referência do ciclo 1, rotulado)
+    força o CEP como pré-requisito de acesso (sem CEP = Frete e Prazo em branco/"A calcular",
+    Total mostra só o preço do produto; decisão revisada em 2026-07-16, ver Rastro — antes
+    disso o padrão era mostrar frete de referência do cache)
   - Frete por canal recalculado para o CEP informado + reordenação visível da pilha
   - Estados novos: calculando frete, CEP inválido, frete indisponível para aquele CEP em
     um canal (sem derrubar o canal inteiro), e troca de CEP
-  - Rotulagem honesta do frete: distinguir "frete de referência" (cache, sem CEP) de
-    "frete para o CEP informado"
+  - Rotulagem honesta do frete: sem CEP não existe valor de frete pra rotular (campo fica
+    "A calcular"); com CEP aplicado, o chip "Frete para {CEP}" já identifica a fonte —
+    dispensa rótulo repetido por card
   - **Responsivo mobile E desktop (correção de escopo 2026-07-15, escalada durante a fase 04):**
     mobile-first NÃO é mobile-only. No desktop (≥900px) a página usa layout de DUAS COLUNAS —
     produto + hero + entrada de CEP à esquerda (coluna sticky), lista "Onde comprar" à direita.
@@ -647,3 +653,15 @@ curta. Legibilidade preservada. Só na elevada.
 [2026-07-15] Fix "carrega scrollado após refresh": history.scrollRestoration=manual + window.scrollTo(0,0) após montar os cards (o navegador restaurava scroll / ancorava quando o JS injetava a pilha). Verificado scrollY=0 no load. Só elevada.
 
 [2026-07-15] +respiro entre seções: conteúdo→barra de garantias e barra→footer agora 64px (sp-1600, +tokens sp-1200/1600 no :root; padding-bottom no .page; margin-top/padding maiores na .trust). REMOVIDA a barra dev (era dev-only) da elevada — os cenários de CEP seguem acessíveis digitando 01310-100 (reordena) / 69900-970 (não entrega); refresh reseta. Só elevada.
+
+[2026-07-16] Adicionado elemento de avaliação (estrelas + nota, ex. "★★★★☆ 4,6") em cada card de canal — pedido do designer a partir de referência visual anexada. Posição: dentro de `channel__id`, logo abaixo do nome+subtítulo do canal (antes das linhas de preço/frete), mesma posição nos 3 cards independente de "melhor oferta". Motivo da posição: consistência (não desloca com a badge "Melhor oferta", que fica à direita), e hierarquia (identidade → confiança/verificação → nota → dados de compra). Implementado com token novo `--amber-600` (#D97706, de `color-kz/amber/600` do DS) para as estrelas preenchidas; estrelas vazias em `--neutral-300`. Notas são mock por canal (shopee 4,6 / tiktok 4,3 / ybera 4,8) — pendência: origem real da nota (loja oficial do canal vs. agregador) fica para Engenharia/Produto decidir; não há RF que cubra isso ainda. Replicado nos 3 espelhos (raiz, pecas/comparador-publico/, entrega-ciclo2/).
+
+[2026-07-16] [correção, mesmo ciclo] Duas correções apontadas pelo designer após revisão visual da peça acima: (1) estrelas trocadas de caractere Unicode cortado por %-de-largura (gerava recorte serrilhado feio na estrela parcial) para SVGs discretos — cheia/meia/vazia, arredondando a nota pro múltiplo de 0,5 mais próximo (a nota exata continua exibida ao lado, só o desenho da estrela arredonda); meia-estrela usa `clip-path` sobre o mesmo path vetorial (corte limpo, sem serrilhado). (2) badge "Melhor oferta" estava descolando do padding superior do card porque `channel__head` centralizava verticalmente (`align-items:center`) e o bloco nome+subtítulo+rating ficou mais alto que o logo — badge (e logo) agora ficam no topo (`align-items:flex-start`), alinhados com a primeira linha do nome, respeitando o padding do card (sp-500/20px) igual antes da rating existir. `STAR_PATH` da estrela virou constante única, reaproveitada pelo ícone da badge (elimina duplicação do path SVG). Replicado nos 3 espelhos.
+
+[2026-07-16] [correção, mesmo ciclo] Designer trouxe print de referência (card TikTok Shop) mudando o formato do rating: em vez de 5 estrelas empilhadas numa linha própria abaixo do nome, virou 1 estrela + nota (ex. "★ 4,6") inline na MESMA linha do subtítulo do canal, com um selo de verificado (círculo vermelho + check branco) antes do texto. Pergunta em aberto respondida pelo designer: o ícone de check só aparece quando o texto é "Canal verificado" (hoje só o card de melhor oferta) — os demais cards mantêm seu subtítulo próprio (ex. "Loja no TikTok Shop") sem o ícone, sem alterar a lógica de quem é "verificado". Efeito colateral corrigido: essa linha ficou mais larga que antes, o que empurrava a badge "Melhor oferta" pra quebrar numa linha nova no mobile (375px) — resolvido reestruturando `channel__id` em duas linhas próprias: `channel__toprow` (nome + badge, sempre juntos, badge não compete mais por espaço com o subtítulo) e `channel__meta` (ícone verificado + subtítulo + estrela + nota), cada uma com a largura cheia do card pra si. Replicado nos 3 espelhos.
+
+[2026-07-16] [correção, mesmo ciclo] Removido o selo de verificado (círculo vermelho + check) adicionado na entrada anterior — pedido do designer, sem motivo registrado. "Canal verificado" volta a ser só texto (igual ao subtítulo dos demais canais), seguido da estrela + nota. Removidos `VERIFIED_ICON`, `.channel__verified` e `.channel__verified svg` dos 3 espelhos — nenhum uso restante desses símbolos no código.
+
+[2026-07-16] [correção, drift entre spec e peça] Designer perguntou por que o frete aparecia sem ele ter informado o CEP ainda. Investigação: comportamento em si é o esperado (spec do ciclo 2 já prevê "sem CEP a página funciona como o ciclo 1, frete de referência do cache") — mas a exigência da própria spec de "rotulagem honesta do frete" (distinguir frete de referência vs. frete para o CEP informado) nunca chegou a ficar visível: `st.src` era computado e a chamada `srcLabel.textContent = st.src` já existia no JS, só que nenhum elemento `id="srcLabel"` existia no HTML — atribuição morta, silenciada pelo `if(srcLabel)`. Corrigido: adicionado `<span class="src" id="srcLabel">` na linha "Preços atualizados há 6 min", alternando entre "frete de referência" (sem CEP) e "frete para {CEP}" (com CEP aplicado) — reaproveita o texto que já existia em `STATE.*.src`, sem inventar copy nova. Ajuste de craft durante a verificação: o separador "·" ficava órfão numa linha sozinha quando o texto quebrava no mobile (375px) — envolvido "· + rótulo" num `.src-sep{white-space:nowrap}` pra viajarem juntos. Replicado e testado (com e sem CEP aplicado) nos 3 espelhos.
+
+[2026-07-16] [mudança intencional de spec, ciclo 2] Ao ver a correção acima, o designer decidiu que rotular o frete de referência não é suficiente — achou ruim mostrar valores de Frete/Prazo "reais" antes do CEP, mesmo rotulados. Pergunta feita e respondida: como ficam Total/ordenação/badge, já que dependiam do frete de referência? Decisão: Total vira "A partir de {preço}" (só o preço do produto, sem frete), ordenação fica neutra (a ordem de cadastro dos canais, que já coincidia com a ordem por custo do ciclo 1 — não precisou reordenar o array), e a badge "Melhor oferta" + texto "Canal verificado" somem até o CEP ser aplicado (não há "melhor" sem frete pra comparar). **Isso reverte a premissa 9 e as seções "Resultado esperado"/"Escopo" do ciclo 2** (que diziam "sem CEP = frete de referência do cache, rotulado") — texto dessas seções já atualizado acima para refletir a decisão nova. Implementação: `STATE.ref` ganhou `isRef:true` (único jeito confiável de sinalizar "sem CEP" pro `fillCard`, já que nem todo estado com CEP tem `st.cep` — o `cepGen` genérico não tem); `hasCep = !st.isRef` decide: Frete/Prazo → `<dd class="pending">A calcular</dd>` (cinza, `--neutral-500`, mais leve que o valor real em `--neutral-900`/700 weight) em vez do valor; `isBest` força `false` sem CEP (cascata: sem badge, sem "Canal verificado", sem `channel--best`); Total usa preço em vez de total quando `!hasCep`. Removido também o rótulo "frete de referência"/"frete para X" da fase anterior (`srcLabel`, `.src`, `.src-sep`, `st.src` nos 3 estados) — ficou redundante: sem CEP não há mais valor de frete pra "rotular" (o campo já comunica isso sozinho, em branco), e com CEP o chip "Frete para {CEP}" já identifica a fonte. Testado sem CEP (Frete/Prazo em branco, Total "A partir de", sem badge/"Canal verificado") e com CEP 01310-100 (comportamento normal restaurado: Frete/Prazo reais, "Total da compra", badge, "Canal verificado") nos 3 espelhos.
