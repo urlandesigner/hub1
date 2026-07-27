@@ -120,6 +120,23 @@
     background:var(--b2c-neutral); border-radius:16px; padding:16px;
     display:flex; flex-direction:column; gap:8px; margin-bottom:16px;
   }
+  /* #panel-rows/#panel-loading são wrappers que a barra de dev esconde/mostra por
+     estado (carregado/loading/erro) — o gap de .links-panel só separa ESSES wrappers
+     entre si, não os cards que ficam dentro de cada um; sem isto os 3 cards colavam.
+     Layout em grade horizontal (2026-07-17, pedido do designer com print de referência):
+     os canais viram cards lado a lado em vez de linhas empilhadas. `auto-fit,
+     minmax(220px,1fr)` em vez de um número fixo de colunas: cabe 4 canais lado a lado
+     em telas largas e vai reduzindo sozinho (3, 2, 1 coluna) conforme o espaço encolhe
+     ou mais canais forem adicionados — sem precisar editar breakpoint a cada canal
+     novo (Mercado Livre entrou assim, 2026-07-17). O media query abaixo é necessário
+     MESMO com auto-fit: a sidebar (240px) é fixa e não encolhe/colapsa em viewport
+     estreito, então o container do grid nunca fica estreito o bastante pro auto-fit
+     cair sozinho pra 1 coluna — sem essa trava, a página estourava horizontalmente
+     com 2 colunas espremidas num mobile (achado testando responsivo). */
+  #panel-rows:not([hidden]), #panel-loading:not([hidden]){display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px}
+  @media (max-width:720px){
+    #panel-rows:not([hidden]), #panel-loading:not([hidden]){grid-template-columns:1fr}
+  }
   .links-panel__head{
     display:flex; align-items:baseline; justify-content:space-between; gap:12px;
     padding:0 4px 8px; flex-wrap:wrap;
@@ -128,19 +145,23 @@
   .links-panel__meta{font-size:12px; font-weight:700; color:var(--b2c-neutral-60)}
   .links-panel__meta b{color:var(--b2c-positive-40)}
   .link-row{
-    display:flex; align-items:center; gap:12px;
+    display:grid; grid-template-columns:32px 1fr; align-items:start;
+    grid-template-areas:"logo name" "chip chip" "hint hint" "act act";
+    column-gap:10px; row-gap:8px;
     border:1px solid var(--b2c-neutral-30); border-radius:calc(var(--radius) + 4px);
-    padding:10px 16px;
+    padding:16px;
   }
   .link-row__logo{
+    grid-area:logo;
     width:32px; height:32px; border-radius:var(--radius); flex:none;
     background:var(--b2c-neutral-20); border:1px solid var(--b2c-neutral-30);
     display:flex; align-items:center; justify-content:center;
   }
   .link-row__logo img{width:18px; height:18px; object-fit:contain}
-  .link-row__name{font-weight:700; color:var(--b2c-neutral-70); white-space:nowrap; min-width:96px}
-  .link-row__hint{color:var(--b2c-neutral-60); flex:1; min-width:0}
+  .link-row__name{grid-area:name; align-self:center; font-weight:700; color:var(--b2c-neutral-70)}
+  .link-row__hint{grid-area:hint; color:var(--b2c-neutral-60)}
   .chip{
+    grid-area:chip; justify-self:start;
     display:inline-flex; align-items:center; gap:6px;
     border-radius:9999px; border:1px solid transparent;
     padding:4px 10px; font-size:12px; font-weight:700; white-space:nowrap;
@@ -149,17 +170,37 @@
   .chip--ok{background:var(--b2c-positive-10); color:var(--b2c-positive-40); border-color:var(--b2c-positive-20)}
   .chip--off{background:var(--b2c-neutral-20); color:var(--b2c-neutral-70); border-color:var(--b2c-neutral-40)}
   .chip--warn{background:var(--b2c-warning-10); color:var(--b2c-warning-40); border-color:var(--b2c-warning-20)}
+  /* "novidade / ainda vai chegar" (Mercado Livre) — tom informativo, não confundir com
+     chip--off (que significa "canal real, só falta você vincular"); reaproveita os
+     tokens --b2c-info-* já usados em .pchip--info, não inventa cor nova. */
+  .chip--soon{background:var(--b2c-info-10); color:var(--b2c-info-50); border-color:var(--b2c-info-10)}
   .link-row__action{
-    font-weight:700; font-size:14px; color:var(--b2c-primary);
-    text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px;
-    white-space:nowrap; cursor:pointer; background:none; border:0; font-family:inherit;
-    padding:10px 4px;
+    grid-area:act;
+    height:40px; border-radius:var(--radius); font-family:inherit;
+    font-size:14px; font-weight:700; color:#fff;
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    background:var(--b2c-primary); border:0; cursor:pointer;
+    transition:background .2s ease, transform .08s ease;
   }
-  .link-row__action:hover{color:var(--b2c-primary-40)}
-  .link-row__action:focus-visible{outline:2px solid var(--b2c-primary); outline-offset:2px; border-radius:4px}
+  .link-row__action:hover{background:var(--b2c-primary-40)}
+  .link-row__action:active{transform:scale(.985)}
+  .link-row__action:focus-visible{outline:2px solid var(--b2c-primary); outline-offset:2px}
+  .link-row__action:disabled{
+    background:var(--b2c-neutral-20); color:var(--b2c-neutral-60);
+    cursor:not-allowed; transform:none;
+  }
 
   /* ================= GRID DE PRODUTOS (réplica) ================= */
-  .grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:16px}
+  /* Era repeat(3,1fr) fixo pros 3 SKUs de placeholder que existiam antes; passou por 1
+     produto só (2026-07-17) e agora são 9 (1 real + 8 fictícios, mesma data). `1fr` em
+     vez de largura máxima fixa: com 240 fixo os 9 cards formavam linhas de 2 (o 9º
+     ficava sozinho, mesmo problema de sobra vazia de antes); `minmax(280px,1fr)` os
+     cards esticam pra preencher a linha toda, e o `280` foi escolhido pra fechar 3 por
+     linha (3×3 pros 9 itens) tanto nos ~1040px do viewport de teste quanto no teto de
+     1160px de `.main` — confirmado calculando: 4 colunas exigiriam ao menos 4×280+3×16
+     = 1168px, maior que o espaço disponível nos dois casos, então nunca "sobra" a
+     coluna 4; auto-fill ainda reduz sozinho pra 2/1 coluna em viewport mais estreito. */
+  .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px}
   .product{
     background:var(--b2c-neutral); border-radius:16px; padding:16px;
     display:flex; flex-direction:column; gap:12px; position:relative;
@@ -174,6 +215,11 @@
     background:var(--b2c-neutral-20); border-radius:12px; overflow:hidden;
   }
   .product__photo img{height:100%; object-fit:cover}
+  /* Produtos fictícios (2026-07-17) não têm foto real — ícone por categoria em vez de
+     reaproveitar a foto do Mirra (ficaria enganoso mostrar o frasco errado). Cor por
+     marca do filtro acima, pra criar agrupamento visual mesmo sem link estrutural real
+     entre catálogo e marcas. */
+  .product__photo svg{width:44px; height:44px}
   .product__name{
     font-size:14px; line-height:20px; color:var(--b2c-neutral-70); text-align:center;
     font-weight:600; min-height:40px;
@@ -288,14 +334,18 @@
   }
   @keyframes shimmer{to{transform:translateX(100%)}}
   @media (prefers-reduced-motion: reduce){.sk::after{animation:none}}
+  /* Mesmo grid de 2 colunas do card real (.link-row), pra skeleton ter a cara do
+     conteúdo que vai substituir — card antes tinha formato de barra horizontal,
+     ficaria com a forma errada depois do painel virar grade de cards. */
   .sk-row{
-    display:flex; align-items:center; gap:12px;
-    border:1px solid var(--b2c-neutral-30); border-radius:12px; padding:10px 16px;
+    display:grid; grid-template-columns:32px 1fr; align-items:start;
+    column-gap:10px; row-gap:10px;
+    border:1px solid var(--b2c-neutral-30); border-radius:calc(var(--radius) + 4px); padding:16px;
   }
-  .sk-logo{width:32px; height:32px; border-radius:8px; flex:none}
-  .sk-name{width:96px; height:14px}
-  .sk-hint{flex:1; height:12px; max-width:320px}
-  .sk-chip{width:88px; height:24px; border-radius:9999px; margin-left:auto}
+  .sk-logo{grid-column:1; grid-row:1; width:32px; height:32px; border-radius:8px}
+  .sk-name{grid-column:2; grid-row:1; align-self:center; width:96px; height:14px}
+  .sk-chip{grid-column:1 / -1; grid-row:2; justify-self:start; width:88px; height:24px; border-radius:9999px}
+  .sk-hint{grid-column:1 / -1; grid-row:3; height:12px; max-width:100%}
   .panel-notice{
     display:flex; gap:10px; align-items:flex-start;
     border:1px dashed var(--b2c-neutral-40); border-radius:12px;
@@ -379,7 +429,7 @@
       <button class="topbar__icon" aria-label="Meu link de afiliada">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
       </button>
-      <button class="topbar__icon" aria-label="Notificações — 9 ou mais">
+      <button class="topbar__icon" aria-label="Notificações: 9 ou mais">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>
         <span class="topbar__badge">9+</span>
       </button>
@@ -414,7 +464,7 @@
       <div class="link-row" id="row-shopee">
         <span class="link-row__logo"><img src="assets/Shopee.svg" alt=""></span>
         <span class="link-row__name">Shopee</span>
-        <span class="link-row__hint">Sua conexão com a Shopee expirou — refaça a autorização para voltar a ganhar comissão.</span>
+        <span class="link-row__hint">Sua conexão com a Shopee expirou. Refaça a autorização para voltar a ganhar comissão.</span>
         <span class="chip chip--warn"><svg viewBox="0 0 512 512" fill="currentColor" aria-hidden="true"><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>Conexão expirada</span>
         <button class="link-row__action" type="button" id="act-shopee" aria-haspopup="dialog">Reconectar Shopee</button>
       </div>
@@ -425,8 +475,16 @@
         <span class="chip chip--off">Não vinculado</span>
         <button class="link-row__action" type="button" id="act-tiktok" aria-haspopup="dialog">Como vincular TikTok ao seu Hub</button>
       </div>
+      <div class="link-row" id="row-ml">
+        <span class="link-row__logo"><img src="assets/mercadolivre.png" alt=""></span>
+        <span class="link-row__name">Mercado Livre</span>
+        <span class="link-row__hint">Essa integração ainda não está disponível. Em breve você vai poder vincular sua conta e vender por esse canal também.</span>
+        <span class="chip chip--soon">Em breve</span>
+        <button class="link-row__action" type="button" id="act-ml" disabled aria-disabled="true">Em breve</button>
+      </div>
       </div>
       <div id="panel-loading" hidden aria-busy="true">
+        <div class="sk-row" aria-hidden="true"><span class="sk sk-logo"></span><span class="sk sk-name"></span><span class="sk sk-hint"></span><span class="sk sk-chip"></span></div>
         <div class="sk-row" aria-hidden="true"><span class="sk sk-logo"></span><span class="sk sk-name"></span><span class="sk sk-hint"></span><span class="sk sk-chip"></span></div>
         <div class="sk-row" aria-hidden="true"><span class="sk sk-logo"></span><span class="sk sk-name"></span><span class="sk sk-hint"></span><span class="sk sk-chip"></span></div>
         <div class="sk-row" aria-hidden="true"><span class="sk sk-logo"></span><span class="sk sk-name"></span><span class="sk sk-hint"></span><span class="sk sk-chip"></span></div>
@@ -434,8 +492,8 @@
       <div id="panel-error" hidden>
         <div class="panel-notice" role="status">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
-          <span>Não conseguimos carregar o status dos seus canais agora — recarregue a página.
-          Seus links e o catálogo continuam funcionando normalmente.</span>
+          <span>Não conseguimos carregar o status dos seus canais agora. Recarregue a página:
+          seus links e o catálogo continuam funcionando normalmente.</span>
         </div>
       </div>
     </section>
@@ -444,8 +502,117 @@
     <div class="grid">
       <article class="product">
         <button class="product__fav" aria-label="Favoritar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 8z"/></svg></button>
-        <div class="product__photo"><img src="assets/produto.jpg" alt="Escova Progressiva 500g Fashion Gold"></div>
-        <h3 class="product__name">336774 Escova Progressiva 500g - Fashion Gold</h3>
+        <div class="product__photo"><img src="assets/produto.jpg" alt="Óleo de Mirra Reparador 90ml"></div>
+        <h3 class="product__name">336774 Óleo de Mirra Reparador 90ml</h3>
+        <div class="product__chips">
+          <span class="pchip pchip--info">Comissão: 15%</span>
+          <span class="pchip pchip--pink">Minhas Vendas: 0</span>
+        </div>
+        <div class="product__prices">
+          <span><small>Grupo</small>R$ 339,90</span>
+          <span><small>Você</small>R$ 297,90</span>
+        </div>
+        <div class="product__actions">
+          <button class="btn btn--outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar</button>
+          <button class="btn btn--primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M3 3h2l2.4 12.2a1.5 1.5 0 0 0 1.5 1.3h7.9a1.5 1.5 0 0 0 1.5-1.2L20 8H6"/></svg>Comprar</button>
+          <button class="btn btn--hub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>HUB Ybera</button>
+        </div>
+      </article>
+
+      <!-- Produtos fictícios (2026-07-17, pedido do designer) — só pra preencher o
+           catálogo com 9 itens; reaproveitam assets/produto.jpg (único asset de
+           produto disponível nesta peça) e nomes alinhados às marcas já listadas no
+           filtro acima. Não representam SKUs reais. -->
+      <article class="product">
+        <button class="product__fav" aria-label="Favoritar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 8z"/></svg></button>
+        <div class="product__photo" style="color:var(--b2c-primary)" role="img" aria-label="Perfume Amazônia 100ml">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9.5" y="3" width="5" height="2" rx="0.5"/><rect x="10" y="5" width="4" height="4" rx="0.5"/><rect x="8" y="9" width="8" height="11" rx="1.5"/></svg>
+        </div>
+        <h3 class="product__name">341022 Perfume Amazônia 100ml</h3>
+        <div class="product__chips">
+          <span class="pchip pchip--info">Comissão: 15%</span>
+          <span class="pchip pchip--pink">Minhas Vendas: 0</span>
+        </div>
+        <div class="product__prices">
+          <span><small>Grupo</small>R$ 189,90</span>
+          <span><small>Você</small>R$ 159,90</span>
+        </div>
+        <div class="product__actions">
+          <button class="btn btn--outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar</button>
+          <button class="btn btn--primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M3 3h2l2.4 12.2a1.5 1.5 0 0 0 1.5 1.3h7.9a1.5 1.5 0 0 0 1.5-1.2L20 8H6"/></svg>Comprar</button>
+          <button class="btn btn--hub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>HUB Ybera</button>
+        </div>
+      </article>
+
+      <article class="product">
+        <button class="product__fav" aria-label="Favoritar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 8z"/></svg></button>
+        <div class="product__photo" style="color:var(--b2c-neutral-90)" role="img" aria-label="Kit Skincare Black Diva">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="6" width="10" height="3" rx="1"/><rect x="6" y="9" width="12" height="10" rx="2"/></svg>
+        </div>
+        <h3 class="product__name">342115 Kit Skincare Black Diva</h3>
+        <div class="product__chips">
+          <span class="pchip pchip--info">Comissão: 15%</span>
+          <span class="pchip pchip--pink">Minhas Vendas: 0</span>
+        </div>
+        <div class="product__prices">
+          <span><small>Grupo</small>R$ 249,90</span>
+          <span><small>Você</small>R$ 219,90</span>
+        </div>
+        <div class="product__actions">
+          <button class="btn btn--outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar</button>
+          <button class="btn btn--primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M3 3h2l2.4 12.2a1.5 1.5 0 0 0 1.5 1.3h7.9a1.5 1.5 0 0 0 1.5-1.2L20 8H6"/></svg>Comprar</button>
+          <button class="btn btn--hub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>HUB Ybera</button>
+        </div>
+      </article>
+
+      <article class="product">
+        <button class="product__fav" aria-label="Favoritar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 8z"/></svg></button>
+        <div class="product__photo" style="color:var(--b2c-warning-40)" role="img" aria-label="Shampoo Hidratante Pet 500ml">
+          <svg viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="16.5" rx="5" ry="4"/><circle cx="6" cy="9.5" r="2"/><circle cx="10.5" cy="6" r="2"/><circle cx="15" cy="6.5" r="2"/><circle cx="18.5" cy="10" r="2"/></svg>
+        </div>
+        <h3 class="product__name">343087 Shampoo Hidratante Pet 500ml</h3>
+        <div class="product__chips">
+          <span class="pchip pchip--info">Comissão: 15%</span>
+          <span class="pchip pchip--pink">Minhas Vendas: 0</span>
+        </div>
+        <div class="product__prices">
+          <span><small>Grupo</small>R$ 79,90</span>
+          <span><small>Você</small>R$ 69,90</span>
+        </div>
+        <div class="product__actions">
+          <button class="btn btn--outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar</button>
+          <button class="btn btn--primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M3 3h2l2.4 12.2a1.5 1.5 0 0 0 1.5 1.3h7.9a1.5 1.5 0 0 0 1.5-1.2L20 8H6"/></svg>Comprar</button>
+          <button class="btn btn--hub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>HUB Ybera</button>
+        </div>
+      </article>
+
+      <article class="product">
+        <button class="product__fav" aria-label="Favoritar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 8z"/></svg></button>
+        <div class="product__photo" style="color:var(--b2c-positive-40)" role="img" aria-label="Whey Protein Isolado 900g">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="5" width="6" height="3"/><path d="M8 8h8l-1 12H9L8 8z"/><path d="M7 8h10"/></svg>
+        </div>
+        <h3 class="product__name">344230 Whey Protein Isolado 900g</h3>
+        <div class="product__chips">
+          <span class="pchip pchip--info">Comissão: 15%</span>
+          <span class="pchip pchip--pink">Minhas Vendas: 0</span>
+        </div>
+        <div class="product__prices">
+          <span><small>Grupo</small>R$ 199,90</span>
+          <span><small>Você</small>R$ 174,90</span>
+        </div>
+        <div class="product__actions">
+          <button class="btn btn--outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar</button>
+          <button class="btn btn--primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M3 3h2l2.4 12.2a1.5 1.5 0 0 0 1.5 1.3h7.9a1.5 1.5 0 0 0 1.5-1.2L20 8H6"/></svg>Comprar</button>
+          <button class="btn btn--hub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>HUB Ybera</button>
+        </div>
+      </article>
+
+      <article class="product">
+        <button class="product__fav" aria-label="Favoritar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 8z"/></svg></button>
+        <div class="product__photo" style="color:var(--club-700)" role="img" aria-label="Escova Progressiva 500g Fashion Gold">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 4h14"/><path d="M6 4v16M9 4v10M12 4v16M15 4v10M18 4v16"/></svg>
+        </div>
+        <h3 class="product__name">345561 Escova Progressiva 500g - Fashion Gold</h3>
         <div class="product__chips">
           <span class="pchip pchip--info">Comissão: 15%</span>
           <span class="pchip pchip--pink">Minhas Vendas: 0</span>
@@ -463,15 +630,17 @@
 
       <article class="product">
         <button class="product__fav" aria-label="Favoritar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 8z"/></svg></button>
-        <div class="product__photo"><img src="assets/produto.jpg" alt="Escova Progressiva 150g Fashion Gold"></div>
-        <h3 class="product__name">337648 Escova Progressiva 150g - Fashion Gold</h3>
+        <div class="product__photo" style="color:var(--b2c-neutral-90)" role="img" aria-label="Sérum Facial Vitamina C 30ml">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C9 8 6 11.5 6 15a6 6 0 0 0 12 0c0-3.5-3-7-6-12z"/></svg>
+        </div>
+        <h3 class="product__name">346402 Sérum Facial Vitamina C 30ml</h3>
         <div class="product__chips">
           <span class="pchip pchip--info">Comissão: 15%</span>
           <span class="pchip pchip--pink">Minhas Vendas: 0</span>
         </div>
         <div class="product__prices">
-          <span><small>Grupo</small>R$ 99,90</span>
-          <span><small>Você</small>R$ 89,90</span>
+          <span><small>Grupo</small>R$ 129,90</span>
+          <span><small>Você</small>R$ 109,90</span>
         </div>
         <div class="product__actions">
           <button class="btn btn--outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar</button>
@@ -482,15 +651,38 @@
 
       <article class="product">
         <button class="product__fav" aria-label="Favoritar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 8z"/></svg></button>
-        <div class="product__photo"><img src="assets/produto.jpg" alt="Escova Progressiva 300g Fashion Gold"></div>
-        <h3 class="product__name">337348 Escova Progressiva 300g - Fashion Gold</h3>
+        <div class="product__photo" style="color:var(--b2c-warning-40)" role="img" aria-label="Ração Premium Cães Adultos 3kg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18"/><path d="M4 10a8 6 0 0 0 16 0"/></svg>
+        </div>
+        <h3 class="product__name">347890 Ração Premium Cães Adultos 3kg</h3>
         <div class="product__chips">
           <span class="pchip pchip--info">Comissão: 15%</span>
           <span class="pchip pchip--pink">Minhas Vendas: 0</span>
         </div>
         <div class="product__prices">
-          <span><small>Grupo</small>R$ 257,90</span>
-          <span><small>Você</small>R$ 227,90</span>
+          <span><small>Grupo</small>R$ 159,90</span>
+          <span><small>Você</small>R$ 139,90</span>
+        </div>
+        <div class="product__actions">
+          <button class="btn btn--outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar</button>
+          <button class="btn btn--primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M3 3h2l2.4 12.2a1.5 1.5 0 0 0 1.5 1.3h7.9a1.5 1.5 0 0 0 1.5-1.2L20 8H6"/></svg>Comprar</button>
+          <button class="btn btn--hub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>HUB Ybera</button>
+        </div>
+      </article>
+
+      <article class="product">
+        <button class="product__fav" aria-label="Favoritar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 8z"/></svg></button>
+        <div class="product__photo" style="color:var(--b2c-positive-40)" role="img" aria-label="Creatina Monohidratada 300g">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8v8M6 9v6M18 9v6M20 8v8M8 12h8"/></svg>
+        </div>
+        <h3 class="product__name">348765 Creatina Monohidratada 300g</h3>
+        <div class="product__chips">
+          <span class="pchip pchip--info">Comissão: 15%</span>
+          <span class="pchip pchip--pink">Minhas Vendas: 0</span>
+        </div>
+        <div class="product__prices">
+          <span><small>Grupo</small>R$ 149,90</span>
+          <span><small>Você</small>R$ 129,90</span>
         </div>
         <div class="product__actions">
           <button class="btn btn--outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar</button>
@@ -518,16 +710,16 @@
         <svg viewBox="0 0 384 512" fill="currentColor"><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>
       </button>
     </div>
-    <p class="dialog__intro">É rapidinho e você só faz uma vez: a autorização acontece na
-    <b>sua conta do TikTok</b> — a Ybera nunca vê sua senha.</p>
+    <p class="dialog__intro">É rapidinho e você só faz uma vez. A autorização acontece na
+    <b>sua conta do TikTok</b>, e a Ybera nunca vê sua senha.</p>
     <div class="video-ph" role="img" aria-label="Vídeo tutorial de vinculação (em produção)">
       <span class="video-ph__play"><svg viewBox="0 0 384 512" fill="currentColor"><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span>
-      <small>Vídeo tutorial — em produção (Produto/Operação)</small>
+      <small>Vídeo tutorial em produção (Produto/Operação)</small>
     </div>
     <ul class="steps steps--new">
       <li><span class="n">1</span><span>Tenha sua conta <b>TikTok</b> aberta no celular ou no navegador.</span></li>
       <li><span class="n">2</span><span>Toque em <b>Iniciar vinculação</b> e autorize o acesso na tela do TikTok.</span></li>
-      <li><span class="n">3</span><span>Volte para cá — o status do canal atualiza sozinho.</span></li>
+      <li><span class="n">3</span><span>Volte para cá: o status do canal atualiza sozinho.</span></li>
     </ul>
     <p class="dialog__note">A autorização permite que o Hub gere seus links comissionáveis
     no TikTok. Você pode revogar quando quiser, direto na sua conta.</p>
@@ -556,19 +748,19 @@
         <svg viewBox="0 0 384 512" fill="currentColor"><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>
       </button>
     </div>
-    <p class="dialog__intro"><b>Você já fez essa autorização antes</b> — ela só expirou,
+    <p class="dialog__intro"><b>Você já fez essa autorização antes.</b> Ela só expirou,
     como acontece de tempos em tempos por segurança. Nada mudou na sua conta:
     refazer leva menos de um minuto.</p>
     <div class="video-ph" role="img" aria-label="Vídeo de reautorização (em produção)">
       <span class="video-ph__play"><svg viewBox="0 0 384 512" fill="currentColor"><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span>
-      <small>Vídeo de reautorização — em produção (Produto/Operação)</small>
+      <small>Vídeo de reautorização em produção (Produto/Operação)</small>
     </div>
     <ul class="steps steps--renew">
-      <li><span class="n">1</span><span>Toque em <b>Reautorizar agora</b> e confirme na tela da Shopee — o caminho é o mesmo da primeira vez.</span></li>
-      <li><span class="n">2</span><span>Volte para cá — o canal volta a ficar <b>Vinculado</b> e seus links seguem valendo.</span></li>
+      <li><span class="n">1</span><span>Toque em <b>Reautorizar agora</b> e confirme na tela da Shopee. O caminho é o mesmo da primeira vez.</span></li>
+      <li><span class="n">2</span><span>Volte para cá: o canal volta a ficar <b>Vinculado</b> e seus links seguem valendo.</span></li>
     </ul>
     <p class="dialog__note">Enquanto a conexão estiver expirada, a Shopee fica fora do seu
-    link do Hub — suas vendas nos outros canais não são afetadas.</p>
+    link do Hub. Suas vendas nos outros canais não são afetadas.</p>
     <div class="dialog__actions">
       <button class="btn btn--outline" type="button" data-close>Deixar para depois</button>
       <button class="btn btn--primary" type="button" id="auth-shopee">
@@ -597,6 +789,7 @@
   }
   document.getElementById('act-tiktok').addEventListener('click', e=>open(modalA, e.currentTarget));
   document.getElementById('act-shopee').addEventListener('click', e=>open(modalB, e.currentTarget));
+  // act-ml fica de fora: card do Mercado Livre é "novidade" (CTA disabled), sem modal.
   document.querySelectorAll('[data-close]').forEach(b=>
     b.addEventListener('click', ()=>close(b.closest('.modal'))));
   [modalA, modalB].forEach(m=>{

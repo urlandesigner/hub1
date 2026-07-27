@@ -67,6 +67,7 @@
   .hero__avatar svg{width:14px; height:14px}
   .hero__referral span:last-child{font-size:14px; line-height:18px; font-weight:700; color:var(--neutral-900)}
   .hero__title{font-family:var(--font-display); font-weight:600; font-size:24px; line-height:32px; letter-spacing:-.01em; padding:0 var(--sp-200)}
+  .hero__sku{font-size:12px; line-height:16px; font-weight:600; color:var(--neutral-500); padding:0 var(--sp-200); margin-top:2px}
   .hero__lead{font-size:14px; line-height:20px; color:var(--neutral-600); max-width:280px; margin-top:calc(-1 * var(--sp-200))}
 
   /* CEP */
@@ -131,7 +132,6 @@
   .channel__total{display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:2px}
   .channel__total-label{display:flex; flex-direction:column; align-items:flex-start; gap:6px}
   .channel__total-label b{font-size:12px; line-height:16px; font-weight:600; color:var(--neutral-600)}
-  .channel__savings{display:inline-flex; font-size:12px; line-height:16px; font-weight:700; color:var(--green-800); background:var(--green-100); border-radius:var(--r-full); padding:2px 8px; white-space:nowrap}
   .channel__total-val{font-family:var(--font-display); font-weight:700; font-size:26px; line-height:30px; letter-spacing:-.01em; color:var(--neutral-900); white-space:nowrap}
   .channel__foot{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:var(--sp-300) var(--sp-400)}
   .channel__cta{flex:1 1 auto; min-width:0; max-width:100%; display:flex; align-items:center; justify-content:center; gap:var(--sp-200); height:46px; padding:0 var(--sp-500); border-radius:var(--r-300); border:0; cursor:pointer; font-family:var(--font-body); font-weight:700; font-size:15px; background:var(--neutral-900); color:#fff; text-decoration:none; transition:background .2s ease, transform .08s ease; white-space:nowrap; overflow:hidden}
@@ -141,7 +141,6 @@
   .channel__cta svg{width:18px; height:18px}
   .channel__cta .arrow{transition:transform .25s var(--ease-out)}
   .channel__cta:hover .arrow{transform:translate(3px,-3px)}
-  .channel:not(.channel--best) .channel__savings{display:none}
   .channel:hover{box-shadow:var(--shadow-sm); border-color:var(--neutral-400)}
   /* melhor oferta — sofisticação, não promoção: borda preta, badge dentro do card no tom verde do DS */
   .channel--best{border-color:var(--neutral-900); box-shadow:var(--shadow-sm)}
@@ -226,8 +225,8 @@
     .hero__lead{margin-top:0; max-width:none}
     .cep-wrap{padding:0; margin-top:var(--sp-500)}
     .compare{padding:0}
-    /* desktop: mesmo card, só a grade de detalhes vira 4 colunas e o CTA não estica */
-    .channel__rows{grid-template-columns:repeat(4,1fr)}
+    /* desktop: mesmo card, só a grade de detalhes vira 3 colunas e o CTA não estica */
+    .channel__rows{grid-template-columns:repeat(3,1fr)}
     .channel__cta{flex:0 0 auto; width:auto}
   }
 </style>
@@ -242,6 +241,7 @@
    <div class="col-left">
   <section class="hero">
     <h1 class="hero__title reveal d-0">Óleo de Mirra&nbsp;Reparador 90ml</h1>
+    <p class="hero__sku reveal d-0">SKU 150264</p>
     <div class="hero__media reveal d-1">
       <img src="pecas/comparador-publico/assets/produto-hero.jpg" alt="Óleo de Mirra Reparador 90ml">
       <a class="hero__referral" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Ver perfil de Camila no Instagram">
@@ -317,29 +317,29 @@
   const ALERT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>';
 
   const CH = {
-    shopee:{name:'Shopee', logo:'pecas/comparador-publico/assets/Shopee.svg', cta:'Comprar na Shopee', artigo:'a', href:'https://shopee.com.br/', sub:'Marketplace parceiro', parcelamento:'até 12x com juros', rating:4.6},
-    tiktok:{name:'TikTok Shop', logo:'pecas/comparador-publico/assets/tiktok.svg', cta:'Comprar no TikTok Shop', artigo:'o', href:'https://www.tiktok.com/shop', sub:'Loja no TikTok Shop', parcelamento:'até 4x sem juros', rating:4.3},
-    ybera:{name:'Ybera.com', logo:'pecas/comparador-publico/assets/ybera.svg', cta:'Comprar na Ybera.com', artigo:'a', href:'https://www.ybera.com/produto/escova-progressiva-500g-fashion-gold-150264?parceiro=52154', sub:'Canal oficial Ybera', parcelamento:'até 6x sem juros', rating:4.8},
+    shopee:{name:'Shopee', logo:'pecas/comparador-publico/assets/Shopee.svg', cta:'Comprar na Shopee', artigo:'a', href:'https://shopee.com.br/', sub:'Marketplace parceiro', rating:4.6, noPrazo:true},
+    tiktok:{name:'TikTok Shop', logo:'pecas/comparador-publico/assets/tiktok.svg', cta:'Comprar no TikTok Shop', artigo:'o', href:'https://www.tiktok.com/shop', sub:'Loja no TikTok Shop', rating:4.3, noFrete:true},
+    ybera:{name:'Ybera.com', logo:'pecas/comparador-publico/assets/ybera.svg', cta:'Comprar na Ybera.com', artigo:'a', href:'https://www.ybera.com/produto/escova-progressiva-500g-fashion-gold-150264?parceiro=52154', sub:'Canal oficial Ybera', rating:4.8},
   };
 
   const STATE = {
-    ref:{ isRef:true, order:['shopee','tiktok','ybera'], best:'shopee', savings:'Economize R$ 2,10',
-      d:{ shopee:{total:'R$ 204,80', price:'R$ 179,90', freight:'+ frete R$ 24,90', prazo:'5–8 dias úteis'},
-          tiktok:{total:'R$ 206,90', price:'R$ 184,90', freight:'+ frete R$ 22,00', prazo:'4–7 dias úteis'},
+    ref:{ isRef:true, order:['shopee','tiktok','ybera'], best:'shopee',
+      d:{ shopee:{total:'R$ 204,80', price:'R$ 179,90', freight:'+ frete R$ 24,90'},
+          tiktok:{total:'R$ 206,90', price:'R$ 184,90', prazo:'4–7 dias úteis'},
           ybera:{total:'R$ 209,80', price:'R$ 189,90', freight:'+ frete R$ 19,90', prazo:'3–5 dias úteis'} } },
-    cepA:{ cep:'01310-100', city:'São Paulo, SP', order:['ybera','shopee','tiktok'], best:'ybera', savings:'Economize R$ 6,90',
+    cepA:{ cep:'01310-100', city:'São Paulo, SP', order:['ybera','shopee','tiktok'], best:'ybera',
       d:{ ybera:{total:'R$ 189,90', price:'R$ 189,90', freight:'Frete grátis', free:true, prazo:'2–4 dias úteis'},
-          shopee:{total:'R$ 196,80', price:'R$ 179,90', freight:'+ frete R$ 16,90', prazo:'3–5 dias úteis'},
-          tiktok:{total:'R$ 202,90', price:'R$ 184,90', freight:'+ frete R$ 18,00', prazo:'3–6 dias úteis'} } },
-    cepB:{ cep:'69900-970', city:'Rio Branco, AC', order:['shopee','ybera','tiktok'], best:'shopee', savings:'Economize R$ 2,00',
-      d:{ shopee:{total:'R$ 222,80', price:'R$ 179,90', freight:'+ frete R$ 42,90', prazo:'8–12 dias úteis'},
+          shopee:{total:'R$ 196,80', price:'R$ 179,90', freight:'+ frete R$ 16,90'},
+          tiktok:{total:'R$ 202,90', price:'R$ 184,90', prazo:'3–6 dias úteis'} } },
+    cepB:{ cep:'69900-970', city:'Rio Branco, AC', order:['shopee','ybera','tiktok'], best:'shopee',
+      d:{ shopee:{total:'R$ 222,80', price:'R$ 179,90', freight:'+ frete R$ 42,90'},
           ybera:{total:'R$ 224,80', price:'R$ 189,90', freight:'+ frete R$ 34,90', prazo:'6–9 dias úteis'},
           tiktok:{noship:true} } },
     // fallback do demo: qualquer CEP válido não-mapeado usa frete recalculado genérico
     cepGen:{ order:['ybera','shopee','tiktok'], best:'ybera',
       d:{ ybera:{total:'R$ 199,80', price:'R$ 189,90', freight:'+ frete R$ 9,90', prazo:'3–6 dias úteis'},
-          shopee:{total:'R$ 202,80', price:'R$ 179,90', freight:'+ frete R$ 22,90', prazo:'5–8 dias úteis'},
-          tiktok:{total:'R$ 203,90', price:'R$ 184,90', freight:'+ frete R$ 19,00', prazo:'4–7 dias úteis'} } },
+          shopee:{total:'R$ 202,80', price:'R$ 179,90', freight:'+ frete R$ 22,90'},
+          tiktok:{total:'R$ 203,90', price:'R$ 184,90', prazo:'4–7 dias úteis'} } },
   };
   const CEP_MAP = {'01310100':'cepA','69900970':'cepB'};
 
@@ -392,15 +392,18 @@
           '<div class="channel__total-label"><b>A partir de</b></div>'+
           '<span class="channel__total-val">'+info.price+'</span>'+
         '</div>');
-    const freteVal = !hasCep ? '<dd class="pending">A calcular</dd>' : (info.free ? '<dd class="free">Grátis</dd>' : '<dd>'+info.freight.replace('+ frete ','')+'</dd>');
-    const prazoVal = !hasCep ? '<dd class="pending">A calcular</dd>' : '<dd>'+info.prazo+'</dd>';
+    const freteVal = ch.noFrete
+      ? '<dd class="pending">Calculado no checkout</dd>'
+      : !hasCep ? '<dd class="pending">Informe o CEP</dd>' : (info.free ? '<dd class="free">Grátis</dd>' : '<dd>'+info.freight.replace('+ frete ','')+'</dd>');
+    const prazoVal = ch.noPrazo
+      ? '<dd class="pending">Não informado</dd>'
+      : !hasCep ? '<dd class="pending">Informe o CEP</dd>' : '<dd>'+info.prazo+'</dd>';
     el.innerHTML =
       '<div class="channel__head">'+idBlock+'</div>'+
       '<dl class="channel__rows">'+
         '<div class="channel__row"><dt>Preço do produto</dt><dd>'+info.price+'</dd></div>'+
         '<div class="channel__row"><dt>Frete</dt>'+freteVal+'</div>'+
         '<div class="channel__row"><dt>Prazo de entrega</dt>'+prazoVal+'</div>'+
-        '<div class="channel__row"><dt>Parcelamento</dt><dd>'+ch.parcelamento+'</dd></div>'+
       '</dl>'+
       '<div class="channel__divider"></div>'+
       '<div class="channel__foot">'+total+cta+'</div>';

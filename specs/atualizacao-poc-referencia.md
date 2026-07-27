@@ -213,3 +213,195 @@ Escritório, com evidência calculada); Δspec → premissas 3 e 4 marcadas reso
 tabela; Δrubric → NENHUM (o rubric v4 cobriu todas as falhas encontradas — o item 7 de
 performance, criado no ciclo anterior, já foi exercitado e funcionou); notas → nenhuma
 sem destino. Status da spec: entregue. Fim do ciclo 1.
+
+[2026-07-17] [correção pós-entrega] Designer reportou os cards de "Meus canais de venda"
+colados sem respiro em `06-fluxo-completo.html`. Causa: esse é o único arquivo com a
+barra de dev que alterna estados (carregado/loading/erro) — pra isso, os 3 cards reais
+ficam dentro de um wrapper `#panel-rows` (e o skeleton dentro de `#panel-loading`), e o
+`gap:8px` está declarado em `.links-panel` (o container-pai), que só separa esses
+wrappers entre si, não os cards dentro deles. Os arquivos 01/02/05 não têm esse wrapper
+(mostram os estados lado a lado, sem toggle) e por isso nunca tiveram o bug. Corrigido
+com `#panel-rows:not([hidden]), #panel-loading:not([hidden]){display:flex;
+flex-direction:column; gap:8px}` — o `:not([hidden])` é necessário porque uma regra sem
+essa guarda venceria o `display:none` nativo do atributo `hidden` (origem autor > origem
+UA no cascade, independente de especificidade), quebrando o toggle da barra de dev.
+Testado nos 3 estados (carregado/loading/erro) confirmando gap presente e toggle intacto.
+Aplicado em `06-fluxo-completo.html` e seu espelho em `entrega/`.
+
+[2026-07-17] [ajuste de layout, mesmo ciclo] Designer trouxe print de referência (4
+canais incl. Mercado Livre, em cards lado a lado) pedindo o painel "Meus canais de
+venda" alinhado na horizontal. Duas decisões tomadas com o designer antes de implementar:
+(1) escopo só em `06-fluxo-completo.html` (+ espelho `entrega/`) — 01/02/05 são peças
+atômicas/referência com propósito diferente, não pertencem a este ajuste; (2) mantidos os
+3 canais e o conteúdo atuais (Ybera/Shopee/TikTok, mesmos textos de status e descrição) —
+Mercado Livre e os rótulos do print ("Wake · canal base", "Afiliado", "Creator",
+"Parceiro") NÃO foram adotados, ficaria fora do escopo desta spec (RF-004: até 3 canais).
+Implementação: `.link-row` virou CSS Grid com áreas nomeadas (logo+nome no topo, chip,
+descrição, ação — cada um ocupando sua própria linha) em vez de flexbox horizontal;
+`#panel-rows`/`#panel-loading` viraram `grid-template-columns:repeat(3,1fr)` (1 coluna
+abaixo de 720px — painel não pode quebrar em viewport estreito, por restrição da spec).
+O botão de ação (`.link-row__action`) deixou de ser link sublinhado e passou a botão
+sólido rosa (reaproveita a cor de `.btn--primary`, já usada nos modais, pra não inventar
+token novo). Skeleton de loading (`.sk-row`) redesenhado no mesmo grid, senão ficaria com
+a forma errada (barra horizontal) num painel que agora é grade de cards. Testado: os 3
+canais nos 3 estados de vínculo, toggle carregado/loading/erro, fluxo completo de
+reautorização da Shopee (clique → modal → "Reautorizar agora" → card atualiza para
+Vinculado, contador "2 de 3") e responsivo abaixo de 720px (1 coluna, sem espremer).
+Aplicado em `06-fluxo-completo.html` e seu espelho em `entrega/` (arquivos idênticos,
+confirmado por `diff`).
+
+[2026-07-17] [mudança intencional de escopo, só nesta peça] Designer pediu explicitamente
+pra adicionar o Mercado Livre como 4º canal — reverte a decisão da entrada anterior
+("ficaria fora do escopo desta spec, RF-004: até 3 canais"). Como o pedido foi direto (não
+uma pergunta em aberto), implementei em vez de reconfirmar. Escopo da mudança: **só
+`06-fluxo-completo.html` + espelho `entrega/`** — 01/02/05 continuam com os 3 canais
+originais (Wake/Ybera, Shopee, TikTok) e o restante desta spec (premissas, RF-004,
+"3 canais" nas seções Resultado esperado/Escopo) segue valendo como contrato-base; esta
+peça específica passa a ser uma exceção/experimento de 4 canais, não uma atualização
+silenciosa do contrato. Pendência registrada: se o Mercado Livre for pra frente de
+verdade, isso precisa virar mudança de escopo formal (Δspec nas seções-base, não só no
+Rastro) — o que não foi feito aqui de propósito, já que o pedido foi pontual nesta
+conversa, sem uma decisão de Produto por trás. Implementação: 4º card (`row-ml`) no mesmo
+padrão dos demais (ícone provisório "ML" em texto — sem asset de marca disponível, mesma
+caixa neutra dos outros logos); grade trocou de `repeat(3,1fr)` fixo pra
+`repeat(auto-fit,minmax(220px,1fr))`, que acomoda 4 (ou mais, no futuro) canais sem
+precisar editar o número de colunas a cada canal novo; Modal ML duplicado do Modal A
+(mesmo padrão "primeira vinculação" usado pro TikTok) com cópia própria — Modal A tem
+"TikTok" no texto, não é genérico, então duplicar foi mais seguro que parametrizar a
+lógica compartilhada; contador "N de 3" virou "N de 4" (texto inicial + `setLinked`).
+Achado durante o teste responsivo: `auto-fit` sozinho não bastava — a sidebar fixa
+(240px) não encolhe/colapsa em viewport estreito, então o container do grid nunca fica
+estreito o bastante pro auto-fit cair pra 1 coluna sozinho, e a página estourava
+horizontalmente com 2 colunas espremidas no mobile. Corrigido restaurando o media query
+`@media(max-width:720px){grid-template-columns:1fr}` por cima do auto-fit (baseado na
+largura real do viewport, não na largura do container, então não sofre do mesmo
+problema). Confirmado por `document.documentElement.clientWidth`/`scrollWidth` que o
+painel em si respeita 1 coluna abaixo de 720px — o scroll horizontal residual da página
+inteira nesse viewport é da sidebar fixa e do grid de produtos, pré-existente e fora do
+escopo desta peça (spec já registra: "mobile não é o foco primário desta tela"). Testado:
+grade com 4 cards numa linha só em 1280px, fluxo completo do Mercado Livre (clique →
+modal → "Iniciar vinculação" → card atualiza pra Vinculado, contador "2 de 4"), skeleton
+de loading com 4 cards, e o painel em 1 coluna em viewport estreito. Aplicado em
+`06-fluxo-completo.html` e seu espelho em `entrega/` (idênticos, confirmado por `diff`).
+
+[2026-07-17] [correção de tratamento, mesmo dia] Designer redirecionou o tratamento do
+card do Mercado Livre: continua só nesta peça (`06-fluxo-completo.html` + `entrega/`),
+mas deixa de simular um canal real "não vinculado ainda" e passa a ser uma **novidade —
+algo que ainda vai chegar**, sem interação nenhuma disponível. Isso resolve a inconsistência
+que a entrada anterior já tinha deixado como pendência aberta ("se o ML for pra frente de
+verdade, isso precisa virar mudança de escopo formal") — ao tratá-lo como anúncio/prévia
+em vez de canal funcional, o card não compete mais com o RF-004 (até 3 canais reais).
+Mudanças: (1) chip trocou de "Não vinculado" (`chip--off`, mesmo tom dos canais reais que
+só falta vincular) pra "Em breve" — nova variante `.chip--soon`, reaproveitando os tokens
+`--b2c-info-10`/`--b2c-info-50` já usados em `.pchip--info` (nenhuma cor nova); (2) texto
+de descrição deixou de convidar a ação ("Vincule sua conta...") e passou a avisar que a
+integração ainda não existe; (3) CTA virou `<button disabled aria-disabled="true">Em
+breve</button>` — sem `aria-haspopup`, sem listener de clique, com estilo próprio
+`.link-row__action:disabled` (cinza neutro, `cursor:not-allowed`) pra não parecer uma ação
+disponível; (4) Modal ML (duplicado do Modal A na entrada anterior) foi REMOVIDO por
+inteiro — não tem mais nenhum caminho que leve até ele, ficaria morto; (5) contador
+"N de 4" voltou pra "N de 3" (texto inicial + `setLinked`) — o Mercado Livre não conta
+como canal disponível enquanto for só uma prévia, então ele existe visualmente no painel
+mas fica de fora da métrica "canais recebendo suas vendas pelo link do Hub". Testado: CTA
+não responde a clique (`button.disabled === true`), sem erros no console após remover o
+modal, chip/copy/contador conferidos visualmente. Aplicado em `06-fluxo-completo.html` e
+seu espelho em `entrega/` (idênticos, confirmado por `diff`).
+
+[2026-07-17] [asset + revisão de copy, mesmo dia] Designer adicionou o logo real do
+Mercado Livre (`assets/mercadolivre.png`) — substituído o selo provisório "ML" em texto
+pela imagem (mesmo padrão `<img>` dos outros logos), CSS do selo de texto removido por
+não ter mais uso. Asset espelhado em `entrega/assets/`. Em seguida, rodada `/ux-copy`
+pra revisar todo o texto voltado à influenciadora nesta peça (painel de canais, chips,
+aria-labels, conteúdo dos Modais A e B) com um objetivo explícito do designer: remover
+todos os travessões do copy, reescrevendo cada frase em vez de só trocar pontuação.
+Reescritas (10 trechos, todos em `link-row__hint`, `dialog__intro`, `dialog__note`,
+`steps li`, `video-ph` e o `aria-label` de notificações): travessão explicativo
+("frase — explicação") virou frase nova com ponto final ou dois-pontos, escolhido frase
+a frase pra soar natural em vez de mecânico — ex. "Sua conexão com a Shopee expirou —
+refaça a autorização..." → "Sua conexão com a Shopee expirou. Refaça a autorização...";
+"Volte para cá — o status atualiza sozinho" → "Volte para cá: o status atualiza
+sozinho" (dois-pontos aqui porque a segunda oração é consequência direta da primeira,
+não uma frase independente — mesmo padrão aplicado nos dois modais pra manter
+consistência de voz). Comentários de código (CSS/HTML) e o `<title>` da página não
+foram tocados — não são copy que a influenciadora vê ou ouve. Testado: nenhum travessão
+restante fora de comentário/título (`grep`), logo real carregando sem erro de console,
+fluxo de reautorização da Shopee ainda funcionando (`2 de 3` após confirmar). Aplicado em
+`06-fluxo-completo.html` e seu espelho em `entrega/` (HTML idêntico por `diff`, asset
+copiado pros dois `assets/`).
+
+[2026-07-17] [correção de conteúdo, mesmo dia] Designer perguntou por que o grid de
+produtos (contexto herdado, "estrutura já estabelecida" — ver linha 30) tinha 3 cards e o
+que significavam "Grupo"/"Você" nos preços. Resposta dada: os 3 cards são só contexto
+visual, não o foco da peça (spec já registra isso); "Grupo"/"Você" não está documentado
+em nenhum insumo desta demanda — resposta ficou como inferência não confirmada, não
+como fato. Nessa investigação, achado um mismatch: a imagem de cada card (`produto.jpg`)
+já era a garrafa do Óleo de Mirra Reparador (mesmo produto do `comparador-publico`), mas
+o nome exibido dizia "Escova Progressiva {tamanho}g - Fashion Gold" — texto de placeholder
+de outro SKU que sobrou de um ciclo anterior, nunca atualizado. Designer pediu a
+correção: nome trocado pra "Óleo de Mirra Reparador 90ml" nos 3 cards (mantido o número
+de SKU de cada um — 336774/337648/337348 — removido só o pedaço "Escova Progressiva
+{tamanho}g - Fashion Gold" que estava desencontrado da imagem); `alt` da imagem
+corrigido pra igual. Preços/comissão/chips não mexidos (não foi pedido, e sem definição
+de "Grupo"/"Você" documentada eu não tinha base pra decidir se ainda fariam sentido pro
+produto novo). Aplicado em `06-fluxo-completo.html` e seu espelho em `entrega/`
+(confirmado via DOM que os 3 `.product__name` mudaram).
+
+[2026-07-17] [correção de estrutura, mesmo dia] Designer perguntou se os 3 cards eram
+produtos diferentes ou um por canal vinculado — resposta: nenhum dos dois, o grid de
+produtos ("Catálogo de Produtos") é uma seção independente do painel "Meus canais de
+venda", sem nenhuma ligação estrutural entre um card e um canal específico (o botão "HUB
+Ybera" funciona igual pra qualquer canal vinculado). Isso expôs a consequência da
+correção de nome anterior: os 3 cards agora mostravam o MESMO produto com preços
+diferentes entre si (R$ 339,90/297,90 · R$ 99,90/89,90 · R$ 257,90/227,90), parecendo 3
+anúncios duplicados. Perguntado como resolver — decisão: reduzir pra 1 card só (mantido
+o primeiro: SKU 336774, Grupo R$ 339,90, Você R$ 297,90), removidos os outros 2 por
+inteiro. Efeito colateral corrigido de novo: `.grid` era `grid-template-columns:
+repeat(3,1fr)` fixo — com 1 card só, ficaria ocupando 1/3 da linha com vazio do lado
+(mesmo padrão de bug já visto no painel de canais, ver entrada de 2026-07-17 sobre
+`#panel-rows`). Trocado pra `repeat(auto-fill, minmax(240px,360px))`, que também deixa
+o grid pronto pra acomodar mais produtos lado a lado sem editar o CSS, se o catálogo
+crescer de novo no futuro. Testado: 1 card renderizando em 360px (não esticado, não
+cortado), sem erros de console. Aplicado em `06-fluxo-completo.html` e seu espelho em
+`entrega/` (idênticos, confirmado por `diff`).
+
+[2026-07-17] [conteúdo fictício, mesmo dia] Designer pediu 9 produtos no catálogo,
+mantendo o Óleo de Mirra Reparador na posição 1. Adicionados 8 produtos fictícios
+(posições 2–9), reaproveitando `assets/produto.jpg` (único asset de produto disponível
+nesta peça — nenhuma foto real pros itens novos) com nomes alinhados às marcas já
+listadas no filtro do topo (Brasil Influencer, Black Diva Luxury, Spa Pet, Acquafit,
+Fashion Gold), incluindo de propósito "345561 Escova Progressiva 500g - Fashion Gold"
+— o texto de placeholder que existia na posição 1 antes da correção de nome, reaproveitado
+aqui numa posição onde a marca realmente bate (Fashion Gold é linha de alisamento).
+Comissão 15% e Minhas Vendas: 0 mantidos iguais em todos (mesmo padrão dos 3 originais,
+não inventei variação sem pedido). Preços Grupo/Você inventados por faixa de categoria,
+mesma proporção Você≈12% abaixo de Grupo dos cards existentes. Efeito colateral
+corrigido: com 9 itens, `minmax(240px,360px)` (da entrada anterior) fechava só 2 colunas
+no viewport testado, deixando o 9º item sozinho numa linha (mesmo padrão de bug de
+sobra vazia já visto 2x nesta peça). Trocado pra `minmax(280px,1fr)` — calculado pra
+fechar exatamente 3 colunas tanto no viewport de teste (~1040px de `.main`) quanto no
+teto de 1160px (4 colunas exigiriam ≥1168px nos dois casos, nunca cabe). Testado via
+DOM (screenshot da preview instável nesta sessão, mesmo bug de renderização de sessões
+anteriores — não é o código): 9 cards, 3 linhas de 3, nomes corretos, Mirra em 1º,
+`gridTemplateColumns` computado em 3 colunas de ~325px, sem erros de console. Aplicado
+em `06-fluxo-completo.html` e seu espelho em `entrega/` (idênticos, confirmado por
+`diff`).
+
+[2026-07-17] [ícones em vez de foto, mesmo dia] Designer pediu pra trocar a imagem dos 8
+produtos fictícios. Sem asset real disponível pra nenhum deles (só existe
+`assets/produto.jpg`, a foto do Mirra) — reaproveitar essa foto pros 8 seria enganoso
+(mostraria o frasco errado pra "Whey Protein", "Ração Premium", etc.). Substituído por
+ícone SVG simples por categoria, cor por marca do filtro (reforça o agrupamento visual
+mesmo sem link estrutural real entre catálogo e marca): Perfume Amazônia → ícone de
+frasco, cor `--b2c-primary` (rosa, Brasil Influencer); Kit Skincare e Sérum Facial →
+ícone de pote e de gota, cor `--b2c-neutral-90` (escuro, Black Diva Luxury); Shampoo Pet
+e Ração → ícone de pata e de tigela, cor `--b2c-warning-40` (âmbar, Spa Pet); Whey e
+Creatina → ícone de coqueteleira e de haltere, cor `--b2c-positive-40` (verde, Acquafit);
+Escova Progressiva → ícone de pente, cor `--club-700` (Fashion Gold). Cada `<img>` virou
+uma `<div class="product__photo" role="img" aria-label="...">` com o SVG dentro —
+mantém o texto alternativo pra leitor de tela, só que como `aria-label` no container em
+vez de `alt` na imagem (não tem mais imagem). Testado via DOM (screenshot da preview
+seguiu instável nesta sessão — mesmo bug de renderização já visto, não é o código):
+confirmado que os 8 novos têm SVG (não `img`), cor e `aria-label` corretos cada um; 2
+capturas de tela que renderizaram (linha 1 e 2) confirmam visualmente ícones limpos e
+distintos; sem erros de console. Aplicado em `06-fluxo-completo.html` e seu espelho em
+`entrega/` (idênticos, confirmado por `diff`).
