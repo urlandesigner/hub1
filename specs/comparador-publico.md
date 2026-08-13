@@ -1,9 +1,12 @@
 # Spec — comparador-publico
 
 status: ativa
-ciclo: 2
+ciclo: 3
 carimbo-entrega-ciclo-1: demo (2026-07-15, `pecas/comparador-publico/entrega/`)
-atualizada: 2026-07-15
+carimbo-entrega-ciclo-2: demo (2026-07-15, `pecas/comparador-publico/entrega-ciclo2/`)
+atualizada: 2026-08-13
+insumo-de-referencia: Brief Design v1.7 (12/08/2026, derivado do DRP v2.4) — colado na
+conversa, NÃO presente em `insumos/` (lá só existe a v1.1); a v1.6 não existe no repo
 
 ## Resultado esperado
 O cliente final (anônimo) que recebe um link de indicação consegue, ao abrir a página do
@@ -24,6 +27,16 @@ ordenação por custo (ordem neutra, a de cadastro dos canais); informado um CEP
 os fretes e prazos aparecem, a ordenação recalcula visivelmente (o "melhor" pode trocar
 de canal sem quebrar a página) e nenhum dado do cliente persiste — recarregou, o CEP
 sumiu.
+
+**Ciclo 3 — selos de tier (recorte deste ciclo):** o cliente enxerga, em cada card de canal,
+o **Estoque** e o **Volume de Vendas** daquele canal como rótulo categórico (selo), nunca
+como número. Critério de sucesso observável do ciclo: abrindo a página **sem informar CEP**,
+cada card já exibe seu selo de Estoque (Disponível / Últimas unidades / Indisponível) e, quando
+houver, seu selo de Volume de Vendas (Campeão de vendas / Mais vendido / Lançamento); nenhum
+número de estoque ou de unidades vendidas aparece em qualquer estado; um canal com Estoque
+"Indisponível" permanece **visível** no card, sem total e sem CTA de compra (não é ocultado
+nem confundido com "não entrega neste CEP"); e a presença de qualquer selo **não altera a
+ordem** da pilha — a ordenação continua sendo só por custo total (RF-06).
 
 ## Usuário primário
 Cliente Final — consumidor anônimo que recebe o link via redes sociais, WhatsApp ou lives.
@@ -52,6 +65,34 @@ performance).
     mobile-first NÃO é mobile-only. No desktop (≥900px) a página usa layout de DUAS COLUNAS —
     produto + hero + entrada de CEP à esquerda (coluna sticky), lista "Onde comprar" à direita.
     Abaixo de 900px, coluna única (o layout mobile já validado). Decisão do designer.
+- Dentro (ciclo 3 — selos de tier de Estoque e Volume de Vendas):
+  - **Selo de Estoque** por canal, 3 valores: `Disponível` · `Últimas unidades` · `Indisponível`
+    (rótulos literais do Produto — decisão de Design para H-UX-10, ver Rastro)
+  - **Selo de Volume de Vendas** por canal, 4 valores: `Campeão de vendas` · `Mais vendido` ·
+    `Lançamento` · nada (ausência de selo é um valor válido e o padrão — H-UX-11)
+  - Ambos os selos visíveis **desde o primeiro paint**, sem depender de CEP (decisão do
+    designer 2026-08-13: os selos vêm da API do canal, não do frete)
+  - Estado novo de card: **canal com Estoque "Indisponível"** — card visível, sem total e
+    sem CTA de compra, visualmente distinto do canal "não entrega neste CEP" (premissa 10)
+  - Hierarquia visual entre os selos e a badge "Melhor oferta" já existente (H-UX-11 pede a
+    decisão de qual selo é mais chamativo — o card não pode virar mural de badges)
+  - Tratamento visual **não alarmista** de "Últimas unidades" (mitigação do risco de limiar
+    mal calibrado registrado no brief v1.7)
+- Fora (ciclo 3):
+  - **Interface administrativa de override + TTL (Telas 4 e 5 do brief v1.7, RF-13)** — é
+    outro usuário primário (admin) e outra tarefa principal; exige spec própria, não cabe
+    aqui pela regra de 1 demanda = 1 tarefa. É a prioridade declarada do brief e segue
+    pendente de spec (ver Rastro)
+  - Qualquer indicação, no card público, de que um campo está sob override ou de quando
+    expira — o brief é explícito: a indicação de override é do painel, nunca do card
+  - Número exato de estoque ou de unidades vendidas — decisão fechada do Produto: tier sempre
+  - Cálculo/limiar que classifica cada tier (Q-23 do DRP) — Produto/Engenharia; a peça recebe
+    o tier já resolvido
+  - Origem do dado por canal (API vs. fallback admin) exposta ao cliente — ver premissa 12
+  - Campo **Imagem** como campo por canal (taxonomia do brief) — a peça mantém uma imagem de
+    produto no hero; ver premissa 13
+  - Campo **Parcelamento** — removido do card em 2026-08-13 por decisão do designer; ver
+    premissa 14
 - Fora (ciclo 2):
   - Cálculo real de frete por CEP no backend (API/arquitetura — Engenharia; a peça simula)
   - Autopreenchimento por geolocalização/IP (fingerprinting proibido — LGPD-mínima)
@@ -79,6 +120,15 @@ performance).
 - Canal indisponível ou sem vínculo é **ocultado**, nunca exibido com erro visível ao cliente
 - Nenhum dado de comissão, ganho ou financeiro exibido
 - v1 é Brasil apenas
+- **[ciclo 3, inegociável — brief v1.7 §Restrições]** Nenhum override administrativo (Estoque,
+  Avaliação, Volume de Vendas) pode ser desenhado de forma que sugira alteração na lógica de
+  **ordenação** do comparador (RF-06): override afeta apenas exibição. Na prática, para a peça:
+  selo nunca reordena a pilha, nunca aparece como critério de ranking e nunca compete com a
+  badge "Melhor oferta" pelo papel de "este é o recomendado"
+- **[ciclo 3, decidido pelo Produto — não reabrir]** Estoque e Volume de Vendas são exibidos
+  como **tier**, nunca número exato. Avaliação segue como **nota real** (estrelas), fora do
+  tratamento de tier. "Lançamento" é escolha manual do admin — nenhuma UI pode sugerir que
+  existe cálculo automático por data por trás desse selo
 
 ## Direção estética
 Decidida na entrada da fase 02 (2026-07-15) via frontend-design, dentro dos guardrails do
@@ -137,6 +187,58 @@ Estende a direção do ciclo 1 sem reabri-la. A aposta do ciclo 2:
   microcopy discreta "usado só agora, não guardamos" perto do campo. Privacidade como
   reforço de confiança, não como letra miúda.
 
+### Direção estética — ciclo 3 (selos de tier), decidida na entrada da fase 02 (2026-08-13)
+Estende as direções dos ciclos 1 e 2 sem reabri-las. O problema de craft do ciclo não é
+"desenhar um badge" — é que o card passa a ter **três marcações simultâneas** (Melhor oferta
++ Estoque + Volume de Vendas) num componente que os últimos ciclos deliberadamente tornaram
+menos promocional. A aposta:
+
+- **Três altitudes de marcação, nunca três badges.** O peso visual de cada marca é
+  proporcional à **autoridade e à durabilidade** do dado que ela carrega:
+  1. **Veredicto** (o comparador falando) = `Melhor oferta`. Única pílula **preenchida** do
+     card, no `toprow`. Não muda — é a conclusão da comparação, o ativo mais valioso da página.
+  2. **Prova social** (o mercado falando) = Volume de Vendas. Chip de **contorno** (borda +
+     texto, sem preenchimento), com hierarquia interna por peso: `Campeão de vendas` mais
+     forte que `Mais vendido`; `Lançamento` é lateral, não é degrau da mesma escada.
+  3. **Estado do estoque** (a loja falando) = Estoque. Marcação **tipográfica** com ponto de
+     status — sem caixa nenhuma. É a mais leve das três de propósito: é o dado mais volátil
+     (TTL de 48–72h no brief) e o mais exposto a erro de limiar (Q-23).
+  Isso responde H-UX-11 (Volume de Vendas > Estoque em proeminência) com um critério, não com
+  gosto — e é a mitigação de craft do risco "selo mal calibrado": a marca mais frágil é também
+  a mais discreta, então errar custa menos.
+- **Cor continua sendo acento cirúrgico.** Verde = veredicto/economia; âmbar = ressalva;
+  rosa Club = CTA/foco. Nenhuma cor nova entra para os tiers: os chips de Volume de Vendas são
+  **neutros** (a "prova social" ganha presença por ícone e peso tipográfico, não por cor —
+  padrão dos produtos-régua Kayak/Google Flights). O único tier colorido é `Últimas unidades`
+  (âmbar, texto + ponto, **sem preenchimento** — ressalva, não alarme) e `Indisponível`
+  (neutro rebaixado). Sem vermelho, sem timer, sem "corre".
+- **Linha própria para os tiers.** Os selos NÃO disputam espaço com o nome nem com a badge:
+  entram numa terceira linha do bloco de identidade (`channel__flags`), abaixo de
+  `toprow` (nome + Melhor oferta) e `meta` (subtítulo + avaliação). Aplicação direta do
+  aprendizado de 2026-07-16, quando enfiar conteúdo na linha do subtítulo empurrou a badge
+  pra quebrar a 375px.
+- **Ausência é um valor, não um buraco.** Volume de Vendas sem tier simplesmente não renderiza
+  chip; a linha de flags colapsa sem deixar espaço morto (o Estoque, que é sempre presente,
+  sustenta a linha sozinho).
+- **Motion (emil-design-eng):** os selos entram no reveal do card já existente, sem animação
+  própria — nada de pulsar, piscar ou contar. Na reordenação FLIP, selo **não** faz crossfade
+  (ele não muda com o CEP): só os valores de frete/total mudam. Selo animado viraria promessa
+  de urgência, exatamente o que a direção recusa.
+- **Copy (design:ux-copy):** rótulos literais do Produto, sentence case — `Disponível`,
+  `Últimas unidades`, `Campeão de vendas`, `Mais vendido`, `Lançamento`. Sem ponto final, sem
+  caps lock, sem exclamação. Decisão de H-UX-10/H-UX-11 registrada no Rastro.
+
+### Dataset de exemplo fixado — ciclo 3 (tiers por canal, imutável entre as peças)
+Escolhido para exercitar TODOS os valores de tier, incluindo a ausência, sem inventar canal:
+- **Shopee:** Estoque `Disponível` · Volume `Campeão de vendas` (é o canal com API de volume)
+- **TikTok Shop:** Estoque `Últimas unidades` · Volume `Lançamento` (fallback admin, tag manual)
+- **Ybera.com:** Estoque `Disponível` · Volume **nada** (Wake é sempre fallback admin — o
+  estado "sem tier" precisa aparecer na peça, e é o canal onde ele é mais provável)
+- **Cenário extra para o estado novo:** Shopee com Estoque `Indisponível` (card visível, sem
+  total, sem CTA — premissa 11)
+- `Mais vendido` é exercitado na ficha de componente (peça 11), onde todos os valores aparecem
+  lado a lado, mesmo os que não caem no dataset da página.
+
 ### Dataset de exemplo fixado — ciclo 2 (imutável entre todas as peças)
 Preços do produto são os mesmos do ciclo 1 (imutáveis); só o frete varia por CEP.
 - **Produto:** Escova Progressiva Fashion Gold 500g · indicação de "Camila".
@@ -172,6 +274,11 @@ Preços do produto são os mesmos do ciclo 1 (imutáveis); só o frete varia por
 | 8 | **[ciclo 2]** Produto referenda a inclusão do frete por CEP (decisão partiu do designer em sessão, não do DRP) | alta (é a licença do ciclo) | decisão registrada no Rastro; referendo pendente | Produto (Victor Lima / Rolim) | refinamento da Feature — a peça DEMO deste ciclo é o material do referendo |
 | 9 | **[ciclo 2]** CEP como refinamento opcional (página abre com frete de referência; CEP melhora) converte mais do que CEP como pedágio de entrada (pedir antes de mostrar) | média (define a arquitetura da página) | palpite de Design, coerente com "sem fricção" do resultado esperado | Design (este ciclo prototipa a via opcional; teste real fica para produção) | ao final deste ciclo |
 | 10 | **[ciclo 2]** Quando um canal não retorna frete para o CEP, mostrar o canal com aviso é melhor que ocultá-lo (a ocultação silenciosa do RF-006 vale para canal INVÁLIDO; canal válido com frete desconhecido é outro caso) | média | sem evidência; análise de requisito | Design propõe na peça; Produto referenda | portão deste ciclo |
+| 11 | **[ciclo 3] CONFLITO DE REQUISITO — o mais crítico do ciclo.** O brief v1.7 lista `Indisponível` como tier EXIBIDO no card; a spec (ciclos 1–2) e o RF-006 dizem que canal sem estoque é OCULTADO sem rastro. As duas regras não coexistem. Decisão do designer (2026-08-13): o canal fica **visível com o selo**, sem total e sem CTA — o que **revoga a parte "sem estoque" do RF-006** e precisa de referendo | alta (a peça materializa a mudança de requisito) | decisão de Design registrada; referendo do Produto pendente | Produto (Victor Lima / Rolim) — a peça deste ciclo é o material do referendo | refinamento da Feature |
+| 12 | **[ciclo 3] H-UX-08 revisada — RESPONDIDA (2026-08-13).** Com Estoque e Volume de Vendas em tier, o cliente vê só o selo, nunca a origem; resta a Avaliação, que é nota real e pode estar sob override. **Resposta de Design: NÃO distinguir** nota de API de nota sob override no card público. Motivo: um rótulo tipo "nota ajustada" expõe mecânica interna e contamina com suspeita TODAS as notas da página — inclusive as que vêm de API — sem ajudar o cliente a decidir a compra. A indicação de override é do painel admin, como o próprio brief determina | média (é resposta a hipótese do brief, não bloqueia a peça) | decisão de Design registrada, coerente com H-UX-05 | Design (respondido); Produto ciente | fechada neste ciclo |
+| 13 | **[ciclo 3]** A taxonomia do brief v1.7 trata **Imagem** como campo por canal (API dos 3 canais, com override), mas a peça tem UMA imagem de produto no hero, fora do card. **Regra proposta por Design (2026-08-13):** o hero mantém UMA imagem, escolhida por **ordem canônica fixa — Wake (canal oficial) → Shopee → TikTok**, a primeira com imagem válida vence, e ela **nunca troca com a reordenação da pilha**. Motivo: imagem é identidade do produto; se ela acompanhasse o "melhor canal", o produto piscaria e pareceria outro a cada CEP informado. O card **não** ganha imagem própria — o comparador compara custo, não fotografia. O override por canal segue fazendo sentido no painel (canal com foto ruim), só não vira imagem por card | média (muda a anatomia da página se resolvida contra a peça) | lacuna do brief; regra proposta por Design | Produto referenda a regra | próxima rodada de brief |
+| 14 | **[ciclo 3]** **Parcelamento** foi REMOVIDO do card por decisão do designer (2026-08-13, commit 2827db4), mas a taxonomia do brief v1.7 ainda o lista como campo do card (admin-only, Q-20). Ou o brief atualiza, ou o campo volta | baixa-média (1 linha do card) | divergência peça × brief, verificada | Produto (referendar a remoção) | próxima rodada de brief |
+| 15 | **[ciclo 3]** A copy `Frete: "Não informado" (exceção TikTok)` do brief divergiu da peça, que mostra `Calculado no checkout` no TikTok. **Decisão de Design (2026-08-13): manter `Calculado no checkout`**, e propor ao Produto a regra geral — **a copy do campo vazio segue a CAUSA, não o campo**: `Não informado` = o dado não existe/não veio (caso do Prazo na Shopee); `Calculado no checkout` = o canal só revela o valor adiante no fluxo (caso do Frete no TikTok); `Informe o CEP` = falta uma entrada do cliente. Achatar as três em "Não informado" descartaria informação verdadeira e faria dado ausente por design parecer falha de integração | baixa | divergência peça × brief, verificada no render | Design decidiu; Produto referenda a regra | próxima rodada de brief |
 
 ## Quebra de tarefas
 Ciclo 1 (entregue):
@@ -191,6 +298,16 @@ Ciclo 2 (frete por CEP) — de dentro pra fora, sobre as peças entregues:
    canal; a troca precisa ser perceptível sem desorientar (atualização da peça 02)
 4. Página completa integrada — hero + entrada de CEP + pilha, fluxo de ponta a ponta
    incluindo troca de CEP e recarga (CEP some — prova do transitório)
+
+Ciclo 3 (selos de tier) — de dentro pra fora, sobre a peça elevada (`10-elevada.html`):
+1. Selo de tier — peça atômica: as 3 variantes de Estoque × as 4 de Volume de Vendas,
+   incluindo a ausência de selo, e a hierarquia com a badge "Melhor oferta" já existente
+2. Card de canal com selos — atualização da anatomia: onde os selos moram no card sem
+   virar mural de badges, nos estados com e sem CEP
+3. Card de canal com Estoque "Indisponível" — o estado novo: visível, sem total, sem CTA,
+   distinguível do "não entrega neste CEP" (premissa 11)
+4. Pilha + página completa — os selos convivendo com a reordenação FLIP e com a ordenação
+   por custo, provando que selo não mexe na ordem (RF-06)
 
 ## Critérios de verificação
 O portão confere olhando a peça renderizada (nunca o código):
@@ -213,6 +330,20 @@ Ciclo 2 (adicionais):
 - CEP não sobrevive à recarga da página e não aparece em URL/query string
 - Canal sem frete para o CEP não é confundível com canal indisponível
 - Estados de CEP inválido e de cálculo em andamento não derrubam a comparação já exibida
+
+Ciclo 3 (adicionais) — o portão confere olhando a peça renderizada:
+- Cada card exibe seu selo de Estoque **já no primeiro paint**, sem CEP informado; o selo de
+  Volume de Vendas aparece quando existe e a sua ausência não deixa buraco no layout
+- Nenhum número de estoque ("3 unidades") ou de vendas ("1.2 mil vendidos") aparece em
+  qualquer estado — só rótulo categórico
+- O canal com "Indisponível" é visível, sem total e sem CTA, e **não é confundível** com o
+  canal "não entrega neste CEP" nem com um canal oculto
+- Trocar o CEP e disparar a reordenação FLIP **não muda nenhum selo** e nenhum selo muda a
+  ordem da pilha — a ordem continua explicada só pelo custo total
+- "Últimas unidades" não usa vermelho, timer, nem tratamento de urgência agressiva
+- O card com 3 marcações simultâneas (Melhor oferta + Estoque + Volume de Vendas) mantém
+  hierarquia legível a 375px, sem quebra de linha órfã e sem badge vazando da caixa
+- Contraste AA (4.5:1) em cada par cor/fundo novo dos selos, medido no render
 
 ## Rastro
 [2026-07-15] [fase 01] Spec criada a partir dos insumos em `insumos/` (brief.md v1.1,
@@ -667,3 +798,622 @@ curta. Legibilidade preservada. Só na elevada.
 [2026-07-16] [mudança intencional de spec, ciclo 2] Ao ver a correção acima, o designer decidiu que rotular o frete de referência não é suficiente — achou ruim mostrar valores de Frete/Prazo "reais" antes do CEP, mesmo rotulados. Pergunta feita e respondida: como ficam Total/ordenação/badge, já que dependiam do frete de referência? Decisão: Total vira "A partir de {preço}" (só o preço do produto, sem frete), ordenação fica neutra (a ordem de cadastro dos canais, que já coincidia com a ordem por custo do ciclo 1 — não precisou reordenar o array), e a badge "Melhor oferta" + texto "Canal verificado" somem até o CEP ser aplicado (não há "melhor" sem frete pra comparar). **Isso reverte a premissa 9 e as seções "Resultado esperado"/"Escopo" do ciclo 2** (que diziam "sem CEP = frete de referência do cache, rotulado") — texto dessas seções já atualizado acima para refletir a decisão nova. Implementação: `STATE.ref` ganhou `isRef:true` (único jeito confiável de sinalizar "sem CEP" pro `fillCard`, já que nem todo estado com CEP tem `st.cep` — o `cepGen` genérico não tem); `hasCep = !st.isRef` decide: Frete/Prazo → `<dd class="pending">A calcular</dd>` (cinza, `--neutral-500`, mais leve que o valor real em `--neutral-900`/700 weight) em vez do valor; `isBest` força `false` sem CEP (cascata: sem badge, sem "Canal verificado", sem `channel--best`); Total usa preço em vez de total quando `!hasCep`. Removido também o rótulo "frete de referência"/"frete para X" da fase anterior (`srcLabel`, `.src`, `.src-sep`, `st.src` nos 3 estados) — ficou redundante: sem CEP não há mais valor de frete pra "rotular" (o campo já comunica isso sozinho, em branco), e com CEP o chip "Frete para {CEP}" já identifica a fonte. Testado sem CEP (Frete/Prazo em branco, Total "A partir de", sem badge/"Canal verificado") e com CEP 01310-100 (comportamento normal restaurado: Frete/Prazo reais, "Total da compra", badge, "Canal verificado") nos 3 espelhos.
 
 [2026-07-17] [limpeza de código morto] Investigação disparada por task separada (mesmo padrão do bug do `srcLabel`): o campo `savings:'Economize R$ X,XX'` existia nos 3 estados de `STATE` (ref/cepA/cepB) e havia CSS pronto pra um chip `.channel__savings` (inclusive uma regra escondendo-o em cards não-melhores), mas nenhum lugar do `fillCard` inseria esse valor no HTML — nunca foi renderizado. Confirmado antes de decidir: os valores já estavam matematicamente corretos (diferença entre o total do canal "melhor oferta" e o segundo mais barato — ex. ref: R$ 206,90 − R$ 204,80 = R$ 2,10), então não era dado quebrado, só nunca ligado à tela. Perguntado ao designer se queria ligar o chip (perto do Total, só com CEP aplicado, seguindo a mesma regra de `hasCep` do badge/Total) ou remover como código morto — decisão: **remover**. Apagados `savings` dos 3 objetos em `STATE` e as regras `.channel__savings` e `.channel:not(.channel--best) .channel__savings{display:none}` do CSS, nos 3 espelhos. Sem mudança visual (o chip nunca apareceu) — confirmado sem erros de console após a remoção.
+
+[2026-08-13] [fase 01 · ciclo 3] **Spec reaberta (ciclo 3)** a partir do **Brief Design v1.7**
+(12/08/2026, DRP v2.4), colado na conversa pelo designer. Recorte fechado: entram apenas os
+**selos de tier de Estoque e Volume de Vendas** no card do comparador público (Tela 1 do brief).
+Rota: mudança intencional de spec (o brief mudou o contrato), não drift.
+- **Fatiamento decidido:** as Telas 4 e 5 do brief (override administrativo + TTL + tag manual
+  "Lançamento", RF-13) são a **prioridade declarada do Produto**, mas ficaram FORA desta spec —
+  outro usuário primário (admin), outra tarefa principal, e a regra do processo é 1 demanda = 1
+  tarefa. Precisam de **spec própria** (`specs/painel-override-ttl.md`, a nascer numa fase 01
+  separada). Sinalizado ao designer: enquanto essa spec não existir, o entregável que o brief
+  mais pede segue não atendido — é a maior lacuna aberta do ciclo, e é de escopo, não de peça.
+- **Lacuna de insumo registrada:** `insumos/brief.md` é a **v1.1**; a **v1.6** não existe no
+  repo. Todos os itens que a v1.7 marca "sem mudança — ver Brief v1.6" (H-UX-06, H-UX-07,
+  H-UX-09, Q-22, Telas 2/3/6/7/8, riscos e restrições herdados) ficam **não verificáveis** neste
+  ciclo. Consequência concreta já observada: não consigo confirmar se o disclaimer de variação
+  de preço (Tela 7, "sem mudança") e a contrapartida pública do timer de escassez (Tela 6) eram
+  requisitos já pendentes — a peça atual não tem nenhum dos dois. Dono: Produto (anexar a v1.6
+  em `insumos/`). Não bloqueia o recorte dos selos.
+- **3 decisões do designer que destravaram o recorte** (perguntadas na entrada da fase 01):
+  (1) *Estoque "Indisponível"* → canal fica **visível com o selo**, sem total e sem CTA. Isso
+  **revoga a parte "sem estoque" do RF-006** (ocultação silenciosa) e virou a premissa 11 —
+  crítica, com referendo do Produto pendente e a peça como material do referendo. A ocultação
+  silenciosa continua valendo para canal INVÁLIDO/sem vínculo.
+  (2) *Selos sem CEP* → **sempre visíveis**, desde o primeiro paint: vêm da API do canal, não
+  do frete. Difere do tratamento de Frete/Prazo/Total/badge, que a decisão de 2026-07-16
+  condicionou ao CEP — e é coerente, porque ali o motivo era não mostrar valor de frete que a
+  página não sabe; aqui a página sabe.
+  (3) *Copy dos tiers (H-UX-10/H-UX-11)* → **rótulos literais do Produto** (`Disponível`,
+  `Últimas unidades`, `Campeão de vendas`, `Mais vendido`, `Lançamento`), sem estilizar para
+  urgência comercial. Motivo: casa com a direção "premium, menos promocional" consolidada nos
+  últimos ciclos e **baixa o custo de um limiar mal calibrado** — risco que o próprio brief
+  mapeia (Q-23) e cuja mitigação ele atribui ao tratamento visual.
+- **H-UX-08 revisada respondida** como premissa 12 (não distinguir, no card público, nota de API
+  de nota sob override). **H-UX-12** (motivo obrigatório para "Lançamento") NÃO é resposta desta
+  spec — é decisão da tela administrativa, vai com a spec do painel.
+- **3 divergências peça × brief** encontradas na leitura e registradas como premissas em vez de
+  serem corrigidas em silêncio: Imagem como campo por canal (13), Parcelamento removido do card
+  mas ainda na taxonomia (14), copy do Frete no TikTok (15). Nenhuma bloqueia os selos.
+- **Pendência FECHADA pelo brief:** a origem real da nota de avaliação (aberta sem dono no
+  Rastro de 2026-07-16) agora tem fonte definida — API (Wake, Shopee) / fallback admin (TikTok,
+  até HT-04). O mock atual da peça (4,6 / 4,3 / 4,8) segue válido como dado de exemplo.
+- **Portão de saída da fase 01:** critério de sucesso do ciclo 3 é checável olhando ✔ · escopo
+  com fronteira explícita (incluindo o fatiamento do painel admin) ✔ · premissa crítica 11 com
+  dono (Produto) e prazo (refinamento da Feature) ✔. Spec segue `ativa`, não bloqueada.
+  Próximo passo: fase 02 (`/gerar-com-guardrails`) — decidir a Direção Estética dos selos na
+  entrada, antes da 1ª peça, e fixar os valores de tier de exemplo por canal (aprendizado dos
+  ciclos 1 e 2: dados de exemplo fixados cedo).
+
+[2026-08-13] [fase 02 · ciclo 3] **Direção Estética do ciclo 3 registrada na spec ANTES da 1ª
+peça** (regra 5b), via `frontend-design`: "três altitudes de marcação, nunca três badges" — peso
+visual proporcional à autoridade e à durabilidade do dado (veredicto preenchido > prova social em
+contorno > estado de estoque tipográfico). Dataset de tiers por canal também fixado antes de
+gerar (aprendizado dos ciclos 1 e 2), escolhido para exercitar todos os valores incluindo a
+ausência de tier (Ybera.com/Wake).
+
+[2026-08-13] [fase 02 · ciclo 3] **Peça 11 (selo de tier) gerada** em
+`pecas/comparador-publico/11-selo-tier.html` — ficha de componente com **3 direções** para o
+designer escolher olhando o renderizado (a decisão de hierarquia é dele, não da geração):
+- **A — estado tipográfico:** nenhum chip novo; Estoque e Volume viram texto com marcador.
+  Trade-off: card máximamente calmo, mas a prova social quase desaparece e o Produto pode
+  considerar que o selo não entrega o que o brief pediu.
+- **B — chip de contorno (recomendada):** `Melhor oferta` segue a única pílula preenchida;
+  Volume de Vendas em chip de contorno com hierarquia interna (borda 1.5px + neutral-900 para
+  `Campeão de vendas`, 1px + neutral-700 para `Mais vendido`, tracejado para `Lançamento` —
+  tracejado porque é escolha MANUAL do admin, não degrau da mesma escada, atendendo a restrição
+  do brief de não sugerir cálculo automático); Estoque tipográfico com ponto de status.
+  Trade-off: mais uma forma no card — satura se um 4º selo aparecer depois.
+- **C — badge preenchido semântico:** usa o sistema `surface·text·border/badge/*` do DS por cor.
+  Trade-off: legível de longe, mas é o mural de badges, colide o âmbar de `Últimas unidades` com
+  o âmbar do aviso "não entrega neste CEP", e reintroduz o tom promocional que os ciclos
+  anteriores tiraram de propósito. Registrado na peça que blue/purple nunca foram usados nesta
+  página — escolher C é decidir expandir a paleta do comparador.
+- **Estado novo (premissa 11) prototipado lado a lado** com o "não entrega neste CEP" para provar
+  o critério de não-confundibilidade: sem estoque = neutro rebaixado, borda contínua, nota
+  "Sem estoque nesta loja agora", sem total e sem CTA; não entrega = âmbar, borda tracejada,
+  estoque segue `Disponível`. Causas diferentes, tratamentos diferentes.
+- **Linha de flags** (`.channel__flags`) criada como 3ª linha do bloco de identidade, sem disputar
+  espaço com nome/badge — aplicação direta do aprendizado de 2026-07-16.
+- **Correções durante a geração:** (a) o separador "·" da direção A ficava **órfão no início da
+  linha** quando a linha de flags quebrava — mesma armadilha do `.src-sep` do ciclo 2; removido, a
+  separação ficou no `column-gap`. (b) a ficha punha 3 cards lado a lado a partir de 720px, o que
+  dava cards de ~240px — mais estreitos que na página real (~340px), fazendo a linha de flags
+  quebrar num lugar onde a página real não quebra: a ficha estaria mentindo. Breakpoint subiu para
+  1000px e a ficha para 1080px de largura; cards medidos em **349px**, próximos do real.
+- **Verificação:** console limpo; a 375px e a 1280px sem h-scroll, sem clipping e **nenhum selo
+  vazando da caixa do card** (medido elemento-contra-sua-caixa, não contra o viewport — lição do
+  ciclo 2); linha de flags em 1 linha nos dois breakpoints. **Ressalva honesta:** os screenshots
+  pararam de funcionar no meio da verificação (painel do Browser oculto, imagens vindo preto), então
+  as direções B e C foram verificadas por **medição de DOM, não visualmente** — a direção A eu vi
+  renderizada. A crítica visual das três é do designer (é o veredicto desta fase).
+- **Δtokens:** NENHUM novo. Tudo em rampas já existentes no `tokens.json` (neutral, green, amber; a
+  direção C usa blue/purple que existem no DS mas nunca foram usados nesta superfície). Ícones
+  (troféu, tendência, brilho) são SVG inline provisórios — pendência #1, já carimbada, não renasce.
+- **Achado fora do escopo da peça, para o portão:** o `.pending` da peça 10/elevada (usado em
+  "Informe o CEP", "Não informado", "Calculado no checkout") é `neutral-500` #B0AFB2 sobre branco =
+  **~2,2:1, reprova WCAG AA** com folga. É texto que o cliente lê, introduzido na mudança de
+  2026-07-16 (quando Frete/Prazo passaram a ficar em branco sem CEP) e nunca medido. Na peça 11 usei
+  `neutral-600` (5,30:1, par já validado no ciclo 1) para o mesmo papel. **Não corrigi na peça 10 por
+  estar fora do recorte desta peça** — vai como bloqueio candidato para o portão do ciclo 3.
+Aguardando veredicto do designer (aceitar uma direção / corrigir / rejeitar) antes da peça 12.
+
+[2026-08-13] [fase 02 · ciclo 3] **Veredicto do designer na peça 11: direção C** (badge preenchido
+semântico) — não a B que eu havia recomendado. Decisão registrada, direção C aplicada.
+**Peça 12 (selos na página) aplicada** em `index.html` e `pecas/comparador-publico/10-elevada.html`:
+`.channel__flags` como 3ª linha do bloco de identidade, `TIER` (stock/volume) + `TIER_ICON` e
+`renderFlags(ch)`; tiers por canal no `CH` conforme o dataset da spec (Shopee ok/champ · TikTok
+low/launch · Ybera ok/sem volume). Ordem no card: volume → estoque. Selos independem de CEP, como
+decidido. +6 tokens no `:root` (blue-100/200/700, purple-100/200/700) — rampas que já existem no
+`tokens.json` mas **entram nesta superfície pela 1ª vez**; nenhum valor inventado.
+**`entrega-ciclo2/10-elevada.html` NÃO foi tocada** (divergindo da prática de "3 espelhos" dos
+ciclos anteriores): é pacote de entrega carimbado do ciclo 2 e o ciclo 3 ainda não passou pelo
+portão — a entrega do ciclo 3 nasce em pasta própria na fase 04. O espelho fica desatualizado de
+propósito, e isso está registrado aqui para não virar drift silencioso.
+**Verificação (375 e 1280, console limpo):** sem h-scroll, nenhum selo/badge/CTA vazando da caixa
+do card (medido elemento-contra-sua-caixa), linha de flags em 1 linha nos dois breakpoints;
+reordenação FLIP com CEP 01310-100 preservada (asserção: order=[ybera,shopee,tiktok], best=ybera)
+e **nenhum selo muda com o CEP** — a ordem segue explicada só pelo custo (RF-06 preservado).
+Contrastes calculados dos pares novos, todos PASS AA: blue-700/blue-100 **6,64:1** ·
+purple-700/purple-100 **5,92:1** · neutral-900/neutral-200 **14,1:1** · green-800/green-100 e
+amber-800/amber-100 já validados nos ciclos 1–2 (6,6 e 6,37:1).
+**2 problemas REAIS que a direção C materializou** (eram os riscos que a peça 11 previa; agora têm
+evidência visual, ambos no cenário CEP 69900-970):
+1. **Colisão de verde:** o card melhor exibe `Melhor oferta` (pílula verde) e `Disponível` (pílula
+   verde) em linhas adjacentes, mesma forma e quase mesma cor. O verde deixa de significar "este é
+   o recomendado" e passa a significar também "tem estoque" — o veredicto, que é o ativo mais
+   valioso da página, perde exclusividade. Ninguém tinha previsto ESTE par (a peça 11 mostrou o
+   card melhor com Ybera, que não tem tier de volume, então o empilhamento não apareceu).
+2. **Colisão de âmbar (prevista na peça 11, confirmada):** no card "não entrega neste CEP", a
+   pílula âmbar `Últimas unidades` fica imediatamente acima da faixa âmbar "A loja não entrega
+   neste CEP". Além da cor repetida, a leitura é contraditória: pressa pra comprar em cima do
+   aviso de que ali não dá pra comprar.
+Ambos vão ao designer com proposta de correção mínima (sem sair da direção C) antes do portão.
+
+[2026-08-13] [fase 02 · ciclo 3] **Peça 12 ACEITA pelo designer sem correções** — as duas colisões
+apontadas (verde `Melhor oferta` × `Disponível`; âmbar `Últimas unidades` × aviso "não entrega")
+ficam como estão, por decisão explícita ("pode manter assim"). Registrado como **decisão, não
+descuido**: as correções mínimas foram propostas (neutralizar o `Disponível`; suprimir o selo de
+estoque no card que não entrega) e recusadas. Consequência assumida: o verde deixa de ser
+exclusivo do veredicto do comparador, e o card "não entrega" carrega duas marcas âmbar com leitura
+contraditória. Se o portão (fase 03) reabrir esses pontos pela seção de craft/hierarquia, o
+veredicto continua sendo do designer — este registro existe para que a reabertura seja uma escolha
+informada e não uma redescoberta.
+**Estado do ciclo 3:** peças 11 (ficha de 3 direções) e 12 (selos aplicados na página) geradas e
+aceitas. Pendentes da quebra de tarefas: o card com Estoque `Indisponível` como estado de página
+(hoje só existe na ficha da peça 11 — deliberadamente NÃO implementei o caminho `stock:'out'` no
+`fillCard`, porque não há cenário que o alcance e isso viraria código morto, o mesmo defeito que
+`srcLabel` e `savings` já causaram neste projeto). **Nenhuma peça do ciclo 3 passou pelo portão
+ainda** — regra 2 do processo: nada é entrega, apresentação ou commit final antes da fase 03.
+
+[2026-08-13] [fase 01 · ciclo 3 · Δspec] Fechados os 4 itens de "a ajustar" que o brief v1.7
+levantou e que sobreviveram ao ciclo (os outros 2 — selos sem CEP e selo × ordenação — foram
+resolvidos e verificados na peça 12):
+- **Frete no TikTok (premissa 15):** mantido `Calculado no checkout`. Regra geral proposta ao
+  Produto: copy de campo vazio segue a CAUSA (`Não informado` = dado não veio · `Calculado no
+  checkout` = canal só revela adiante · `Informe o CEP` = falta entrada do cliente). Zero mudança
+  de código — a peça já estava certa, o brief é que precisa alinhar.
+- **Imagem (premissa 13):** hero mantém uma imagem, por ordem canônica Wake → Shopee → TikTok,
+  imutável na reordenação. Card não ganha imagem própria. Zero mudança de código — a peça já se
+  comporta assim; o que faltava era a REGRA escrita, que agora existe para o Produto referendar.
+- **H-UX-08 (premissa 12): RESPONDIDA** — não distinguir nota de API de nota sob override no card
+  público. Fechada.
+- **Origem da nota de avaliação:** pendência aberta desde 2026-07-16 **FECHADA** pelo brief v1.7
+  (API Wake/Shopee; fallback admin TikTok até HT-04). Mocks 4,6 / 4,3 / 4,8 seguem válidos como
+  dado de exemplo. **Deliberadamente NÃO criei campo `source:'api'|'admin'` no `CH`**: como a
+  premissa 12 decidiu não exibir origem, o campo nasceria sem ninguém que o renderize — seria o
+  terceiro caso de código morto deste projeto, depois de `srcLabel` e `savings`. A origem vive no
+  documento, não no protótipo.
+Nenhum dos quatro exigiu tocar em `index.html` — são contrato, não pixel. Δ pro Produto sai da
+premissa 13 (regra da imagem) e da 15 (regra da copy por causa).
+
+[2026-08-13] [fase 02 · ciclo 3] **Card de melhor oferta reformulado a partir de print de
+referência do designer** — moldura preta GROSSA (border 1px → 3px, cor `neutral-900` mantida a
+pedido, não a rosa do print) + faixa full-width no topo, DENTRO da moldura: fundo `neutral-900`,
+texto branco em caixa alta com `letter-spacing:.12em`, estrela `amber-600`. **Reverte duas decisões
+anteriores** e isso é intencional, não drift: (a) 72c2e96, que trouxe o selo de volta pra DENTRO
+do card alinhado ao logo; (b) a mudança de 2026-07-15, que levou o selo de rosa `club-600` →
+`green-800` → pílula clara `green-100/200`. O `.channel__badge` foi REMOVIDO (CSS e JS) em vez de
+ficar órfão — sem resíduo, confirmado por grep.
+Implementação: `.channel__ribbon` é o 1º filho do `<article>`, com margem negativa
+`calc(var(--sp-500) * -1)` compensando o padding do card, e `overflow:hidden` no `.channel--best`
+para a faixa herdar o raio interno sem cálculo de raio. A animação de migração do selo trocou de
+`badgePop` (scale) para `ribbonIn` (translateY + opacity): scale com overshoot 1.08 seria clipado
+pelo `overflow:hidden`. `prefers-reduced-motion` atualizado para o novo seletor.
+**Efeito colateral positivo:** some a **colisão de verde** registrada e aceita na entrada anterior
+— o veredicto agora é preto, então o verde volta a ser exclusivo do selo `Disponível`. O problema
+1 daquela lista morreu sem correção dedicada. A colisão de âmbar (problema 2) **continua**, como
+decidido.
+**Verificação (375 e 1280, console limpo):** faixa a 3px do topo e da esquerda do card (= exatamente
+a borda), largura interna cheia (337px no mobile, 628px no desktop), 20px de respiro até o conteúdo;
+sem h-scroll; nada vazando da caixa em nenhum card. Artefato de método registrado de novo: com a aba
+sem pintar, a animação congela no frame 0 e a medição acusa a faixa 38px acima do card — falso
+positivo já documentado no ciclo 2; medido de novo sem a classe de animação, geometria correta.
+
+[2026-08-13] [fase 02 · ciclo 3] **Selos de tier reposicionados a pedido do designer**: menores
+(12→11px, padding 6/10→4/8, ícone 13→11px) e no **canto superior direito do card**, não mais numa
+faixa própria abaixo da identidade. Implementação final: os selos vivem dentro do
+`.channel__toprow` (linha do nome), com `margin-left:auto`; `align-items` do toprow passou de
+`center` para `flex-start` para o topo dos selos casar com a 1ª linha do nome e com o topo do logo.
+No mobile (<1080px) os dois selos empilham em coluna (`flex-direction:column; align-items:flex-end`);
+no desktop ficam em linha.
+**Duas tentativas descartadas antes desta, com o motivo medido:** (1) selos como 3º filho do
+`.channel__head` (irmãos do bloco de identidade) — a 375px o flex quebrava os selos para uma linha
+própria e sobrava um vão morto à esquerda deles, porque `flex-basis:auto` do `.channel__id` reserva
+a largura do conteúdo antes de encolher; (2) forçar a mesma linha com `.channel__id{flex:1 1 0}` —
+os selos subiam para o topo, mas o subtítulo era espremido a 94px e quebrava em **3 linhas**
+(medido: `metaH` 54px na Shopee, 38px no TikTok). A solução adotada evita as duas porque o
+subtítulo fica numa linha própria, embaixo, com a largura cheia do card.
+**Verificação (375 e 1280, console limpo, com e sem CEP):** selos alinhados ao topo do cabeçalho
+(`topGapVsHead` = 0) e rentes à borda direita do conteúdo (`rightGap` = 0) nos 3 canais; nome e
+subtítulo em 1 linha cada; sem colisão entre selo e nome; sem h-scroll. Convivência verificada nos
+3 contextos: card melhor (faixa preta no topo + selos abaixo dela, à direita), card comum e card
+"não entrega neste CEP" (selos no canto, aviso âmbar abaixo — a colisão de âmbar segue, como
+decidido pelo designer).
+
+[2026-08-13] [fase 02 · ciclo 3] **Painel branco do card melhor com raio nos 4 cantos** (designer:
+o branco só tinha raio embaixo; no print de referência tem nos quatro). O card melhor deixou de ser
+"card branco com borda" e virou **moldura**: `.channel--best` tem fundo `neutral-900` e `padding:0`,
+e o conteúdo passou a morar num `.channel__panel` — branco, `border-radius:var(--r-200)`, recuado
+4px (`var(--sp-100)`) à esquerda, direita e base, de modo que o preto apareça em volta dele. Raio
+escolhido por geometria, não por gosto: raio externo 16 − borda 3 = 13 de raio interno, menos 4 de
+recuo = 9 ideal; `--r-200` (8px) é o token mais próximo, sem inventar valor.
+`.channel__panel` foi adicionado como wrapper no `fillCard` do card normal — no card comum ele é
+**transparente, sem padding e sem raio** (verificado: `rgba(0,0,0,0)` / `0px` / `0px`), só ganha
+corpo sob `.channel--best`. O caminho "não entrega neste CEP" não recebeu wrapper: `isBest` exclui
+`noship` por construção, então ali o painel nunca teria efeito e seria estrutura morta.
+**Verificação (375 e 1280, console limpo):** recuo de 4px medido nos três lados (esquerda, direita,
+base), faixa encostada no topo do painel (`ribbonToPanel` = 0), raio 8px aplicado, fundo do painel
+branco sobre moldura preta, sem h-scroll. Artefato de método reincidente: o FLIP congela no meio
+quando a aba não pinta — precisei finalizar as animações via `getAnimations().finish()` antes de
+screenshotar; não é bug da peça (já documentado no ciclo 2).
+
+[2026-08-13] [fase 02 · ciclo 3] **Moldura do card melhor afinada para 4px** (designer: "ficou
+grossa"). Diagnóstico: o preto aparente eram **7px** — 3px de borda + 4px de recuo do painel — e não
+os 3px que o CSS declarava; a espessura percebida não estava num valor só. Correção: borda
+3px→4px e recuo do painel 4px→0, deixando a moldura ser exatamente a borda. Medido: preto = 4px à
+esquerda, direita e base, nos dois breakpoints. **Topo mantido como estava**, conforme pedido — a
+faixa "MELHOR OFERTA" segue com a mesma altura (38px) e o mesmo tratamento. O painel branco conserva
+o raio nos 4 cantos (`--r-200`, 8px); encostado na moldura, os cantos de baixo mostram um vinco
+preto discreto contra o raio interno, e os de cima seguem soltos sob a faixa. Sem h-scroll a 375 e
+1280, console limpo.
+
+[2026-08-13] [fase 02 · ciclo 3] **Nota de saída externa adicionada abaixo da pilha** (designer, com
+print de referência): "Você será levado ao site do canal oficial para finalizar." + ícone de escudo,
+centralizada, `neutral-700` 14px, ícone `neutral-600` 18px. Reaproveita o path do escudo já usado na
+barra de garantias do rodapé — sem ícone novo, pendência #1 não cresce. Entra no reveal orquestrado
+(`d-5`), depois dos cards.
+Contexto: isto **restaura** a função da "nota de confiança no rodapé da pilha" que existia no ciclo 1
+("Sua compra é feita direto na loja escolhida…") e se perdeu na reformulação da peça elevada — com
+copy nova, mais direta sobre o redirecionamento (RF-007) e ancorada onde a decisão acontece, não só
+no rodapé da página.
+Espaçamento: `margin-top:var(--sp-500)` soma ao `gap` de 16px do `.compare` (flex column), dando
+**36px** entre o último card e a nota — exatamente o mesmo respiro que já existe entre o cabeçalho
+"Onde comprar" e a pilha (20 + 16). Ritmo preservado por coincidência verificada, não por sorte:
+medido nos dois pontos. Verificado a 375 e 1280: 1 linha, sem h-scroll, console limpo.
+
+[2026-08-13] [fase 02 · ciclo 3] **Hover dos cards replicado da peça irmã** indicada pelo designer
+(`hub2-eta.vercel.app/pecas/comparador-publico/07-comparador-premium.html`). Lido direto do CSS dela,
+não estimado por screenshot: `transform:translateY(-4px)` + `box-shadow:0 16px 40px rgba(30,30,31,.10)`,
+transição de **240ms** em `cubic-bezier(.23,1,.32,1)`, tudo dentro de `@media (hover:hover)`.
+Aplicado aqui com 3 adaptações conscientes:
+- **Curva:** usei a `--ease-out` que já existe no projeto (`cubic-bezier(.22,1,.36,1)`) em vez de
+  importar a da referência (`.23,1,.32,1`) — diferença imperceptível, e evita um token duplicado.
+- **Cor da sombra do card melhor:** a referência tinta de rosa (`rgba(237,26,87,…)`) porque a moldura
+  dela é `club-600`; a nossa moldura é preta, então a sombra tinge de `rgba(30,30,31,…)`. Mesma
+  estrutura (`0 16px 40px -12px`, alfa .30), coerente com a nossa moldura.
+- **`@media (hover:hover)` adotado** (não existia nas nossas peças): evita hover grudado em touch,
+  onde o dedo não tem como "sair de cima". Sob `prefers-reduced-motion` o lift é desligado e só a
+  sombra responde.
+- **Borda deixou de mudar no hover** (era `neutral-400`), acompanhando a referência. A regra
+  `.channel--best:hover{border-color}` existia só para neutralizar esse efeito → **removida**, senão
+  ficaria CSS morto.
+**Risco do FLIP resolvido (era o alerta que eu tinha levantado):** o FLIP escreve `transition` e
+`transform` INLINE, e a inline vencia o CSS — depois de cada reordenação o hover herdava
+`transform .42s cubic-bezier(.2,.7,.2,1)` (lift lento, e sombra sem transição nenhuma, porque a
+inline não lista `box-shadow`). Correção: `flipCleanup`, um timeout de 460ms agendado no fim do FLIP
+que **remove a transition inline**, devolvendo o controle ao CSS; cancelado no topo de `applyState`
+para não interferir em toggle rápido de CEP.
+**Verificação (console limpo):** em repouso, hover no card comum = `translateY(-4px)` +
+`rgba(30,30,31,.1) 0 16px 40px` (idêntico à referência). Após aplicar CEP e a pilha reordenar
+(ordem [ybera,shopee,tiktok], best=ybera), `transition` e `transform` inline voltaram a vazio,
+`transitionProperty` efetiva = `transform, box-shadow`, e o hover no card melhor deu
+`translateY(-4px)` + `rgba(30,30,31,.3) 0 16px 40px -12px`. Ou seja: hover funciona **antes e depois**
+da reordenação, que era exatamente o risco.
+**Δtokens (candidato, para a fase 04):** a sombra de hover `0 16px 40px rgba(...)` **não existe no
+`tokens.json`** — o DS só tem `$shadow-sm` (`0 0 8px rgba(5,5,5,.10)`). Isto ressuscita o
+`--shadow-lift` que o designer REJEITOU no portão do ciclo 1, agora com procedência diferente: não é
+valor meu, é o valor de uma peça Ybera já publicada. Vai como Δtokens/pendência para o guardião do DS
+decidir (elevação de hover é padrão recorrente, merece token), NÃO como invenção silenciosa.
+
+[2026-08-13] [fase 02 · ciclo 3] **Tilt 3D + brilho na foto do produto**, portado da mesma peça irmã
+(`07-comparador-premium`), que por sua vez porta o comet-card da Aceternity. Lido do CSS/JS de lá,
+não recriado de olho: `perspective:1200px` no wrapper, `rotateX(--tiltx) rotateY(--tilty)` na foto
+com `transition:transform .15s ease-out`, amplitude `maxDeg 12` (±24° de faixa total), e uma camada
+de brilho `radial-gradient(circle at --gx --gy, rgba(255,255,255,.55), transparent 60%)` em
+`mix-blend-mode:overlay`, que aparece no hover e segue o cursor.
+**Armadilha estrutural resolvida na entrada:** o `.hero__media` carregava a classe `reveal`, que é
+uma animação com `animation-fill-mode:forwards` sobre `transform`. Animação vence declaração normal
+no cascade, então o `forwards` do reveal (transform:none) **anularia o tilt para sempre** depois do
+page-load. Correção: criado o wrapper `.hero__figure`, que ficou com a perspectiva E com o `reveal`;
+o tilt vive na foto. As duas camadas de transform deixam de disputar.
+Ordem no DOM: a camada de brilho entra **entre a `<img>` e o pill "Indicação de Camila"** — assim
+glaza a foto sem lavar o pill. `pointer-events:none` garante que não rouba o clique do link do
+Instagram.
+Mantido o zoom lento que já existia (`img:hover{scale(1.04)}`, 800ms) — não estava na referência,
+mas é detalhe já aceito em ciclo anterior e compõe com o tilt em vez de brigar (elementos
+diferentes). **Sinalizo para o veredicto:** se ficar movimento demais junto, o zoom é o primeiro a
+sair, não o tilt.
+**Verificação (console limpo):** desktop com ponteiro no canto superior esquerdo da foto →
+`--tiltx:-7.51deg`, `--tilty:7.23deg`, `--gx:19.9% --gy:18.7%`, `transform` resolvido em `matrix3d`
+real e perspectiva de 1200px no wrapper; ao sair do elemento, tilt volta a `0deg`/matriz identidade e
+o brilho a `opacity:0`. Em viewport touch (375px, `hover:none`, 5 pontos de toque): `transform:none`
+na foto e `display:none` no brilho — os dois guardas da referência funcionando, sem tilt travado no
+mobile. Sem h-scroll, foto em 343px.
+
+[2026-08-13] [fase 02 · ciclo 3] **Respiro cabeçalho → 1º card reduzido de 36px para 20px**
+(designer: distância grande demais). Causa: o espaçamento não estava num valor só — `margin-top`
+de 20px na `.pilha` somando ao `gap` de 16px do `.compare` (flex column). Correção no `margin-top`
+(20px → 4px), preservando o `gap` do container. Hierarquia de espaçamento resultante, medida:
+cabeçalho→1º card **20px** · entre cards **16px** · último card→nota de saída **36px**. Ou seja, o
+cabeçalho fica colado no que ele rotula (só 4px mais que o intervalo entre cards) e a nota de saída
+mantém o respiro maior, porque encerra o bloco em vez de pertencer a ele.
+Nota de método: as medições brutas acusaram 8px e 48px porque o `reveal` estava congelado no frame 0
+(`translateY(12px)`) — a aba sem pintar não avança a animação. Remedido após `getAnimations().finish()`
+nos elementos com `reveal`. Terceira vez que este artefato aparece no ciclo; vale como aviso pra quem
+medir espaçamento nesta peça: finalize as animações antes de acreditar no número.
+
+[2026-08-13] [fase 02 · ciclo 3] **Raio do botão "Trocar" alinhado ao padrão de CTA** (designer):
+`.cep__change` usava `--r-full` (pílula) — era o único botão redondo da peça, enquanto "Ver frete"
+(`.cep__apply`) e "Comprar na…" (`.channel__cta`) usam `--r-300`. Trocado para `--r-300`. Verificado
+no render: `borderRadius` do "Trocar" = 12px = o do CTA, e a altura de **44px** foi preservada (era o
+bloqueio 4.2 corrigido no portão do ciclo 2 — alvo de toque; não regrediu).
+Varredura de consistência no resto da peça: os `--r-full` restantes são todos elementos onde a pílula
+é correta (selos de tier, pill de indicação, avatar, ponto de frescor, spinner, dots do overlay) —
+nenhum outro botão fora do padrão.
+**Achado colateral, fora do escopo desta edição:** o CSS de `.devbar` (e a linha
+`document.querySelectorAll('.devbar button')` em `applyState`) continuam na peça, mas **não existe
+markup de devbar** — ela foi removida em 2026-07-15. É CSS + JS morto, quarto caso do padrão
+`srcLabel`/`savings`. Não removi porque não é o que o designer pediu aqui; fica registrado como
+limpeza candidata para o portão.
+
+[2026-08-13] [fase 02 · ciclo 3] **Selo Reclame Aqui adicionado ao rodapé — como PLACEHOLDER**,
+entre a barra de garantias e o divisor. Marca "RA" em `green-800`, "Reclame Aqui" + "Reputação boa"
+com ponto verde, caixa de borda `alfa-10-light` e raio `--r-300` (mesmo raio dos CTAs). Tudo em
+tokens KZ, sem cor nova.
+**Não reproduzi o selo oficial, de propósito, e isso não é preciosismo:** (1) o selo do RA é ativo
+licenciado, servido pelo próprio Reclame Aqui via embed com link de verificação — uma cópia estática
+é credencial fabricada; (2) reputação é dado DINÂMICO, muda com o tratamento das reclamações, então
+um selo chapado no HTML começa correto e vira mentira sozinho; (3) exibir "Reputação boa" pressupõe
+que a Ybera tenha esse status hoje, o que Design não tem como afirmar. O elemento entrega a **posição
+e o peso visual** do selo no layout, que é o que a peça precisa validar; a troca pelo selo real é
+tarefa de produção. Registrado como **pendência #5** em `pendencias-tokens.md` — com dono em
+Produto + Marketing/Jurídico, não no guardião do DS, porque o bloqueio é de marca de terceiro e não
+de token. `aria-label` declara "selo provisório" e o `href` é `#` (não aponta para uma página de
+verificação que não existe).
+**Verificação:** 375 e 1280, sem h-scroll, selo contido no `.footer__inner` (183×62px no mobile),
+ordem do rodapé: garantias → selo → divisor → logo → privacidade → links → copyright.
+**Ressalva de método:** os screenshots do painel pararam de repintar no fim desta rodada (devolvem
+frame antigo em qualquer scroll), então o selo foi verificado por **medição de DOM, não visualmente**.
+Vale um olhar do designer antes do portão.
+
+[2026-08-13] [fase 02 · ciclo 3] **Barra flutuante do produto (só mobile)** — pedido do designer a
+partir da peça irmã `07-comparador-premium`. Thumb 36px + nome do produto, `position:fixed` no topo,
+entra quando o hero sai da tela via `IntersectionObserver` (não listener de scroll — não roda a cada
+pixel). `aria-hidden` porque duplica o `<h1>`.
+**Achado que muda a decisão, encontrado no CSS da própria referência:** lá a barra é **desligada no
+mobile de propósito**, com o motivo escrito no arquivo — `@media(max-width:600px){.float-produto{
+display:none}}` e o comentário "o chip flutuante vira só um círculo sem rótulo e sobrepõe os preços
+dos cards" (abaixo de 480px eles já escondiam o rótulo, sobrando um círculo mudo). Ou seja: o pedido
+é justamente para o breakpoint onde a referência desistiu. Entreguei mesmo assim, resolvendo as duas
+causas em vez de repetir o formato:
+- **Pílula ocupa a largura entre as gutters** (`left` e `right` = `sp-400`) em vez de ancorar em
+  `top/right`. Não paira sobre UMA coluna do card, e o rótulo nunca precisa sumir (era a causa do
+  "círculo mudo").
+- **Fundo sólido** (`neutral-50`) em vez de `rgba(255,255,255,.92)` + blur: na referência ela pairava
+  sobre fundo liso; aqui passa por cima dos cards, e o translúcido deixava o preço de trás
+  fantasmando através dela — visto no render e corrigido.
+- **Não existe no desktop** (`display:none` ≥1080px): a coluna esquerda já é sticky e mantém o produto
+  visível o tempo todo; a barra seria redundância sobre redundância.
+Sobra o overlap inerente a qualquer overlay fixo (o conteúdo passa por baixo) — agora limpo, sem
+transparência. Se ainda incomodar, o caminho é a barra empurrar o conteúdo em vez de sobrepor
+(`padding-top` no topo do documento quando ela aparece), o que custa um reflow no scroll.
+**Verificado:** 375px — barra oculta com o hero na tela, aparece ao sair (`show` aplicado pelo
+observer), fundo `rgb(255,255,255)` sólido, sem `backdrop-filter`, sem h-scroll. 1280px —
+`display:none`. Console limpo.
+
+[2026-08-13] [fase 02 · ciclo 3] **Seção "Como funciona" (3 passos) adicionada antes do rodapé**, a
+partir de print do designer — a peça irmã do link NÃO tem essa seção (confirmado por busca no DOM
+dela), então foi construída do zero com os tokens KZ, não portada. Título Syne 28px, subtítulo
+`neutral-700`, três passos com círculo `neutral-900` numerado (36px) + título + descrição, ligados
+por um traço `neutral-300` de 1px.
+Detalhe de implementação que vale registrar: o traço vai de centro a centro dos círculos via
+`.howto__step + .howto__step::before{left:-50%; right:50%}`, o que **só fecha exato com `gap:0`** no
+grid — por isso o respiro entre colunas fica no `padding` do item, não no gap. Os círculos sobem com
+`z-index:1` para o traço passar por trás.
+Mobile: coluna única, `gap:sp-800`, **sem traço** (o conector horizontal não faz sentido empilhado).
+**Verificado:** 1280px — 3 colunas de 376px, os três círculos com o centro exatamente na mesma altura
+(y=290) e o traço a 18px do topo do passo, que é o centro do círculo de 36px; 375px — empilhado, sem
+h-scroll, conector ausente. Console limpo. Semântica: `<section aria-labelledby>` + `<ol>` (é uma
+sequência ordenada, não uma lista de features).
+
+[2026-08-13] [fase 02 · ciclo 3] **Selo do Reclame Aqui trocado do placeholder para a ARTE OFICIAL**
+(designer: "ficou muito diferente do oficial… só pra vermos a aplicação real"). Origem: manual do
+próprio RA (`manual.reclameaqui.com.br/ra-verificada`), variante escura — escolhida porque o rodapé
+é `neutral-900` e as variantes clara/verde-clara sumiriam no fundo. Asset em
+`assets/selo-reclame-aqui.png` (210×169), renderizando a 80×64.
+Como o asset foi obtido, para o registro: o PNG limpo e avulso do selo **só é liberado para empresas
+já verificadas**; o que existe público é um screenshot da página do manual mostrando as 3 variantes.
+Recortei a variante escura desse screenshot com bounding box detectado por varredura de pixel (não a
+olho): recorte exato em (1643,95)–(1853,264). **É raster de screenshot** — bom para avaliar
+aplicação, ruim para produção.
+**Duas ressalvas que mudam o que a peça está afirmando:**
+1. **O selo oficial não fala de reputação.** "Verificada por ReclameAQUI" atesta identidade e
+   existência da empresa. Reputação (Ótimo/Bom/Regular) é outro artefato, com o *RA1000* como selo
+   próprio. Hoje a peça mostra a arte de verificação **ao lado** do texto "Reputação boa", que não é
+   arte oficial — são duas coisas diferentes coladas. Decisão de qual comunicar é do designer/Produto.
+2. **Em produção não é imagem:** o RA entrega um embed com script de tracking
+   (`trk.reclameaqui.com.br/assets/trk.min.js?trackIdRA=…`) que renderiza o selo e o link de
+   verificação — e exige que a Ybera esteja de fato verificada.
+Pendência #5 de `pendencias-tokens.md` atualizada com os três pontos. **Verificado:** imagem carrega
+(`naturalWidth` 210), render 80×64, `alt` "Verificada por Reclame AQUI", sem h-scroll a 1280.
+Screenshots do painel seguem sem repintar — conferência visual final é do designer.
+
+[2026-08-13] [fase 02 · ciclo 3] **Selo do RA corrigido: era o artefato errado.** O designer apontou
+que o certo é o selo de **REPUTAÇÃO** ("Ótimo", carinha verde), não o *RA Verificada* (escudo azul)
+que eu tinha aplicado — e indicou o rodapé da KaBuM como referência viva. Erro meu de leitura na
+rodada anterior: tratei "selo com reputação boa" como se houvesse um selo só.
+Em vez de imitar de olho pelo print, inspecionei o widget real no rodapé da KaBuM e copiei a
+especificação: caixa **137×48**, borda `1px #A4C929`, raio 4px, carinha **38px** à esquerda, e à
+direita "ÓTIMO" (14px/700, `#4B5963`, uppercase) empilhado sobre o wordmark **80×12,75**. Os dois
+SVGs são os **arquivos oficiais do RA** (`s3.amazonaws.com/raichu-beta/selos/assets/images/`),
+baixados para `assets/ra-otimo.svg` e `assets/ra-logo.svg` — a peça fica self-contained, sem
+hotlink. Asset da tentativa anterior (`selo-reclame-aqui.png`) **removido** do repositório.
+Adaptação necessária: o selo tem texto `#4B5963` e wordmark escuro, feito para fundo claro — sumiria
+no rodapé `neutral-900`. Por isso ele mora sobre uma **placa branca** (`neutral-50`, raio `--r-200`),
+que é como marcas aplicam esse selo em rodapé escuro. Hover com o mesmo lift de 2px/sombra da peça.
+**Verificado no render:** os dois SVGs carregam, caixa 137×48, borda `rgb(164,201,41)`, raio 4px,
+carinha 38×38, wordmark 80×13, rótulo "Ótimo" em `rgb(75,89,99)` 14px — bate com o widget da KaBuM
+medida por medida. Sem h-scroll.
+**Segue valendo (pendência #5):** "Ótimo" aqui é dado de exemplo — reputação real muda com o tempo,
+e em produção isto deve ser o embed que o RA serve e mantém atualizado, com link para a página da
+empresa. Reprodução estática não se atualiza sozinha.
+
+[2026-08-13] [fase 02 · ciclo 3] **Selo do RA mudou de nível: "Ótimo" → "Boa"** (designer). Troquei
+também a ARTE, não só o texto: a carinha do widget é vinculada ao nível, então baixei a oficial do
+nível correspondente (`bom.svg` → `assets/ra-bom.svg`) e removi `ra-otimo.svg`, que ficou sem uso.
+`aria-label` atualizado. Trocar só o rótulo deixaria a arte de "Ótimo" contradizendo o texto.
+**Divergência de nomenclatura registrada:** a escala oficial do RA é `otimo` · **`bom`** · `regular`
+· `ruim` · `nao-recomendada` — confirmado testando os arquivos no S3 deles (`boa.svg` responde 403,
+`bom.svg` responde 200). Ou seja, o rótulo oficial deste nível é **"BOM"**, não "Boa". Mantive "Boa"
+porque foi o pedido explícito do designer, mas fica o registro: se a intenção é fidelidade ao selo
+oficial, é uma palavra a trocar. Verificado no render: `ra-bom.svg` carrega, rótulo "Boa", caixa
+137×48 preservada, sem h-scroll.
+
+[2026-08-13] [fase 02 · ciclo 3] Seção "Como funciona" ganhou **fundo branco** (`neutral-50`),
+full-bleed (designer). Efeito de ritmo: a página passa a ter três faixas distintas — comparação
+sobre o gradiente neutro, "como funciona" em branco, rodapé em `neutral-900` — em vez de a seção
+flutuar sobre o mesmo fundo da comparação. Verificado: `rgb(255,255,255)`, largura = viewport
+(1280), sem h-scroll.
+
+[2026-08-13] [fase 02 · ciclo 3] **Rodapé reorganizado no desktop** (print do designer): de coluna
+única centrada para **grid de 2 colunas**, com `grid-template-areas` — `trust` e `div` ocupando a
+largura toda, `brand` (logo sobre o texto, alinhados à esquerda) × `links` (à direita, em linha
+única `nowrap`), e embaixo `copy` × **selo do RA no canto inferior direito**. O selo saiu de perto
+do topo do rodapé e virou o último elemento, encostado na direita. Markup: logo e texto de
+privacidade agrupados num `.footer__brand` (o grid precisa de UM item por área). **Mobile
+intacto:** o grid vive só dentro do `@media (min-width:1080px)`; abaixo disso o rodapé continua
+flex column centrado — única mudança lá é a posição do selo, que agora fecha a pilha em vez de
+aparecer logo após a barra de garantias.
+**Verificado — desktop 1280:** `display:grid`, marca a 32px da borda esquerda, logo acima do texto,
+links a 32px da direita, selo a 32px da direita, abaixo dos links, na mesma linha do copyright e
+sendo o elemento mais baixo do rodapé. **Mobile 375:** `display:flex`, ordem trust → divisor →
+marca → links → copyright → selo, tudo centrado. Sem h-scroll nos dois. Console limpo.
+**NÃO adotei a copy do print** — e isso é deliberado: o texto mostrado ("O Hub Inteligente é um
+comparador independente…") nomeia o **HUB**, e existe decisão registrada desde o ciclo 1 de que a
+palavra "HUB" não aparece em lugar nenhum da página (H-UX-05: o cliente deve perceber a vitrine da
+influenciadora, não um agregador). Mantive o texto de privacidade atual na mesma posição. Vale
+registrar, porém, que a frase do print é justamente o **disclaimer de variação de preço** que o
+brief v1.7 pede na Tela 7 (RNF-Transparência) e que a peça não tem — apontado na leitura do brief e
+ainda em aberto. Cabe adotá-la com redação sem "Hub" (ex.: "Preços e condições pertencem a cada
+canal e podem mudar a qualquer momento"), o que fecharia a lacuna sem violar H-UX-05. Decisão do
+designer.
+
+[2026-08-13] [fase 02 · ciclo 3] Quatro ajustes de rodapé/fundo pedidos em sequência, todos só no
+desktop exceto o último:
+- **Garantias acompanhando a grid:** o diagnóstico não era o óbvio — as CAIXAS dos 3 itens já
+  estavam alinhadas (offset 0 nas duas pontas). O que destoava era o CONTEÚDO: com `flex:1 1 240px`
+  cada item virava uma coluna de 349px com o texto encostado à esquerda, então o 3º texto parava
+  antes da borda. Fix: `flex:0 1 auto` + `justify-content:space-between` + `nowrap`. Medido: 1º a
+  0px da esquerda, 3º a 0px da direita, larguras agora 250/301/312 (tamanho do conteúdo).
+- **48px do divisor ao conteúdo:** resolvido com `row-gap:var(--sp-1200)` no grid e `margin:0` no
+  divisor — **num valor só**, sem compor margem + gap (a armadilha que já apareceu duas vezes neste
+  ciclo: 36px do cabeçalho e 7px da moldura eram somas escondidas). Efeito colateral coerente:
+  garantias→divisor também virou 48px, dando ritmo uniforme ao rodapé.
+- **Links alinhados ao topo do TEXTO, não do logo:** desciam junto com o topo do bloco de marca.
+  Em vez de cravar 40px, criei `--footer-logo-h:24px` como fonte única — o logo usa a variável e os
+  links descem `calc(var(--footer-logo-h) + var(--sp-400))`. Se o logo mudar de altura, o
+  alinhamento acompanha sozinho. Medido: `linksTop - textoTop = 0`; antes era 0 contra o logo, agora
+  são 40px abaixo dele. `margin-top` fica dentro do media query — no mobile é 0, empilhado intacto.
+- **Fundo da página clareado:** o gradiente ia de `neutral-100` a `neutral-200` já em 62% da altura,
+  escurecendo o miolo. Passou a `neutral-50` → `neutral-200` em 100%: começa branco e só encosta no
+  cinza na base. Mesmas rampas do DS, nenhuma cor nova.
+**Verificado 1280/1080/1079/375:** no limiar 1080 os 3 itens cabem numa linha sem clipe e sem
+h-scroll; a 1079 o rodapé volta ao empilhado centrado (`flex`, `flex:1 1 240px`, `justify:center`),
+com a margem dos links zerada. Console limpo.
+
+[2026-08-13] [fase 02 · ciclo 3] **Fundo clareado de novo** — o designer disse que a 1ª tentativa
+"não mudou nada", e ele estava certo na percepção: a mudança existia no CSS, mas era pequena demais
+no miolo da tela. Diagnóstico com número, não com impressão: pintei os dois gradientes em canvas e
+amostrei a cor por altura de viewport. Original × 1ª tentativa × versão final, no meio da tela:
+`#EFEEF2` → (1ª tentativa, ~`#F6F5F8`) → **`#FBFAFD`**. Amostragem da versão final:
+15% `#FEFDFE` · 35% `#FCFBFD` · 50% `#FBFAFD` · 70% `#F5F4F8` · 90% `#EFEEF2` — contra o original,
+que já chapava em `#ECEBF0` a partir de 62% (70% e 90% ambos `#ECEBF0`).
+Solução: parada intermediária em `neutral-100` aos 55%, com `neutral-200` só encostando na base.
+Mantém o miolo quase branco **sem** matar a profundidade sob os cards — que é o motivo de eu não ter
+ido para branco chapado: os cards são `neutral-50` (#FFFFFF) e perderiam a separação do fundo.
+Só rampas do DS, nenhuma cor nova. `background-attachment:fixed` inalterado (o gradiente é da
+viewport, não do documento — por isso a percepção muda pouco ao rolar).
+
+[2026-08-13] [fase 02 · ciclo 3] **Bloqueio de acessibilidade corrigido — pego pelo designer a olho
+nu, e confirmado por cálculo.** Os valores em `.pending` ("Informe o CEP", "Não informado",
+"Calculado no checkout") usavam `neutral-500` #B0AFB2 sobre o branco do card = **2,18:1**, contra o
+mínimo de 4,5:1 do WCAG AA. Trocado para `neutral-600` = **5,30:1** (par já validado no portão do
+ciclo 1). Isso fecha o achado que eu tinha registrado como candidato a bloqueio na entrada da peça
+12 — herdado da mudança de 2026-07-16, quando Frete/Prazo passaram a ficar em branco sem CEP e a cor
+nunca foi medida.
+**Varredura do mesmo defeito no resto da peça** (não me limitei ao elemento apontado): `.hero__sku`
+("SKU 150264") tinha o mesmo `neutral-500` sobre o fundo da página = **2,15:1** — também corrigido
+para `neutral-600` (5,22:1). O `.site-footer__copy` usa `neutral-500` mas sobre o rodapé
+`neutral-900`: **7,63:1**, passa, mantido.
+**Fica em aberto, mesma família, NÃO corrigido:** a borda do `.cep__input` usa `neutral-500` sobre
+branco = 2,18:1, contra o mínimo de **3:1** exigido para contorno de componente de UI (WCAG 1.4.11
+Non-text Contrast). É borda, não texto — muda o peso visual do campo, então não mexi sem o designer
+ver. Candidato a bloqueio no portão.
+Medido no render após a correção: `pending` 5,30:1 e `sku` 5,22:1, ambos PASS AA.
+
+[2026-08-13] [fase 05→06 · ciclo 3] Crítica de screenshot (senior product designer) sobre a seção
+"Como funciona" + rodapé no desktop. Achados medidos, não estimados. **Três aplicados pelo designer:**
+- **Passo 3 — texto reescrito por DUPLICAÇÃO, não por estilo.** A descrição era "Você vai direto ao
+  site oficial para finalizar a compra", quase verbatim da nota da pilha ("Você será levado ao site
+  do canal oficial para finalizar") a ~600px de distância: o passo 3, que fecha a sequência, virava
+  eco. Reescrito mudando o ÂNGULO, não só as palavras — "A compra é fechada na loja, sob as regras e
+  a garantia dela" responde quem é o responsável depois do clique, informação que **nenhum outro
+  elemento da página dava** (a nota diz para onde você vai; a barra de garantias fala de pagamento e
+  de custo). Sobreposição de palavras entre os dois textos verificada por script: **zero**.
+- **Título do passo 3 → "Compre".** Era "Compre com segurança", 3 palavras contra 1 dos outros dois.
+  A sequência agora é **Compare → Escolha → Compre**: mesma classe gramatical, mesmo peso, e o
+  paralelismo faz o trio ler como uma sequência em vez de três blocos.
+- **Placa do selo do RA: padding `sp-300/sp-400` → `sp-200`.** A placa branca 169×72 era o elemento
+  mais claro do rodapé e ficava na posição de menor prioridade, puxando o olho antes da marca.
+  Agora 153×64, o selo continua legível e para de competir.
+**Não aplicados nesta rodada** (registrados para o portão): (a) vazio de 102px entre o texto de
+privacidade e o copyright — `align-self:center` no copyright resolve; (b) conector dos passos em
+`neutral-300` sobre branco ≈1,3:1, quase invisível, sendo ele que carrega a metáfora de sequência —
+`neutral-400` resolve sem virar traço pesado.
+Verificado após as três: sem h-scroll, console limpo.
+
+[2026-08-13] [fase 02 · ciclo 3] **BUG REAL corrigido: 2 selos quebravam o card no mobile.** O
+designer mandou print: com duas tags no canto superior direito, elas empilhavam e rasgavam o bloco
+de identidade — nome no topo, subtítulo empurrado ~28px pra baixo, escadinha. **A causa é física, e
+foi medida antes de mexer:** a 375px sobram ~303px úteis no card; logo (44) + subtítulo com nota
+(~180) + coluna de tags (~118) = **342px**. Não cabe lado a lado em nenhuma configuração — reduzir
+fonte/padding das tags não fecha a conta (sobra 247px para 180+118).
+**Correção por breakpoint, em vez de forçar um layout só:**
+- **Mobile:** as tags voltam a ser a 3ª linha do bloco de identidade (abaixo de nome e subtítulo),
+  alinhadas à ESQUERDA com o subtítulo. Isso resolve o vão morto que motivou a mudança anterior —
+  o problema lá não era a linha própria, era ela estar alinhada à direita.
+- **Desktop:** as tags ficam no canto superior direito como o designer pediu, agora via
+  `position:absolute` no `.channel__id` (que ganhou `position:relative`). Absolutas saem do fluxo,
+  então não empurram nem espremem nada: nome e subtítulo continuam colados. Só é seguro porque no
+  desktop o card tem ~628px, folga de sobra.
+**Verificado 375:** nome→subtítulo 2px (era 28), tags numa linha só, abaixo do subtítulo, alinhadas
+à esquerda com ele, nada vazando do card, nos 3 canais (1 e 2 tags). **Verificado 1280:** tags a 0px
+do topo e 0px da direita do bloco de identidade, sem colisão com nome nem subtítulo, numa linha.
+Sem h-scroll nos dois. Console limpo.
+
+[2026-08-13] [fase 02 · ciclo 3] **Barra flutuante do produto passou a ter a largura do conteúdo**
+(designer: ocupava a página toda). Removido o `right`, o `position:fixed` encolhe para o conteúdo;
+`max-width:calc(100vw - var(--sp-800))` impede vazamento com nome longo, e o `text-overflow:ellipsis`
+do rótulo assume a partir daí. Medido a 375px: **272px** de largura (era 343), ancorada a 16px da
+esquerda, 87px de folga à direita, sem clipe de texto. Nota: isso reduz a área coberta, mas não
+elimina a sobreposição — overlay fixo sempre passa por cima do conteúdo que rola sob ele.
+
+[2026-08-13] [fase 02 · ciclo 3] **SKU tirado do fluxo de leitura do topo** (designer questionou a
+relevância dele ali). Concordo com a leitura, e a spec sustenta: o SKU interno é **guarda-corpo de
+sistema** — "se um canal não retornar o SKU, o canal é ocultado" (Decisões anteriores) — não é
+informação de compra para um cliente anônimo. Ele estava ocupando uma linha inteira entre o título e
+a foto, na região mais cara da página.
+Movido para um **chip discreto no canto superior direito da foto**: custo zero de altura (sai do
+fluxo), continua acessível a quem procura, e para de competir com o título. Chip claro
+(`rgba(255,255,255,.9)` + blur) em vez de texto direto sobre a imagem — sobre foto o contraste seria
+imprevisível; com o chip é `neutral-700` sobre branco = **8,04:1**. Herda o tilt junto com a foto,
+como o pill de indicação.
+**Alternativa que fica registrada:** remover do card público de vez também se defende, já que o
+papel do SKU é de backend. Mantive porque o designer pediu para reposicionar, não para remover.
+Verificado 375 e 1280: chip dentro da foto (13px do topo e da direita nos dois), sem h-scroll.
+
+[2026-08-13] [fase 02 · ciclo 3] **Ícone da nota de saída desalinhado no mobile — corrigido.** Causa:
+o escudo era irmão flex do texto com `align-items:center`, então quando a frase quebrava em 2 linhas
+a 375px ele ficava centralizado contra o bloco inteiro — boiando entre as duas linhas em vez de
+acompanhar a leitura. Fix: o ícone entrou no FLUXO do texto (`display:inline-block` +
+`vertical-align:-3px`), o `.stack-note` virou `display:block; text-align:center`. Assim ele ancora na
+1ª linha e as demais fluem por baixo, como qualquer ícone dentro de frase. Tamanho 18→16px para casar
+com a altura da linha de 20px. Medido: centro do ícone a **0,5px** do centro da 1ª linha (era
+metade da altura do bloco de 2 linhas). Sem h-scroll.
+
+[2026-08-13] [fase 02 · ciclo 3] Ordem dos campos do card trocada (designer): **Preço do produto →
+Prazo de entrega → Frete** (Frete e Prazo invertidos). Consequência favorável, registrada: o Frete
+passa a ficar encostado no divisor, imediatamente acima do Total — e é ele a parcela que faz o total
+variar com o CEP. No mobile (grade 2 col) a 1ª linha vira `Preço | Prazo` e o Frete ocupa a largura
+cheia da 2ª linha, ganhando peso. Verificado nos 3 canais por leitura de DOM; sem h-scroll.
+
+[2026-08-13] [fase 02 · ciclo 3] **"Calculado no checkout" parou de quebrar em 2 linhas.** Causa
+direta da troca de ordem da entrada anterior: são 3 campos numa grade de 2 colunas no mobile, então
+o último (agora o Frete) ficava sozinho na 2ª linha com metade da largura. Fix: no mobile o último
+campo ocupa a linha inteira (`grid-column:1/-1`), escopado em `@media (max-width:1079px)` para não
+tocar o desktop, onde a grade é de 3 colunas e cada campo tem a sua. Não mexi na copy — "Calculado
+no checkout" é a redação decidida na premissa 15 (copy segue a causa), então o ajuste tinha que ser
+de layout. Medido a 375px: célula do Frete 301px (era ~145) e valor em **1 linha** nos 3 canais.
+A 1280px: 3 colunas de 189px, `grid-column:auto`, tudo na mesma linha, sem regressão.

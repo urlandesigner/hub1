@@ -16,6 +16,9 @@
     --club-500:#ED1A57; --club-600:#C70F43; --club-700:#980B38;
     --green-100:#E6F6E5; --green-200:#D1EECE; --green-600:#50AE47; --green-700:#33922A; --green-800:#2B6A25;
     --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-600:#D97706; --amber-700:#B45309; --amber-800:#92400E;
+    /* ciclo 3 — rampas do DS que entram na página pela 1ª vez (selos de tier, direção C) */
+    --blue-100:#E0E9FA; --blue-200:#C6D6F6; --blue-700:#1F4BA3;
+    --purple-100:#F3E8FF; --purple-200:#E9D5FF; --purple-700:#7E22CE;
     --red-600:#CF3030; --red-700:#A31F1F;
     --alfa-10-light:rgba(255,255,255,.1);
     --sp-100:4px; --sp-200:8px; --sp-300:12px; --sp-400:16px;
@@ -25,6 +28,7 @@
     --font-body:'Nunito Sans',system-ui,sans-serif;
     --shadow-sm:0 0 8px rgba(5,5,5,.10);
     --ease-out:cubic-bezier(.22,1,.36,1);
+    --footer-logo-h:24px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
@@ -33,7 +37,10 @@
     /* atmosfera: brilho Club (club-50) fadeando do topo sobre gradiente neutral (tokens) */
     background:
       radial-gradient(130% 90% at 50% -12%, var(--club-50) 0%, rgba(254,240,244,0) 46%),
-      linear-gradient(180deg, var(--neutral-100) 0%, var(--neutral-200) 62%);
+      /* clareado a pedido do designer. Parada intermediária em neutral-100 aos 55% mantém o miolo
+         quase branco; neutral-200 vira só um encosto na base, preservando alguma profundidade sob
+         os cards. Antes o cinza chegava a 62% e ficava chapado dali pra baixo. */
+      linear-gradient(180deg, var(--neutral-50) 0%, var(--neutral-100) 55%, var(--neutral-200) 100%);
     background-attachment:fixed;
     min-height:100vh;
   }
@@ -55,10 +62,49 @@
   /* topbar + hero */
   .site-header{width:100%; display:flex; align-items:center; justify-content:center; padding:var(--sp-400); background:var(--neutral-50); border-bottom:1px solid var(--neutral-200)}
   .site-header img{height:30px; width:auto}
+  /* ===== barra flutuante do produto — SÓ MOBILE =====
+     Portada da peça irmã 07-comparador-premium, com UMA mudança estrutural: lá é uma pílula
+     ancorada em `top/right`, e lá mesmo ela foi DESLIGADA no mobile com o motivo no CSS
+     ("sobrepõe os preços dos cards"; abaixo de 480px o rótulo sumia e sobrava um círculo mudo).
+     Aqui ela ocupa a largura entre as gutters: continua pílula, mas não paira sobre UMA coluna
+     do card — e o rótulo nunca precisa sumir. No desktop não existe: a coluna esquerda é sticky
+     e o produto já fica sempre visível, então o flutuante seria redundância sobre redundância. */
+  /* largura do CONTEÚDO (sem `right`, o fixed encolhe pro conteúdo), com teto nas gutters pra
+     nome longo não vazar — o ellipsis do rótulo entra a partir daí. */
+  .float-produto{position:fixed; top:var(--sp-400); left:var(--sp-400); z-index:40;
+    max-width:calc(100vw - var(--sp-800));
+    display:flex; align-items:center; gap:var(--sp-300);
+    /* SÓLIDO, não translúcido: na referência a pílula pairava sobre fundo liso, aqui ela passa
+       por cima dos cards — com .92 + blur o preço de trás ficava fantasmando através dela. */
+    background:var(--neutral-50);
+    border:1px solid var(--neutral-200); border-radius:var(--r-full);
+    padding:var(--sp-200) var(--sp-400) var(--sp-200) var(--sp-200); box-shadow:0 8px 24px rgba(5,5,5,.14);
+    opacity:0; transform:translateY(-8px); pointer-events:none;
+    transition:opacity 240ms var(--ease-out), transform 240ms var(--ease-out)}
+  .float-produto.show{opacity:1; transform:translateY(0)}
+  .float-produto img{width:36px; height:36px; border-radius:var(--r-full); object-fit:cover; flex:none}
+  .float-produto span{font-size:14px; line-height:20px; font-weight:700; color:var(--neutral-900);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
+  @media (prefers-reduced-motion: reduce){ .float-produto{transition:opacity 240ms linear; transform:none} }
+  @media (min-width:1080px){ .float-produto{display:none} }
+
   .hero{display:flex; flex-direction:column; align-items:center; text-align:center; padding:0 var(--sp-400) var(--sp-500); gap:var(--sp-400)}
-  .hero__media{width:100%; border-radius:var(--r-500); overflow:hidden; background:var(--neutral-100); border:1px solid var(--neutral-300); aspect-ratio:1/1; position:relative}
+  /* tilt 3D + brilho na foto — efeito portado da peça irmã 07-comparador-premium.
+     A perspectiva mora no WRAPPER, não na foto: o `reveal` (que anima transform) fica no
+     wrapper e o tilt na foto, senão o `forwards` do reveal venceria o transform do tilt. */
+  .hero__figure{width:100%; position:relative; perspective:1200px}
+  .hero__media{width:100%; border-radius:var(--r-500); overflow:hidden; background:var(--neutral-100); border:1px solid var(--neutral-300); aspect-ratio:1/1; position:relative;
+    transform:rotateX(var(--tiltx,0deg)) rotateY(var(--tilty,0deg)); transition:transform .15s ease-out}
   .hero__media img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .8s var(--ease-out)}
   .hero__media:hover img{transform:scale(1.04)}
+  .hero__glare{position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .2s ease;
+    background:radial-gradient(circle at var(--gx,50%) var(--gy,50%), rgba(255,255,255,.55), transparent 60%);
+    mix-blend-mode:overlay}
+  @media (hover:hover){ .hero__media:hover .hero__glare{opacity:1} }
+  @media (hover:none),(prefers-reduced-motion:reduce){
+    .hero__media{transform:none}
+    .hero__glare{display:none}
+  }
   .hero__media::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 62%,rgba(5,5,5,.18)); pointer-events:none}
   .hero__referral{position:absolute; left:var(--sp-300); bottom:var(--sp-300); z-index:1; display:inline-flex; align-items:center; gap:var(--sp-200); background:rgba(255,255,255,.9); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); border-radius:var(--r-full); padding:6px 12px 6px 6px; text-decoration:none; cursor:pointer; transition:background .2s ease}
   .hero__referral:hover{background:#fff}
@@ -67,7 +113,14 @@
   .hero__avatar svg{width:14px; height:14px}
   .hero__referral span:last-child{font-size:14px; line-height:18px; font-weight:700; color:var(--neutral-900)}
   .hero__title{font-family:var(--font-display); font-weight:600; font-size:24px; line-height:32px; letter-spacing:-.01em; padding:0 var(--sp-200)}
-  .hero__sku{font-size:12px; line-height:16px; font-weight:600; color:var(--neutral-500); padding:0 var(--sp-200); margin-top:2px}
+  /* SKU é chave interna (guarda-corpo de canal na spec), não informação de compra: saiu do fluxo
+     abaixo do título — onde custava uma linha inteira de leitura no topo — e virou um chip discreto
+     sobre a foto, custo zero de altura. Chip claro garante o contraste, que sobre a foto seria
+     imprevisível. */
+  .hero__sku{position:absolute; top:var(--sp-300); right:var(--sp-300); z-index:1;
+    font-size:11px; line-height:14px; font-weight:700; letter-spacing:.02em; color:var(--neutral-700);
+    background:rgba(255,255,255,.9); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    border-radius:var(--r-full); padding:5px 10px}
   .hero__lead{font-size:14px; line-height:20px; color:var(--neutral-600); max-width:280px; margin-top:calc(-1 * var(--sp-200))}
 
   /* CEP */
@@ -94,7 +147,9 @@
   .cep__applied-label{font-size:12px; line-height:16px; color:var(--neutral-600); font-weight:600}
   .cep__applied-value{font-size:16px; line-height:20px; font-weight:700; color:var(--neutral-900)}
   .cep__applied-value .muted{display:block; font-size:13px; line-height:18px; color:var(--neutral-700); font-weight:600}
-  .cep__change{flex:none; border:1px solid var(--neutral-400); background:var(--neutral-50); color:var(--neutral-900); font-family:var(--font-body); font-weight:700; font-size:14px; min-height:44px; padding:0 18px; display:inline-flex; align-items:center; border-radius:var(--r-full); cursor:pointer}
+  /* raio alinhado ao padrão de CTA da peça (--r-300, igual a "Ver frete" e "Comprar na…");
+     era --r-full, a única pílula entre os botões */
+  .cep__change{flex:none; border:1px solid var(--neutral-400); background:var(--neutral-50); color:var(--neutral-900); font-family:var(--font-body); font-weight:700; font-size:14px; min-height:44px; padding:0 18px; display:inline-flex; align-items:center; border-radius:var(--r-300); cursor:pointer}
   .cep__change:hover{background:var(--neutral-100)}
   .cep__change:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
   .cep__spin{width:16px; height:16px; border-radius:50%; border:2px solid rgba(255,255,255,.45); border-top-color:#fff; animation:spin .7s linear infinite}
@@ -107,27 +162,60 @@
   .compare-head .freshness{font-size:14px; line-height:18px; color:var(--neutral-600); font-weight:500; display:flex; align-items:center; gap:6px}
   .compare-head .freshness::before{content:""; width:6px; height:6px; border-radius:var(--r-full); background:var(--green-600); flex:none}
 
-  .pilha{display:flex; flex-direction:column; gap:var(--sp-400); margin-top:var(--sp-500)}
+  /* margin-top soma ao gap de 16px do `.compare` (flex column): 4 + 16 = 20px do cabeçalho
+     até o 1º card. Era 20 + 16 = 36px, que o designer leu como distância grande demais. */
+  .pilha{display:flex; flex-direction:column; gap:var(--sp-400); margin-top:var(--sp-100)}
+  /* nota de saída externa — fecha a pilha, antes da barra de garantias do rodapé */
+  /* ícone INLINE, dentro do fluxo do texto: como irmão flex ele ficava centralizado contra o
+     bloco todo e, quando a frase quebrava em 2 linhas no mobile, boiava entre elas. Inline, ele
+     ancora na 1ª linha e as demais fluem por baixo. */
+  .stack-note{display:block; text-align:center; margin-top:var(--sp-500); padding:0 var(--sp-200);
+    font-size:14px; line-height:20px; font-weight:600; color:var(--neutral-700)}
+  .stack-note svg{width:16px; height:16px; display:inline-block; vertical-align:-3px;
+    margin-right:6px; color:var(--neutral-600)}
   /* ===== card DETALHADO (por canal) ===== */
-  .channel{position:relative; background:var(--neutral-50); border:1px solid var(--neutral-300); border-radius:var(--r-400); padding:var(--sp-500); transition:box-shadow .3s ease, border-color .3s ease; will-change:transform}
+  .channel{position:relative; background:var(--neutral-50); border:1px solid var(--neutral-300); border-radius:var(--r-400); padding:var(--sp-500); transition:transform 240ms var(--ease-out), box-shadow 240ms var(--ease-out); will-change:transform}
   .channel__head{display:flex; flex-wrap:wrap; align-items:flex-start; column-gap:var(--sp-300); row-gap:var(--sp-300); margin-bottom:var(--sp-400)}
   .channel__id{flex:1 1 auto; min-width:0}
   .channel__logo{width:44px; height:44px; border-radius:var(--r-300); background:var(--neutral-100); border:1px solid var(--neutral-200); display:flex; align-items:center; justify-content:center; overflow:hidden; flex:none}
   .channel__logo img{width:26px; height:26px; object-fit:contain}
-  .channel__toprow{display:flex; align-items:center; flex-wrap:wrap; column-gap:var(--sp-300); row-gap:6px}
+  .channel__toprow{display:flex; align-items:flex-start; flex-wrap:wrap; column-gap:var(--sp-300); row-gap:6px}
   .channel__name{font-family:var(--font-display); font-weight:600; font-size:16px; line-height:22px; color:var(--neutral-900)}
   .channel__meta{display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:2px}
   .channel__sub{font-size:13px; line-height:16px; color:var(--neutral-600); font-weight:600}
   .channel__rating{display:inline-flex; align-items:center; gap:4px}
   .channel__rating .channel__star{width:14px; height:14px; flex:none; fill:var(--amber-600)}
   .channel__rating-val{font-size:13px; line-height:16px; font-weight:700; color:var(--neutral-900)}
+  /* ===== selos de tier (ciclo 3) — direção C: badge preenchido semântico do DS =====
+     Linha PRÓPRIA (3ª do bloco de identidade): não disputa espaço com nome nem com a badge
+     "Melhor oferta" — aprendizado de 2026-07-16, quando conteúdo na linha do subtítulo
+     empurrou a badge a quebrar a 375px. Ordem: prova social (volume) → estado (estoque). */
+  /* MOBILE: linha própria, alinhada à esquerda com o nome e o subtítulo — 3ª linha do bloco de
+     identidade. Não cabe ao lado: a 375px sobram ~303px no card e logo(44)+subtítulo(~180)+
+     tags(~118) = 342. Tentar encaixar empilha as tags e rasga o bloco (nome no topo, subtítulo
+     empurrado pra baixo). Medido, não estimado. */
+  .channel__flags{display:flex; align-items:center; flex-wrap:wrap;
+    column-gap:6px; row-gap:6px; margin-top:var(--sp-300)}
+  .tier{display:inline-flex; align-items:center; gap:4px; font-size:11px; line-height:1; padding:4px 8px; border-radius:var(--r-full); font-weight:700; letter-spacing:.02em; white-space:nowrap}
+  .tier svg{width:11px; height:11px; flex:none; fill:currentColor}
+  .tier--green{background:var(--green-100); border:1px solid var(--green-200); color:var(--green-800)}
+  .tier--amber{background:var(--amber-100); border:1px solid var(--amber-200); color:var(--amber-800)}
+  .tier--blue{background:var(--blue-100); border:1px solid var(--blue-200); color:var(--blue-700)}
+  .tier--purple{background:var(--purple-100); border:1px solid var(--purple-200); color:var(--purple-700)}
+  .tier--neutral{background:var(--neutral-200); border:1px solid var(--neutral-400); color:var(--neutral-900)}
   /* 4 blocos em colunas: rótulo em cima, valor embaixo (2×2 no mobile, 4 col no desktop) */
   .channel__rows{display:grid; grid-template-columns:repeat(2,1fr); gap:var(--sp-400) var(--sp-300); margin:0}
   .channel__row{display:flex; flex-direction:column; gap:3px; min-width:0}
   .channel__row dt{font-size:12px; line-height:16px; color:var(--neutral-600); font-weight:600}
   .channel__row dd{font-size:15px; line-height:20px; color:var(--neutral-900); font-weight:700}
+  /* mobile: são 3 campos numa grade de 2 colunas, então o último fica sozinho na 2ª linha com
+     metade da largura — e "Calculado no checkout" quebrava em duas. Ocupando a linha inteira,
+     cabe numa linha só (e o Frete, que é o campo que move o total, ganha peso). */
+  @media (max-width:1079px){ .channel__rows > .channel__row:last-child{grid-column:1 / -1} }
   .channel__row dd.free{color:var(--green-800)}
-  .channel__row dd.pending{color:var(--neutral-500); font-weight:600}
+  /* n500 sobre branco dá 2,18:1 — reprova WCAG AA (4.5:1) e o designer pegou no olho.
+     n600 = 5,30:1, o mesmo par já validado no portão do ciclo 1. */
+  .channel__row dd.pending{color:var(--neutral-600); font-weight:600}
   .channel__divider{height:1px; background:var(--neutral-200); margin:var(--sp-300) 0}
   .channel__total{display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:2px}
   .channel__total-label{display:flex; flex-direction:column; align-items:flex-start; gap:6px}
@@ -141,12 +229,32 @@
   .channel__cta svg{width:18px; height:18px}
   .channel__cta .arrow{transition:transform .25s var(--ease-out)}
   .channel__cta:hover .arrow{transform:translate(3px,-3px)}
-  .channel:hover{box-shadow:var(--shadow-sm); border-color:var(--neutral-400)}
-  /* melhor oferta — sofisticação, não promoção: borda preta, badge dentro do card no tom verde do DS */
-  .channel--best{border-color:var(--neutral-900); box-shadow:var(--shadow-sm)}
-  .channel--best:hover{border-color:var(--neutral-900)}
-  .channel__badge{display:inline-flex; align-items:center; gap:5px; margin-left:auto; background:var(--green-100); color:var(--green-800); border:1px solid var(--green-200); font-weight:700; font-size:12px; line-height:1; letter-spacing:.02em; padding:6px 12px; border-radius:var(--r-full)}
-  .channel__badge svg{width:13px; height:13px; flex:none}
+  /* hover replicado da peça irmã 07-comparador-premium (hub2-eta.vercel.app), a pedido do
+     designer: lift de 4px + sombra ampla, 240ms na curva do DS. `@media (hover:hover)` evita
+     hover grudado em touch — o dedo não tem "sair de cima". Sombra de hover NÃO é token: ver
+     Δtokens no Rastro. Borda não muda mais no hover (a referência não muda). */
+  @media (hover:hover){
+    .channel:hover{transform:translateY(-4px); box-shadow:0 16px 40px rgba(30,30,31,.10)}
+    .channel--best:hover{transform:translateY(-4px); box-shadow:0 16px 40px -12px rgba(30,30,31,.30)}
+  }
+  /* sem lift quando o usuário pede menos movimento; a sombra sozinha ainda dá o feedback */
+  @media (hover:hover) and (prefers-reduced-motion: reduce){
+    .channel:hover,.channel--best:hover{transform:none}
+  }
+  /* melhor oferta — moldura preta grossa + faixa no topo, dentro da moldura (ref. do designer
+     2026-08-13). overflow:hidden faz a faixa herdar o raio interno do card sem cálculo de raio. */
+  /* o card melhor vira MOLDURA: fundo preto, padding zero. O conteúdo mora num painel branco
+     com raio nos 4 cantos, recuado 4px — assim o preto aparece em volta dele, como no print. */
+  .channel--best{background:var(--neutral-900); border-color:var(--neutral-900); border-width:4px;
+    padding:0; box-shadow:var(--shadow-sm); overflow:hidden}
+  /* moldura de 4px = só a borda; o painel encosta nela (margin 0). Antes eram 3px de borda + 4px
+     de recuo = 7px de preto aparente, que o designer leu como grossa demais. */
+  .channel--best .channel__panel{background:var(--neutral-50); border-radius:var(--r-200);
+    padding:var(--sp-500); margin:0}
+  .channel__ribbon{display:flex; align-items:center; justify-content:center; gap:var(--sp-200);
+    padding:12px var(--sp-400); background:var(--neutral-900); color:var(--neutral-50);
+    font-weight:700; font-size:12px; line-height:1; letter-spacing:.12em; text-transform:uppercase}
+  .channel__ribbon svg{width:14px; height:14px; flex:none; fill:var(--amber-600)}
   /* não entrega neste CEP */
   .channel--noship{background:var(--neutral-100); border-color:var(--neutral-400); border-style:dashed}
   .channel--noship .channel__head{margin-bottom:var(--sp-400)}
@@ -154,11 +262,35 @@
   .channel__notice{display:flex; align-items:center; gap:var(--sp-200); background:var(--amber-100); border:1px solid var(--amber-200); color:var(--amber-800); border-radius:var(--r-300); padding:12px var(--sp-400); font-size:14px; line-height:18px; font-weight:700}
   .channel__notice svg{width:16px; height:16px; flex:none}
 
-  .channel--just-best .channel__badge{animation:badgePop .5s ease}
-  @keyframes badgePop{0%{transform:scale(.7); opacity:.4}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+  /* a faixa não pode usar scale: overflow:hidden do card clipa o overshoot. Entra deslizando. */
+  .channel--just-best .channel__ribbon{animation:ribbonIn .42s var(--ease-out)}
+  @keyframes ribbonIn{0%{transform:translateY(-100%); opacity:0}100%{transform:none; opacity:1}}
   .swap{animation:swap .42s ease}
   @keyframes swap{0%{opacity:.15}100%{opacity:1}}
-  @media (prefers-reduced-motion: reduce){.channel{transition:none !important} .channel--just-best .channel__badge,.swap{animation:none !important}}
+  @media (prefers-reduced-motion: reduce){.channel{transition:none !important} .channel--just-best .channel__ribbon,.swap{animation:none !important}}
+
+  /* ===== como funciona (3 passos) — antes do rodapé ===== */
+  /* faixa branca full-bleed: separa a comparação (sobre o gradiente da página) do rodapé escuro */
+  .howto{width:100%; padding:var(--sp-1600) var(--sp-400); background:var(--neutral-50)}
+  .howto__inner{width:100%; max-width:1160px; margin:0 auto; padding:0 var(--sp-400); text-align:center}
+  .howto__title{font-family:var(--font-display); font-weight:700; font-size:28px; line-height:36px; color:var(--neutral-900)}
+  .howto__sub{margin-top:var(--sp-200); font-size:15px; line-height:22px; color:var(--neutral-700); font-weight:600}
+  /* gap ZERO de propósito: o traço conector vai de centro a centro via `left:-50%/right:50%`,
+     o que só fecha exato se não houver gap entre as colunas. O respiro fica no padding do item. */
+  .howto__steps{list-style:none; display:grid; grid-template-columns:1fr; gap:var(--sp-800);
+    margin-top:var(--sp-1000); padding:0}
+  .howto__step{position:relative; padding:0 var(--sp-400)}
+  .howto__num{position:relative; z-index:1; width:36px; height:36px; border-radius:var(--r-full);
+    background:var(--neutral-900); color:#fff; display:inline-grid; place-items:center;
+    font-family:var(--font-body); font-weight:700; font-size:14px; line-height:1}
+  .howto__step h3{margin-top:var(--sp-400); font-size:16px; line-height:22px; font-weight:700; color:var(--neutral-900)}
+  .howto__step p{margin-top:6px; font-size:14px; line-height:20px; color:var(--neutral-700); max-width:30ch; margin-inline:auto}
+  @media (min-width:720px){
+    .howto__steps{grid-template-columns:repeat(3,1fr); gap:0}
+    /* traço ligando o círculo anterior ao atual — atrás dos números (z-index) */
+    .howto__step + .howto__step::before{content:""; position:absolute; top:18px; left:-50%; right:50%;
+      height:1px; background:var(--neutral-300); z-index:0}
+  }
 
   /* footer — fundo sangra a viewport, conteúdo preso ao mesmo grid (max-width) do .page */
   .site-footer{width:100%; margin-top:auto; background:var(--neutral-900); color:var(--neutral-400);
@@ -169,9 +301,30 @@
   .trust__item{flex:1 1 240px; display:flex; align-items:center; justify-content:flex-start; text-align:left; gap:var(--sp-300);
     font-size:14px; line-height:20px; font-weight:600; color:var(--neutral-200)}
   .trust__item svg{width:18px; height:18px; color:var(--neutral-200); flex:none}
+  /* selo Reclame Aqui — PLACEHOLDER. A marca e o selo oficial são ativos de terceiro
+     (licenciados, servidos pelo próprio RA com link de verificação) e a reputação é dado
+     DINÂMICO. Aqui é marcador de posição/layout, não o selo real. Ver pendência #5. */
+  /* placa branca: o selo oficial tem texto cinza-escuro e wordmark escuro — some no rodapé
+     neutral-900. Por isso ele mora sobre um plate claro, como marcas fazem em rodapé escuro. */
+  .footer__ra{display:inline-block; background:var(--neutral-50); border-radius:var(--r-200);
+    padding:var(--sp-200); text-decoration:none;
+    transition:transform 240ms var(--ease-out), box-shadow 240ms var(--ease-out)}
+  @media (hover:hover){ .footer__ra:hover{transform:translateY(-2px); box-shadow:0 8px 24px rgba(5,5,5,.24)} }
+  .footer__ra:focus-visible{outline:2px solid var(--club-400); outline-offset:3px}
+  /* medidas do widget oficial: caixa 137×48, borda #A4C929, raio 4px, carinha 38px, logo 80×12.75 */
+  .footer__ra-box{display:flex; align-items:center; width:137px; height:48px; overflow:hidden;
+    border:1px solid #A4C929; border-radius:4px; padding:0 6px; gap:5px}
+  .footer__ra-face{width:38px; height:auto; flex:none; display:block}
+  /* "ÓTIMO" empilhado sobre o wordmark, como no widget oficial */
+  .footer__ra-stack{display:flex; flex-direction:column; align-items:flex-start; gap:4px; min-width:0}
+  .footer__ra-rep{font-family:var(--font-body); font-size:14px; line-height:1; font-weight:700;
+    text-transform:uppercase; color:#4B5963; display:block}
+  .footer__ra-logo{width:80px; height:12.75px; display:block}
   .footer__divider{width:100%; height:1px; background:var(--alfa-10-light);
     margin-top:calc(var(--sp-200) + var(--sp-500)); margin-bottom:var(--sp-300)}
-  .site-footer__logo{height:24px; width:auto}
+  .footer__brand{display:flex; flex-direction:column; align-items:center; gap:var(--sp-500)}
+  /* altura do logo como fonte única: o alinhamento dos links do rodapé no desktop deriva dela */
+  .site-footer__logo{height:var(--footer-logo-h); width:auto}
   .site-footer__privacy{font-size:14px; line-height:22px; color:var(--neutral-400); max-width:440px}
   .site-footer__links{display:flex; flex-wrap:wrap; justify-content:center; gap:var(--sp-400) var(--sp-600)}
   .site-footer__links a{color:var(--neutral-200); text-decoration:none; font-size:14px; font-weight:600}
@@ -228,6 +381,37 @@
     /* desktop: mesmo card, só a grade de detalhes vira 3 colunas e o CTA não estica */
     .channel__rows{grid-template-columns:repeat(3,1fr)}
     .channel__cta{flex:0 0 auto; width:auto}
+    /* DESKTOP: aqui sobra largura (card ~628px), então as tags sobem para o canto superior
+       direito sem espremer o subtítulo. Absolutas: saem do fluxo e não empurram nada — o nome
+       e o subtítulo continuam colados, sem a escadinha que aparecia no mobile. */
+    .channel__id{position:relative}
+    .channel__flags{position:absolute; top:0; right:0; margin-top:0; justify-content:flex-end}
+
+    /* rodapé em 2 colunas: marca+texto à esquerda, links à direita, selo no canto inferior
+       direito. No mobile o rodapé segue empilhado e centrado (a coluna flex do bloco base). */
+    /* row-gap 48px: é a distância do divisor ao conteúdo abaixo dele (pedido do designer).
+       Num valor SÓ — o divisor fica com `margin:0` e não compõe espaçamento com o gap. */
+    .footer__inner{display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:start;
+      text-align:left; column-gap:var(--sp-1600); row-gap:var(--sp-1200);
+      grid-template-areas:
+        "trust trust"
+        "div   div"
+        "brand links"
+        "copy  ra";}
+    /* garantias acompanhando a grid: itens do tamanho do conteúdo e distribuídos ponta a ponta,
+       para o 1º encostar na esquerda e o 3º na direita. Com `flex:1 1 240px` as CAIXAS já ficavam
+       alinhadas, mas o texto do último parava antes da borda (sobrava caixa à direita dele). */
+    .footer__trust{grid-area:trust; justify-content:space-between; flex-wrap:nowrap; gap:var(--sp-600)}
+    .trust__item{flex:0 1 auto}
+    .footer__divider{grid-area:div; margin:0}
+    .footer__brand{grid-area:brand; align-items:flex-start; gap:var(--sp-400)}
+    /* links alinhados ao topo do TEXTO, não ao do logo: descem exatamente a altura do logo
+       mais o gap do bloco de marca. Deriva de `--footer-logo-h` e do gap real do `.footer__brand`,
+       então se o logo mudar de tamanho o alinhamento acompanha sozinho. */
+    .site-footer__links{grid-area:links; justify-self:end; align-self:start;
+      margin-top:calc(var(--footer-logo-h) + var(--sp-400)); gap:var(--sp-600); flex-wrap:nowrap}
+    .site-footer__copy{grid-area:copy; align-self:end}
+    .footer__ra{grid-area:ra; justify-self:end; align-self:end}
   }
 </style>
 </head>
@@ -236,18 +420,28 @@
 
 <header class="site-header reveal d-0"><img src="pecas/comparador-publico/assets/logo-black.svg" alt="Ybera"></header>
 
+<!-- barra flutuante do produto (só mobile) — aparece quando o hero sai da tela.
+     aria-hidden: duplica o <h1>, não deve ser anunciada de novo pelo leitor de tela. -->
+<div class="float-produto" id="floatProduto" aria-hidden="true">
+  <img src="pecas/comparador-publico/assets/produto-hero.jpg" alt="" width="36" height="36">
+  <span>Óleo de Mirra Reparador 90ml</span>
+</div>
+
 <div class="page">
   <div class="layout">
    <div class="col-left">
   <section class="hero">
     <h1 class="hero__title reveal d-0">Óleo de Mirra&nbsp;Reparador 90ml</h1>
-    <p class="hero__sku reveal d-0">SKU 150264</p>
-    <div class="hero__media reveal d-1">
-      <img src="pecas/comparador-publico/assets/produto-hero.jpg" alt="Óleo de Mirra Reparador 90ml">
-      <a class="hero__referral" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Ver perfil de Camila no Instagram">
-        <span class="hero__avatar" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor" stroke="none"/></svg></span>
-        <span>Indicação de Camila</span>
-      </a>
+    <div class="hero__figure reveal d-1">
+      <div class="hero__media" id="prodTilt">
+        <img src="pecas/comparador-publico/assets/produto-hero.jpg" alt="Óleo de Mirra Reparador 90ml">
+        <span class="hero__glare" aria-hidden="true"></span>
+        <span class="hero__sku">SKU 150264</span>
+        <a class="hero__referral" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Ver perfil de Camila no Instagram">
+          <span class="hero__avatar" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor" stroke="none"/></svg></span>
+          <span>Indicação de Camila</span>
+        </a>
+      </div>
     </div>
   </section>
 
@@ -264,11 +458,39 @@
       <span class="freshness">Preços atualizados há 6 min</span>
     </header>
     <div class="pilha" id="pilha"></div>
+    <p class="stack-note reveal d-5">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 7.6 8 9 4.5-1.4 8-4 8-9V6l-8-3Z"/></svg>
+      Você será levado ao site do canal oficial para finalizar.
+    </p>
   </section>
    </div>
   </div>
 
   </div>
+
+<section class="howto" aria-labelledby="howto-title">
+  <div class="howto__inner">
+    <h2 class="howto__title" id="howto-title">Como funciona</h2>
+    <p class="howto__sub">Três passos. Menos de um minuto.</p>
+    <ol class="howto__steps">
+      <li class="howto__step">
+        <span class="howto__num" aria-hidden="true">1</span>
+        <h3>Compare</h3>
+        <p>Veja todos os canais oficiais lado a lado, com preço e condições.</p>
+      </li>
+      <li class="howto__step">
+        <span class="howto__num" aria-hidden="true">2</span>
+        <h3>Escolha</h3>
+        <p>O destaque já aponta a melhor combinação de preço e prazo.</p>
+      </li>
+      <li class="howto__step">
+        <span class="howto__num" aria-hidden="true">3</span>
+        <h3>Compre</h3>
+        <p>A compra é fechada na loja, sob as regras e a garantia dela.</p>
+      </li>
+    </ol>
+  </div>
+</section>
 
 <footer class="site-footer">
  <div class="footer__inner">
@@ -286,9 +508,15 @@
       Você escolhe onde comprar, sem custo extra
     </div>
   </div>
+  <!-- Selo de REPUTAÇÃO do Reclame Aqui, reproduzindo o widget oficial (mesmo que está no rodapé
+       da KaBuM): caixa 137×48, borda 1px #A4C929, raio 4px, carinha 38px + "ÓTIMO" + wordmark 80px.
+       Os dois SVGs são os ARQUIVOS OFICIAIS do RA (s3/raichu-beta), baixados para assets/.
+       Em produção isto é um embed servido pelo RA, com link para a página da empresa. Pendência #5. -->
   <div class="footer__divider" aria-hidden="true"></div>
-  <img class="site-footer__logo" src="pecas/comparador-publico/assets/logo-white.svg" alt="Ybera">
-  <p class="site-footer__privacy">Você navega sem cadastro, nenhum dado pessoal é coletado nesta página. O CEP, quando informado, não é armazenado.</p>
+  <div class="footer__brand">
+    <img class="site-footer__logo" src="pecas/comparador-publico/assets/logo-white.svg" alt="Ybera">
+    <p class="site-footer__privacy">Você navega sem cadastro, nenhum dado pessoal é coletado nesta página. O CEP, quando informado, não é armazenado.</p>
+  </div>
   <nav class="site-footer__links" aria-label="Rodapé">
     <a href="#">Sobre</a>
     <a href="#">Parceiros</a>
@@ -296,6 +524,16 @@
     <a href="#">Termos</a>
   </nav>
   <p class="site-footer__copy">© 2026 Ybera Group</p>
+  <a class="footer__ra" href="#" title="Selo Reclame Aqui" aria-label="Reclame Aqui: empresa de reputação boa">
+    <span class="footer__ra-box">
+      <!-- carinha do nível "bom" (arte oficial do RA) — a arte muda junto com o rótulo -->
+      <img class="footer__ra-face" src="pecas/comparador-publico/assets/ra-bom.svg" alt="" width="38" height="38">
+      <span class="footer__ra-stack">
+        <span class="footer__ra-rep">Boa</span>
+        <img class="footer__ra-logo" src="pecas/comparador-publico/assets/ra-logo.svg" alt="Reclame AQUI" width="80" height="13">
+      </span>
+    </span>
+  </a>
  </div>
 </footer>
 
@@ -316,10 +554,33 @@
   const WARN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>';
   const ALERT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>';
 
+  /* Tiers do ciclo 3 (dataset fixado na spec, imutável entre as peças).
+     stock: 'ok' | 'low' | 'out'   ·   volume: 'champ' | 'best' | 'launch' | null
+     Origem do dado (brief v1.7): Estoque = API dos 3 canais; Volume = API (Shopee) /
+     fallback admin (TikTok até HT-06; Wake sempre). A peça recebe o tier já resolvido —
+     limiar e cálculo são de Produto/Engenharia (Q-23). */
+  const TIER = {
+    stock:{
+      ok:   {label:'Disponível',       cls:'tier--green'},
+      low:  {label:'Últimas unidades', cls:'tier--amber'},
+      out:  {label:'Indisponível',     cls:'tier--neutral'},
+    },
+    volume:{
+      champ: {label:'Campeão de vendas', cls:'tier--blue',    icon:'trophy'},
+      best:  {label:'Mais vendido',      cls:'tier--neutral', icon:'trend'},
+      launch:{label:'Lançamento',        cls:'tier--purple',  icon:'spark'},
+    },
+  };
+  const TIER_ICON = {
+    trophy:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v2a6 6 0 0 1-5 5.92V14h3v2H8v-2h3v-3.08A6 6 0 0 1 6 5V3Zm2 2a4 4 0 0 0 8 0H8ZM7 19h10v2H7v-2Z"/></svg>',
+    trend: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 5-5v3h2V7h-6v2h3l-4 4-4-4-7 7 1 1Z"/></svg>',
+    spark: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l1.6 4.3 4.3 1.6-4.3 1.6L12 14.3l-1.6-4.3L6.1 8.4l4.3-1.6L12 2.5ZM18.5 14l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9.9-2.4Z"/></svg>',
+  };
+
   const CH = {
-    shopee:{name:'Shopee', logo:'pecas/comparador-publico/assets/Shopee.svg', cta:'Comprar na Shopee', artigo:'a', href:'https://shopee.com.br/', sub:'Marketplace parceiro', rating:4.6, noPrazo:true},
-    tiktok:{name:'TikTok Shop', logo:'pecas/comparador-publico/assets/tiktok.svg', cta:'Comprar no TikTok Shop', artigo:'o', href:'https://www.tiktok.com/shop', sub:'Loja no TikTok Shop', rating:4.3, noFrete:true},
-    ybera:{name:'Ybera.com', logo:'pecas/comparador-publico/assets/ybera.svg', cta:'Comprar na Ybera.com', artigo:'a', href:'https://www.ybera.com/produto/escova-progressiva-500g-fashion-gold-150264?parceiro=52154', sub:'Canal oficial Ybera', rating:4.8},
+    shopee:{name:'Shopee', logo:'pecas/comparador-publico/assets/Shopee.svg', cta:'Comprar na Shopee', artigo:'a', href:'https://shopee.com.br/', sub:'Marketplace parceiro', rating:4.6, noPrazo:true, stock:'ok', volume:'champ'},
+    tiktok:{name:'TikTok Shop', logo:'pecas/comparador-publico/assets/tiktok.svg', cta:'Comprar no TikTok Shop', artigo:'o', href:'https://www.tiktok.com/shop', sub:'Loja no TikTok Shop', rating:4.3, noFrete:true, stock:'low', volume:'launch'},
+    ybera:{name:'Ybera.com', logo:'pecas/comparador-publico/assets/ybera.svg', cta:'Comprar na Ybera.com', artigo:'a', href:'https://www.ybera.com/produto/escova-progressiva-500g-fashion-gold-150264?parceiro=52154', sub:'Canal oficial Ybera', rating:4.8, stock:'ok', volume:null},
   };
 
   const STATE = {
@@ -349,6 +610,8 @@
   let current = null;
   let lastCep = null; // CEP digitado (8 dígitos) p/ exibir no chip quando não-mapeado
   let pendingRaf = null; // rAF do FLIP em voo — cancelado se um novo reorder começar antes
+  let flipCleanup = null; // devolve a `transition` ao CSS quando o FLIP assenta (senão a
+                          // transition inline de .42s sequestra o hover: lift lento e sombra sem transição)
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function buildCard(id){
@@ -364,17 +627,31 @@
       '<span class="channel__rating-val">'+scoreStr+'</span>'+
     '</span>';
   }
+  /* Linha de selos. Volume vem antes de Estoque (prova social → estado do canal).
+     Volume ausente é um valor válido: não renderiza chip, e a linha se sustenta no Estoque,
+     que está sempre presente. Os selos NÃO dependem de CEP — vêm da API do canal. */
+  function renderFlags(ch){
+    const s = TIER.stock[ch.stock];
+    const v = ch.volume ? TIER.volume[ch.volume] : null;
+    const volChip = v ? '<span class="tier '+v.cls+'">'+TIER_ICON[v.icon]+v.label+'</span>' : '';
+    const stockChip = s ? '<span class="tier '+s.cls+'">'+s.label+'</span>' : '';
+    if(!volChip && !stockChip) return '';
+    return '<div class="channel__flags">'+volChip+stockChip+'</div>';
+  }
   function fillCard(el, id, st){
     const info = st.d[id]; const ch = CH[id];
     const hasCep = !st.isRef;
     const isBest = hasCep && !info.noship && st.best === id;
     const subText = isBest ? 'Canal verificado' : ch.sub;
-    const badge = isBest ? '<span class="channel__badge"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="'+STAR_PATH+'"/></svg>Melhor oferta</span>' : '';
+    /* faixa full-width no topo do card, dentro da moldura preta — não é mais um chip na
+       linha do nome (reversão registrada no Rastro em 2026-08-13) */
+    const ribbon = isBest ? '<div class="channel__ribbon"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="'+STAR_PATH+'"/></svg>Melhor oferta</div>' : '';
     const idBlock =
       '<div class="channel__logo"><img src="'+ch.logo+'" alt="'+ch.name+'"></div>'+
       '<div class="channel__id">'+
-        '<div class="channel__toprow"><h3 class="channel__name">'+ch.name+'</h3>'+badge+'</div>'+
+        '<div class="channel__toprow"><h3 class="channel__name">'+ch.name+'</h3></div>'+
         '<div class="channel__meta"><span class="channel__sub">'+subText+'</span>'+renderRating(ch.rating)+'</div>'+
+        renderFlags(ch)+
       '</div>';
     if(info.noship){
       el.className = 'channel channel--noship';
@@ -398,15 +675,20 @@
     const prazoVal = ch.noPrazo
       ? '<dd class="pending">Não informado</dd>'
       : !hasCep ? '<dd class="pending">Informe o CEP</dd>' : '<dd>'+info.prazo+'</dd>';
+    /* .channel__panel: no card comum é um wrapper sem estilo; no card melhor é o painel branco
+       de raio nos 4 cantos, recuado dentro da moldura preta. */
     el.innerHTML =
-      '<div class="channel__head">'+idBlock+'</div>'+
-      '<dl class="channel__rows">'+
-        '<div class="channel__row"><dt>Preço do produto</dt><dd>'+info.price+'</dd></div>'+
-        '<div class="channel__row"><dt>Frete</dt>'+freteVal+'</div>'+
-        '<div class="channel__row"><dt>Prazo de entrega</dt>'+prazoVal+'</div>'+
-      '</dl>'+
-      '<div class="channel__divider"></div>'+
-      '<div class="channel__foot">'+total+cta+'</div>';
+      ribbon+
+      '<div class="channel__panel">'+
+        '<div class="channel__head">'+idBlock+'</div>'+
+        '<dl class="channel__rows">'+
+          '<div class="channel__row"><dt>Preço do produto</dt><dd>'+info.price+'</dd></div>'+
+          '<div class="channel__row"><dt>Prazo de entrega</dt>'+prazoVal+'</div>'+
+          '<div class="channel__row"><dt>Frete</dt>'+freteVal+'</div>'+
+        '</dl>'+
+        '<div class="channel__divider"></div>'+
+        '<div class="channel__foot">'+total+cta+'</div>'+
+      '</div>';
   }
 
   function renderCep(which){
@@ -459,6 +741,7 @@
     // 'first' — senão a medição pega uma posição no meio da animação anterior e os
     // cards ficam com transform travado (bug de toggle rápido / duplo-clique).
     if(pendingRaf){ cancelAnimationFrame(pendingRaf); pendingRaf = null; }
+    if(flipCleanup){ clearTimeout(flipCleanup); flipCleanup = null; }
     Object.keys(cards).forEach(id=>{ cards[id].style.transition='none'; cards[id].style.transform=''; });
 
     const first = {};
@@ -492,6 +775,12 @@
         pendingRaf = requestAnimationFrame(()=>{
           Object.keys(cards).forEach(id=>{ cards[id].style.transition='transform .42s cubic-bezier(.2,.7,.2,1)'; cards[id].style.transform=''; });
           pendingRaf = null;
+          // FLIP terminou: remove a transition inline pra que o hover volte a usar a do CSS
+          // (240ms, transform + box-shadow). Cancelado no topo de applyState se houver toggle rápido.
+          flipCleanup = setTimeout(()=>{
+            Object.keys(cards).forEach(id=>{ cards[id].style.transition=''; });
+            flipCleanup = null;
+          }, 460);
         });
       });
     }
@@ -533,6 +822,41 @@
   // Recarregar volta ao estado sem CEP: prova do "não guardamos".
   applyState('ref');
   window.scrollTo(0, 0); // garante topo após montar os cards via JS
+
+  /* barra flutuante do produto — aparece quando o hero sai da tela (só mobile, o CSS esconde
+     ≥1080px). IntersectionObserver em vez de listener de scroll: não roda no thread a cada pixel. */
+  (function(){
+    const floatEl = document.getElementById('floatProduto');
+    const hero = document.querySelector('.hero');
+    if(!floatEl || !hero || !('IntersectionObserver' in window)) return;
+    new IntersectionObserver(es => es.forEach(e => {
+      floatEl.classList.toggle('show', !e.isIntersecting);
+    }), {threshold:0}).observe(hero);
+  })();
+
+  /* tilt 3D + brilho na foto do produto — portado da peça irmã 07-comparador-premium
+     (que por sua vez porta o comet-card da Aceternity). Não roda sob prefers-reduced-motion
+     nem em ponteiro sem hover: em touch o dedo não tem "sair de cima" e o tilt ficaria travado. */
+  (function(){
+    const tiltEl = document.getElementById('prodTilt');
+    if(!tiltEl) return;
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if(!window.matchMedia('(hover: hover)').matches) return;
+    const maxDeg = 12;
+    tiltEl.addEventListener('mousemove', e=>{
+      const r = tiltEl.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      tiltEl.style.setProperty('--tiltx', (py * maxDeg * 2).toFixed(2) + 'deg');
+      tiltEl.style.setProperty('--tilty', (-px * maxDeg * 2).toFixed(2) + 'deg');
+      tiltEl.style.setProperty('--gx', ((px + 0.5) * 100).toFixed(1) + '%');
+      tiltEl.style.setProperty('--gy', ((py + 0.5) * 100).toFixed(1) + '%');
+    });
+    tiltEl.addEventListener('mouseleave', ()=>{
+      tiltEl.style.setProperty('--tiltx', '0deg');
+      tiltEl.style.setProperty('--tilty', '0deg');
+    });
+  })();
 </script>
 </body>
 </html>

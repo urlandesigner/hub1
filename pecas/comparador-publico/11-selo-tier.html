@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peça 11 · selo de tier (Estoque + Volume de Vendas) — 3 direções</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --neutral-50:#FFFFFF; --neutral-100:#FAF9FC; --neutral-200:#ECEBF0;
+    --neutral-300:#E2E1E5; --neutral-400:#C9C8CC; --neutral-500:#B0AFB2;
+    --neutral-600:#6C6B6E; --neutral-700:#505052; --neutral-900:#1E1E1F;
+    --club-50:#FEF0F4; --club-400:#FA4277; --club-600:#C70F43;
+    --green-100:#E6F6E5; --green-200:#D1EECE; --green-600:#50AE47; --green-800:#2B6A25;
+    --amber-100:#FEF3C7; --amber-200:#FDE68A; --amber-600:#D97706; --amber-800:#92400E;
+    --blue-100:#E0E9FA; --blue-200:#C6D6F6; --blue-700:#1F4BA3;
+    --purple-100:#F3E8FF; --purple-200:#E9D5FF; --purple-700:#7E22CE;
+    --sp-100:4px; --sp-200:8px; --sp-300:12px; --sp-400:16px;
+    --sp-500:20px; --sp-600:24px; --sp-800:32px; --sp-1000:40px; --sp-1200:48px;
+    --r-200:8px; --r-300:12px; --r-400:16px; --r-500:20px; --r-full:9999px;
+    --font-display:'Syne',system-ui,sans-serif;
+    --font-body:'Nunito Sans',system-ui,sans-serif;
+    --shadow-sm:0 0 8px rgba(5,5,5,.10);
+    --ease-out:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-body); color:var(--neutral-900);
+    -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(130% 90% at 50% -12%, var(--club-50) 0%, rgba(254,240,244,0) 46%),
+      linear-gradient(180deg, var(--neutral-100) 0%, var(--neutral-200) 62%);
+    background-attachment:fixed; min-height:100vh;
+    padding:var(--sp-800) var(--sp-400) var(--sp-1200);
+  }
+  .sheet{width:100%; max-width:1080px; margin:0 auto; display:flex; flex-direction:column; gap:var(--sp-1000)}
+  .sheet__head{display:flex; flex-direction:column; gap:var(--sp-200)}
+  .sheet__kicker{font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--club-600)}
+  .sheet__head h1{font-family:var(--font-display); font-weight:700; font-size:24px; line-height:30px}
+  .sheet__head p{font-size:15px; line-height:22px; color:var(--neutral-700); max-width:62ch}
+
+  .dir{display:flex; flex-direction:column; gap:var(--sp-400)}
+  .dir__head{display:flex; flex-wrap:wrap; align-items:baseline; gap:var(--sp-300); padding-bottom:var(--sp-300); border-bottom:1px solid var(--neutral-300)}
+  .dir__head h2{font-family:var(--font-display); font-weight:600; font-size:18px; line-height:24px}
+  .dir__tag{font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:4px 10px; border-radius:var(--r-full); background:var(--neutral-900); color:#fff}
+  .dir__tradeoff{font-size:14px; line-height:20px; color:var(--neutral-700); max-width:70ch}
+  .dir__tradeoff b{color:var(--neutral-900)}
+  .cards{display:flex; flex-direction:column; gap:var(--sp-400)}
+
+  /* ===== anatomia real do card (subconjunto: só o bloco de identidade) ===== */
+  .channel{position:relative; background:var(--neutral-50); border:1px solid var(--neutral-300); border-radius:var(--r-400); padding:var(--sp-500)}
+  .channel--best{border-color:var(--neutral-900); box-shadow:var(--shadow-sm)}
+  .channel__head{display:flex; flex-wrap:wrap; align-items:flex-start; column-gap:var(--sp-300); row-gap:var(--sp-300)}
+  .channel__logo{width:44px; height:44px; border-radius:var(--r-300); background:var(--neutral-100); border:1px solid var(--neutral-200); display:flex; align-items:center; justify-content:center; overflow:hidden; flex:none}
+  .channel__logo img{width:26px; height:26px; object-fit:contain}
+  .channel__id{flex:1 1 auto; min-width:0}
+  .channel__toprow{display:flex; align-items:center; flex-wrap:wrap; column-gap:var(--sp-300); row-gap:6px}
+  .channel__name{font-family:var(--font-display); font-weight:600; font-size:16px; line-height:22px; color:var(--neutral-900)}
+  .channel__meta{display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:2px}
+  .channel__sub{font-size:13px; line-height:16px; color:var(--neutral-600); font-weight:600}
+  .channel__rating{display:inline-flex; align-items:center; gap:4px}
+  .channel__rating svg{width:14px; height:14px; flex:none; fill:var(--amber-600)}
+  .channel__rating-val{font-size:13px; line-height:16px; font-weight:700; color:var(--neutral-900)}
+  .channel__badge{display:inline-flex; align-items:center; gap:5px; margin-left:auto; background:var(--green-100); color:var(--green-800); border:1px solid var(--green-200); font-weight:700; font-size:12px; line-height:1; letter-spacing:.02em; padding:6px 12px; border-radius:var(--r-full)}
+  .channel__badge svg{width:13px; height:13px; flex:none; fill:currentColor}
+
+  /* ===== NOVO: linha de flags (3ª linha do bloco de identidade) ===== */
+  .channel__flags{display:flex; align-items:center; flex-wrap:wrap; column-gap:var(--sp-300); row-gap:var(--sp-200); margin-top:var(--sp-300)}
+
+  /* --- marcação tipográfica de Estoque (usada nas direções A e B) --- */
+  .stock{display:inline-flex; align-items:center; gap:6px; font-size:13px; line-height:16px; font-weight:700}
+  .stock::before{content:""; width:7px; height:7px; border-radius:var(--r-full); flex:none; background:currentColor}
+  .stock--ok{color:var(--neutral-700)}
+  .stock--ok::before{background:var(--green-600)}
+  .stock--low{color:var(--amber-800)}
+  .stock--low::before{background:var(--amber-600)}
+  .stock--out{color:var(--neutral-600)}
+  .stock--out::before{background:var(--neutral-400)}
+
+  /* --- direção A: volume também tipográfico --- */
+  .volA{display:inline-flex; align-items:center; gap:5px; font-size:13px; line-height:16px; font-weight:700; color:var(--neutral-900)}
+  .volA svg{width:14px; height:14px; flex:none; fill:currentColor}
+  .volA--soft{color:var(--neutral-700); font-weight:600}
+  /* sem separador "·": quando a linha de flags quebra, o separador fica órfão no início da
+     linha nova (mesma armadilha registrada no ciclo 2). A separação fica no column-gap. */
+
+  /* --- direção B: volume em chip de contorno --- */
+  .volB{display:inline-flex; align-items:center; gap:5px; font-size:12px; line-height:1; padding:6px 10px; border-radius:var(--r-full); background:transparent; border:1px solid var(--neutral-300); color:var(--neutral-700); font-weight:700; letter-spacing:.01em}
+  .volB svg{width:13px; height:13px; flex:none; fill:currentColor}
+  .volB--top{border-color:var(--neutral-400); color:var(--neutral-900); border-width:1.5px}
+  .volB--side{border-style:dashed; color:var(--neutral-700)}
+
+  /* --- direção C: badge preenchido semântico (sistema de badge do DS) --- */
+  .badgeC{display:inline-flex; align-items:center; gap:5px; font-size:12px; line-height:1; padding:6px 10px; border-radius:var(--r-full); font-weight:700; letter-spacing:.02em}
+  .badgeC svg{width:13px; height:13px; flex:none; fill:currentColor}
+  .badgeC--green{background:var(--green-100); border:1px solid var(--green-200); color:var(--green-800)}
+  .badgeC--amber{background:var(--amber-100); border:1px solid var(--amber-200); color:var(--amber-800)}
+  .badgeC--blue{background:var(--blue-100); border:1px solid var(--blue-200); color:var(--blue-700)}
+  .badgeC--purple{background:var(--purple-100); border:1px solid var(--purple-200); color:var(--purple-700)}
+  .badgeC--neutral{background:var(--neutral-200); border:1px solid var(--neutral-400); color:var(--neutral-900)}
+  .badgeC--off{background:var(--neutral-300); border:1px solid var(--neutral-400); color:var(--neutral-700)}
+
+  /* ===== matriz de valores ===== */
+  .matrix{background:var(--neutral-50); border:1px solid var(--neutral-300); border-radius:var(--r-400); padding:var(--sp-500); display:flex; flex-direction:column; gap:var(--sp-400)}
+  .matrix__group{display:flex; flex-direction:column; gap:var(--sp-300)}
+  .matrix__label{font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--neutral-600)}
+  .matrix__row{display:flex; align-items:center; flex-wrap:wrap; gap:var(--sp-400) var(--sp-600)}
+  .matrix__cell{display:flex; flex-direction:column; gap:6px}
+  .matrix__cell small{font-size:11px; line-height:14px; color:var(--neutral-600); font-weight:600}
+  .matrix__none{font-size:13px; line-height:16px; color:var(--neutral-600); font-style:italic}
+
+  /* ===== estado novo: Estoque indisponível (card sem total e sem CTA) ===== */
+  .channel--out{background:var(--neutral-100)}
+  .channel--out .channel__name{color:var(--neutral-700)}
+  .channel__rows{display:grid; grid-template-columns:repeat(2,1fr); gap:var(--sp-400) var(--sp-300); margin-top:var(--sp-400)}
+  .channel__row{display:flex; flex-direction:column; gap:3px; min-width:0}
+  .channel__row dt{font-size:12px; line-height:16px; color:var(--neutral-600); font-weight:600}
+  .channel__row dd{font-size:15px; line-height:20px; color:var(--neutral-900); font-weight:700}
+  .channel__row dd.pending{color:var(--neutral-600); font-weight:600}
+  .channel__divider{height:1px; background:var(--neutral-200); margin:var(--sp-300) 0}
+  .channel__outnote{display:flex; align-items:center; gap:var(--sp-200); font-size:14px; line-height:18px; font-weight:700; color:var(--neutral-700); background:var(--neutral-200); border:1px solid var(--neutral-300); border-radius:var(--r-300); padding:12px var(--sp-400)}
+  .channel__outnote svg{width:16px; height:16px; flex:none; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+
+  .note{font-size:13px; line-height:20px; color:var(--neutral-700); background:var(--neutral-50); border:1px solid var(--neutral-300); border-left:3px solid var(--club-600); border-radius:var(--r-200); padding:var(--sp-300) var(--sp-400)}
+  .note b{color:var(--neutral-900)}
+  /* 3 cards lado a lado só quando cada um puder ter ~340px — a largura que o card tem na
+     página real (coluna direita a 1160). Abaixo disso, empilhado: card estreito faz a linha
+     de flags quebrar num lugar que a página real não quebraria, e a ficha mentiria. */
+  @media (min-width:1000px){
+    .cards{flex-direction:row; align-items:flex-start}
+    .cards > .channel{flex:1 1 0; min-width:0}
+  }
+</style>
+</head>
+<body>
+<main class="sheet">
+
+  <header class="sheet__head">
+    <span class="sheet__kicker">Peça 11 · ciclo 3 · fase 02</span>
+    <h1>Selo de tier — Estoque e Volume de Vendas</h1>
+    <p>Três direções para o mesmo problema: o card passa a ter <b>três marcações simultâneas</b>
+    (Melhor oferta + Estoque + Volume de Vendas). A escolha é do designer, olhando o renderizado.
+    Todos os valores usam tokens KZ — nenhuma cor nova. Ícones são SVG provisórios (pendência #1).</p>
+  </header>
+
+  <!-- ============ DIREÇÃO A ============ -->
+  <section class="dir">
+    <div class="dir__head">
+      <h2>Direção A — estado tipográfico</h2>
+      <span class="dir__tag">contenção máxima</span>
+    </div>
+    <p class="dir__tradeoff"><b>Aposta:</b> nenhum chip novo entra no card. Estoque e Volume viram
+    texto com marcador, na mesma linha. O card continua exatamente tão calmo quanto hoje.
+    <b>Risco:</b> a prova social quase desaparece — "Campeão de vendas" fica indistinguível de
+    um subtítulo, e o Produto pode achar que o selo não está "entregando" o que o brief pediu.</p>
+    <div class="cards">
+      <article class="channel channel--best">
+        <div class="channel__head">
+          <div class="channel__logo"><img src="assets/Shopee.svg" alt="Shopee"></div>
+          <div class="channel__id">
+            <div class="channel__toprow">
+              <h3 class="channel__name">Shopee</h3>
+              <span class="channel__badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg>Melhor oferta</span>
+            </div>
+            <div class="channel__meta">
+              <span class="channel__sub">Canal verificado</span>
+              <span class="channel__rating"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg><span class="channel__rating-val">4,6</span></span>
+            </div>
+            <div class="channel__flags">
+              <span class="stock stock--ok">Disponível</span>
+              <span class="volA"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v2a6 6 0 0 1-5 5.92V14h3v2H8v-2h3v-3.08A6 6 0 0 1 6 5V3Zm2 2a4 4 0 0 0 8 0H8ZM7 19h10v2H7v-2Z"/></svg>Campeão de vendas</span>
+            </div>
+          </div>
+        </div>
+      </article>
+      <article class="channel">
+        <div class="channel__head">
+          <div class="channel__logo"><img src="assets/tiktok.svg" alt="TikTok Shop"></div>
+          <div class="channel__id">
+            <div class="channel__toprow"><h3 class="channel__name">TikTok Shop</h3></div>
+            <div class="channel__meta">
+              <span class="channel__sub">Loja no TikTok Shop</span>
+              <span class="channel__rating"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg><span class="channel__rating-val">4,3</span></span>
+            </div>
+            <div class="channel__flags">
+              <span class="stock stock--low">Últimas unidades</span>
+              <span class="volA volA--soft"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l1.6 4.3 4.3 1.6-4.3 1.6L12 14.3l-1.6-4.3L6.1 8.4l4.3-1.6L12 2.5ZM18.5 14l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9.9-2.4ZM5.5 15l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7.7-1.9Z"/></svg>Lançamento</span>
+            </div>
+          </div>
+        </div>
+      </article>
+      <article class="channel">
+        <div class="channel__head">
+          <div class="channel__logo"><img src="assets/ybera.svg" alt="Ybera.com"></div>
+          <div class="channel__id">
+            <div class="channel__toprow"><h3 class="channel__name">Ybera.com</h3></div>
+            <div class="channel__meta">
+              <span class="channel__sub">Canal oficial Ybera</span>
+              <span class="channel__rating"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg><span class="channel__rating-val">4,8</span></span>
+            </div>
+            <div class="channel__flags">
+              <span class="stock stock--ok">Disponível</span>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+    <div class="matrix">
+      <div class="matrix__group">
+        <span class="matrix__label">Estoque — 3 valores</span>
+        <div class="matrix__row">
+          <div class="matrix__cell"><span class="stock stock--ok">Disponível</span></div>
+          <div class="matrix__cell"><span class="stock stock--low">Últimas unidades</span></div>
+          <div class="matrix__cell"><span class="stock stock--out">Indisponível</span></div>
+        </div>
+      </div>
+      <div class="matrix__group">
+        <span class="matrix__label">Volume de vendas — 4 valores (o 4º é a ausência)</span>
+        <div class="matrix__row">
+          <div class="matrix__cell"><span class="volA"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v2a6 6 0 0 1-5 5.92V14h3v2H8v-2h3v-3.08A6 6 0 0 1 6 5V3Zm2 2a4 4 0 0 0 8 0H8ZM7 19h10v2H7v-2Z"/></svg>Campeão de vendas</span></div>
+          <div class="matrix__cell"><span class="volA volA--soft"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 5-5v3h2V7h-6v2h3l-4 4-4-4-7 7 1 1Z"/></svg>Mais vendido</span></div>
+          <div class="matrix__cell"><span class="volA volA--soft"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l1.6 4.3 4.3 1.6-4.3 1.6L12 14.3l-1.6-4.3L6.1 8.4l4.3-1.6L12 2.5ZM18.5 14l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9.9-2.4Z"/></svg>Lançamento</span></div>
+          <div class="matrix__cell"><span class="matrix__none">(sem selo — não renderiza nada)</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DIREÇÃO B ============ -->
+  <section class="dir">
+    <div class="dir__head">
+      <h2>Direção B — chip de contorno</h2>
+      <span class="dir__tag">recomendada</span>
+    </div>
+    <p class="dir__tradeoff"><b>Aposta:</b> três altitudes explícitas. <b>Melhor oferta</b> é a
+    única pílula preenchida (o veredicto do comparador). <b>Volume de vendas</b> é chip de
+    contorno — presente, mas subordinado; peso da borda e do texto separam "Campeão" de
+    "Mais vendido", e "Lançamento" usa borda tracejada porque é escolha manual, não degrau da
+    mesma escada. <b>Estoque</b> é só texto com ponto, o mais leve, porque é o dado mais volátil
+    e o mais exposto a erro de limiar. <b>Risco:</b> mais uma forma no card — se o Produto pedir
+    um 4º selo depois, essa linha satura.</p>
+    <div class="cards">
+      <article class="channel channel--best">
+        <div class="channel__head">
+          <div class="channel__logo"><img src="assets/Shopee.svg" alt="Shopee"></div>
+          <div class="channel__id">
+            <div class="channel__toprow">
+              <h3 class="channel__name">Shopee</h3>
+              <span class="channel__badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg>Melhor oferta</span>
+            </div>
+            <div class="channel__meta">
+              <span class="channel__sub">Canal verificado</span>
+              <span class="channel__rating"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg><span class="channel__rating-val">4,6</span></span>
+            </div>
+            <div class="channel__flags">
+              <span class="volB volB--top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v2a6 6 0 0 1-5 5.92V14h3v2H8v-2h3v-3.08A6 6 0 0 1 6 5V3Zm2 2a4 4 0 0 0 8 0H8ZM7 19h10v2H7v-2Z"/></svg>Campeão de vendas</span>
+              <span class="stock stock--ok">Disponível</span>
+            </div>
+          </div>
+        </div>
+      </article>
+      <article class="channel">
+        <div class="channel__head">
+          <div class="channel__logo"><img src="assets/tiktok.svg" alt="TikTok Shop"></div>
+          <div class="channel__id">
+            <div class="channel__toprow"><h3 class="channel__name">TikTok Shop</h3></div>
+            <div class="channel__meta">
+              <span class="channel__sub">Loja no TikTok Shop</span>
+              <span class="channel__rating"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg><span class="channel__rating-val">4,3</span></span>
+            </div>
+            <div class="channel__flags">
+              <span class="volB volB--side"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l1.6 4.3 4.3 1.6-4.3 1.6L12 14.3l-1.6-4.3L6.1 8.4l4.3-1.6L12 2.5ZM18.5 14l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9.9-2.4Z"/></svg>Lançamento</span>
+              <span class="stock stock--low">Últimas unidades</span>
+            </div>
+          </div>
+        </div>
+      </article>
+      <article class="channel">
+        <div class="channel__head">
+          <div class="channel__logo"><img src="assets/ybera.svg" alt="Ybera.com"></div>
+          <div class="channel__id">
+            <div class="channel__toprow"><h3 class="channel__name">Ybera.com</h3></div>
+            <div class="channel__meta">
+              <span class="channel__sub">Canal oficial Ybera</span>
+              <span class="channel__rating"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg><span class="channel__rating-val">4,8</span></span>
+            </div>
+            <div class="channel__flags">
+              <span class="stock stock--ok">Disponível</span>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+    <div class="matrix">
+      <div class="matrix__group">
+        <span class="matrix__label">Estoque — 3 valores (tipográfico, o mais leve)</span>
+        <div class="matrix__row">
+          <div class="matrix__cell"><span class="stock stock--ok">Disponível</span></div>
+          <div class="matrix__cell"><span class="stock stock--low">Últimas unidades</span></div>
+          <div class="matrix__cell"><span class="stock stock--out">Indisponível</span></div>
+        </div>
+      </div>
+      <div class="matrix__group">
+        <span class="matrix__label">Volume de vendas — 4 valores (chip de contorno, com hierarquia interna)</span>
+        <div class="matrix__row">
+          <div class="matrix__cell">
+            <span class="volB volB--top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v2a6 6 0 0 1-5 5.92V14h3v2H8v-2h3v-3.08A6 6 0 0 1 6 5V3Zm2 2a4 4 0 0 0 8 0H8ZM7 19h10v2H7v-2Z"/></svg>Campeão de vendas</span>
+            <small>borda 1.5px + texto neutral-900</small>
+          </div>
+          <div class="matrix__cell">
+            <span class="volB"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 5-5v3h2V7h-6v2h3l-4 4-4-4-7 7 1 1Z"/></svg>Mais vendido</span>
+            <small>borda 1px + texto neutral-700</small>
+          </div>
+          <div class="matrix__cell">
+            <span class="volB volB--side"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l1.6 4.3 4.3 1.6-4.3 1.6L12 14.3l-1.6-4.3L6.1 8.4l4.3-1.6L12 2.5ZM18.5 14l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9.9-2.4Z"/></svg>Lançamento</span>
+            <small>tracejado = escolha manual, fora da escada</small>
+          </div>
+          <div class="matrix__cell"><span class="matrix__none">(sem selo — a linha colapsa)</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DIREÇÃO C ============ -->
+  <section class="dir">
+    <div class="dir__head">
+      <h2>Direção C — badge preenchido semântico</h2>
+      <span class="dir__tag">legibilidade máxima</span>
+    </div>
+    <p class="dir__tradeoff"><b>Aposta:</b> usa o sistema de badge do DS por cor (green / amber /
+    blue / purple / neutral), que já existe em <code>surface·text·border/badge/*</code>. Cada tier
+    é reconhecível de longe, sem ler. <b>Risco:</b> é o mural de badges — até 3 pílulas coloridas
+    por card, e o âmbar de "Últimas unidades" colide com o âmbar do aviso "a loja não entrega
+    neste CEP". Também empurra a página de volta pro tom promocional que os últimos ciclos
+    tiraram de propósito.</p>
+    <div class="cards">
+      <article class="channel channel--best">
+        <div class="channel__head">
+          <div class="channel__logo"><img src="assets/Shopee.svg" alt="Shopee"></div>
+          <div class="channel__id">
+            <div class="channel__toprow">
+              <h3 class="channel__name">Shopee</h3>
+              <span class="channel__badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg>Melhor oferta</span>
+            </div>
+            <div class="channel__meta">
+              <span class="channel__sub">Canal verificado</span>
+              <span class="channel__rating"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg><span class="channel__rating-val">4,6</span></span>
+            </div>
+            <div class="channel__flags">
+              <span class="badgeC badgeC--blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v2a6 6 0 0 1-5 5.92V14h3v2H8v-2h3v-3.08A6 6 0 0 1 6 5V3Zm2 2a4 4 0 0 0 8 0H8ZM7 19h10v2H7v-2Z"/></svg>Campeão de vendas</span>
+              <span class="badgeC badgeC--green">Disponível</span>
+            </div>
+          </div>
+        </div>
+      </article>
+      <article class="channel">
+        <div class="channel__head">
+          <div class="channel__logo"><img src="assets/tiktok.svg" alt="TikTok Shop"></div>
+          <div class="channel__id">
+            <div class="channel__toprow"><h3 class="channel__name">TikTok Shop</h3></div>
+            <div class="channel__meta">
+              <span class="channel__sub">Loja no TikTok Shop</span>
+              <span class="channel__rating"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg><span class="channel__rating-val">4,3</span></span>
+            </div>
+            <div class="channel__flags">
+              <span class="badgeC badgeC--purple"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l1.6 4.3 4.3 1.6-4.3 1.6L12 14.3l-1.6-4.3L6.1 8.4l4.3-1.6L12 2.5ZM18.5 14l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9.9-2.4Z"/></svg>Lançamento</span>
+              <span class="badgeC badgeC--amber">Últimas unidades</span>
+            </div>
+          </div>
+        </div>
+      </article>
+      <article class="channel">
+        <div class="channel__head">
+          <div class="channel__logo"><img src="assets/ybera.svg" alt="Ybera.com"></div>
+          <div class="channel__id">
+            <div class="channel__toprow"><h3 class="channel__name">Ybera.com</h3></div>
+            <div class="channel__meta">
+              <span class="channel__sub">Canal oficial Ybera</span>
+              <span class="channel__rating"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg><span class="channel__rating-val">4,8</span></span>
+            </div>
+            <div class="channel__flags">
+              <span class="badgeC badgeC--green">Disponível</span>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+    <div class="matrix">
+      <div class="matrix__group">
+        <span class="matrix__label">Estoque — 3 valores</span>
+        <div class="matrix__row">
+          <div class="matrix__cell"><span class="badgeC badgeC--green">Disponível</span></div>
+          <div class="matrix__cell"><span class="badgeC badgeC--amber">Últimas unidades</span></div>
+          <div class="matrix__cell"><span class="badgeC badgeC--off">Indisponível</span></div>
+        </div>
+      </div>
+      <div class="matrix__group">
+        <span class="matrix__label">Volume de vendas — 4 valores</span>
+        <div class="matrix__row">
+          <div class="matrix__cell"><span class="badgeC badgeC--blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v2a6 6 0 0 1-5 5.92V14h3v2H8v-2h3v-3.08A6 6 0 0 1 6 5V3Zm2 2a4 4 0 0 0 8 0H8ZM7 19h10v2H7v-2Z"/></svg>Campeão de vendas</span></div>
+          <div class="matrix__cell"><span class="badgeC badgeC--neutral"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 5-5v3h2V7h-6v2h3l-4 4-4-4-7 7 1 1Z"/></svg>Mais vendido</span></div>
+          <div class="matrix__cell"><span class="badgeC badgeC--purple"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l1.6 4.3 4.3 1.6-4.3 1.6L12 14.3l-1.6-4.3L6.1 8.4l4.3-1.6L12 2.5ZM18.5 14l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9.9-2.4Z"/></svg>Lançamento</span></div>
+          <div class="matrix__cell"><span class="matrix__none">(sem selo)</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="note"><b>Nota de cor:</b> blue e purple nunca foram usados nesta página. Entram aqui
+    só para provar a direção — se C for escolhida, é decisão de expandir a paleta do comparador,
+    que hoje é neutro + verde (veredicto) + âmbar (ressalva) + rosa (CTA).</p>
+  </section>
+
+  <!-- ============ ESTADO NOVO ============ -->
+  <section class="dir">
+    <div class="dir__head">
+      <h2>Estado novo — Estoque "Indisponível"</h2>
+      <span class="dir__tag">premissa 11</span>
+    </div>
+    <p class="dir__tradeoff">Decisão do designer (13/08): o canal fica <b>visível com o selo</b>,
+    sem total e sem CTA de compra — o que revoga a parte "sem estoque" do RF-006 e precisa de
+    referendo do Produto. Precisa ser distinguível do <b>"não entrega neste CEP"</b>, que usa
+    âmbar + borda tracejada. Aqui: neutro rebaixado, borda contínua, sem âmbar — <b>falta de
+    estoque não é ressalva de entrega</b>. Mostrado na direção B (a recomendada).</p>
+    <div class="cards">
+      <article class="channel channel--out">
+        <div class="channel__head">
+          <div class="channel__logo"><img src="assets/Shopee.svg" alt="Shopee"></div>
+          <div class="channel__id">
+            <div class="channel__toprow"><h3 class="channel__name">Shopee</h3></div>
+            <div class="channel__meta">
+              <span class="channel__sub">Marketplace parceiro</span>
+              <span class="channel__rating"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg><span class="channel__rating-val">4,6</span></span>
+            </div>
+            <div class="channel__flags">
+              <span class="stock stock--out">Indisponível</span>
+            </div>
+          </div>
+        </div>
+        <dl class="channel__rows">
+          <div class="channel__row"><dt>Preço do produto</dt><dd>R$ 179,90</dd></div>
+          <div class="channel__row"><dt>Frete</dt><dd class="pending">—</dd></div>
+        </dl>
+        <div class="channel__divider"></div>
+        <div class="channel__outnote">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+          Sem estoque nesta loja agora
+        </div>
+      </article>
+      <article class="channel" style="border-style:dashed; border-color:var(--neutral-400); background:var(--neutral-100)">
+        <div class="channel__head">
+          <div class="channel__logo"><img src="assets/tiktok.svg" alt="TikTok Shop"></div>
+          <div class="channel__id">
+            <div class="channel__toprow"><h3 class="channel__name" style="color:var(--neutral-700)">TikTok Shop</h3></div>
+            <div class="channel__meta">
+              <span class="channel__sub">Loja no TikTok Shop</span>
+              <span class="channel__rating"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l2.85 6.02 6.6.62-4.98 4.42 1.46 6.46L12 16.9l-5.79 3.42 1.46-6.46L2.7 8.84l6.6-.62L12 2.2Z"/></svg><span class="channel__rating-val">4,3</span></span>
+            </div>
+            <div class="channel__flags">
+              <span class="stock stock--ok">Disponível</span>
+            </div>
+          </div>
+        </div>
+        <div class="channel__divider"></div>
+        <div style="display:flex; align-items:center; gap:var(--sp-200); background:var(--amber-100); border:1px solid var(--amber-200); color:var(--amber-800); border-radius:var(--r-300); padding:12px var(--sp-400); font-size:14px; line-height:18px; font-weight:700">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex:none"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+          A loja não entrega neste CEP
+        </div>
+      </article>
+    </div>
+    <p class="note"><b>Comparação lado a lado:</b> à esquerda, sem estoque (neutro, borda contínua,
+    selo "Indisponível" na linha de flags). À direita, o estado que já existe: não entrega no CEP
+    (âmbar, borda tracejada, estoque segue "Disponível"). São causas diferentes e param a compra
+    por motivos diferentes — o critério do portão exige que não sejam confundíveis.</p>
+  </section>
+
+</main>
+</body>
+</html>
