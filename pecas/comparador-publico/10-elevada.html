@@ -270,15 +270,9 @@
   .channel__row dd.free{color:var(--green-800)}
   /* n500 sobre branco dá 2,18:1 — reprova WCAG AA (4.5:1) e o designer pegou no olho.
      n600 = 5,30:1, o mesmo par já validado no portão do ciclo 1. */
-  /* dois estados vazios, causas diferentes — e agora aparências diferentes:
-     `.pending`  = o dado NÃO EXISTE ("Não informado", "Calculado no checkout") — recuado, cinza.
-     `.await`    = falta uma AÇÃO SUA ("Informe o CEP") — tinta cheia + o mesmo pin do campo de
-                   CEP, que amarra visualmente o valor ao lugar onde se resolve.
-     Não usei sublinhado nem cor de link de propósito: o texto ainda não é clicável, e afordância
-     falsa é pior do que a indistinção que se quer corrigir. */
-  .channel__row dd.pending{color:var(--neutral-600); font-weight:600}
-  .channel__row dd.await{display:inline-flex; align-items:center; gap:5px; color:var(--neutral-900); font-weight:600}
-  .channel__row dd.await svg{width:13px; height:13px; flex:none; color:var(--neutral-600)}
+  /* estado vazio único: sem pin e sem tinta cheia, por decisão do designer (2026-08-13).
+     A distinção entre "falta ação sua" e "o dado não existe" fica só na copy. */
+  .channel__row dd.pending{color:var(--neutral-600); font-weight:400}
   .channel__divider{height:1px; background:var(--neutral-200); margin:var(--sp-300) 0}
   .channel__total{display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:2px}
   .channel__total-label{display:flex; flex-direction:column; align-items:flex-start; gap:6px}
@@ -748,10 +742,10 @@
         '</div>');
     const freteVal = ch.noFrete
       ? '<dd class="pending">Calculado no checkout</dd>'
-      : !hasCep ? '<dd class="await">'+PIN_LEAD+'Informe o CEP</dd>' : (info.free ? '<dd class="free">Grátis</dd>' : '<dd>'+info.freight.replace('+ frete ','')+'</dd>');
+      : !hasCep ? '<dd class="pending">Informe o CEP</dd>' : (info.free ? '<dd class="free">Grátis</dd>' : '<dd>'+info.freight.replace('+ frete ','')+'</dd>');
     const prazoVal = ch.noPrazo
       ? '<dd class="pending">Não informado</dd>'
-      : !hasCep ? '<dd class="await">'+PIN_LEAD+'Informe o CEP</dd>' : '<dd>'+info.prazo+'</dd>';
+      : !hasCep ? '<dd class="pending">Informe o CEP</dd>' : '<dd>'+info.prazo+'</dd>';
     /* .channel__panel: no card comum é um wrapper sem estilo; no card melhor é o painel branco
        de raio nos 4 cantos, recuado dentro da moldura preta. */
     el.innerHTML =

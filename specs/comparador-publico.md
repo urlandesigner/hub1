@@ -1607,3 +1607,17 @@ de comparação já usa.
 Fica registrado que este é o **terceiro tratamento** da mesma faixa em poucas rodadas (dentro do
 rodapé escuro → faixa branca → cinza → sem fundo). O que estabilizou foi parar de escolher cor e
 passar a usar o fundo que a página já tem.
+
+[2026-08-13] [fase 06 · ciclo 3] **Estados vazios: pin removido e peso aliviado** (designer).
+Reverte, por decisão dele, a distinção criada horas antes: o `Informe o CEP` perdeu o pin e a tinta
+cheia (`neutral-900`), e os três estados vazios voltaram a ser idênticos — a diferença entre
+"falta ação sua" e "o dado não existe" agora vive só na copy. Classe `.await` eliminada junto,
+para não deixar CSS morto. **Registrado como escolha, não como descuido**, para o achado não
+reaparecer numa crítica futura como se tivesse passado despercebido.
+Sobre "não devem ficar pretos nem cinza escuro": o preto saiu (todos em `neutral-600`), e em vez de
+descer a cor aliviei o **peso** de 600 para 400 — deixa o texto mais leve sem custar contraste. O
+degrau abaixo de `neutral-600` é `neutral-500` = **2,18:1**, que reprova AA de texto e é exatamente
+o tom que o designer mandou corrigir mais cedo hoje, pelo mesmo motivo. Fica em aberto se o peso 400
+resolveu; se ele pedir o tom mais claro, entra como segunda decisão consciente contra AA, junto com
+a borda do campo, e as duas apontam para o mesmo item 6 de `pendencias-tokens.md`: a rampa neutral
+não tem degrau utilizável entre 2,18:1 e 5,30:1.
