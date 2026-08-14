@@ -1621,3 +1621,15 @@ o tom que o designer mandou corrigir mais cedo hoje, pelo mesmo motivo. Fica em 
 resolveu; se ele pedir o tom mais claro, entra como segunda decisão consciente contra AA, junto com
 a borda do campo, e as duas apontam para o mesmo item 6 de `pendencias-tokens.md`: a rampa neutral
 não tem degrau utilizável entre 2,18:1 e 5,30:1.
+
+- **[2026-08-14] [fase 02 · ciclo 3] Largura e respiro do topo no mobile corrigidos** — a pedido
+  do designer, a partir de um print real de iPhone 16 Pro Max. Eram **dois** defeitos, não um:
+  (a) `.page` tinha `max-width:390px`, a largura do iPhone 12–15. Num aparelho de 430pt isso
+  deixava 20px mortos de cada lado e empurrava o `.hero-card` para **36px de margem** — o dobro
+  dos 16px que a composição pede. Medido: card de 358px numa tela de 430. Passou para
+  `max-width:430px`, que cobre os celulares grandes atuais; acima disso continua coluna centrada,
+  então tablet não estica (conferido em 768px: coluna de 430 centrada, como antes).
+  (b) `padding-top` era `--sp-800` (32px); virou `--sp-400` (16px), como o designer pediu.
+  Depois: 430pt → página 430px, card 398px com 16px de margem, respiro do topo 16px, sem
+  rolagem horizontal. Conferido também em 375px (card 343px, margem 16px) e 768px.
+  Espelho `10-elevada.html` sincronizado. **Não passou pelo portão.**
