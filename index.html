@@ -60,8 +60,25 @@
   @media (prefers-reduced-motion: reduce){.reveal{opacity:1; transform:none; animation:none}}
 
   /* topbar + hero */
-  .site-header{width:100%; display:flex; align-items:center; justify-content:center; padding:var(--sp-400); background:var(--neutral-50); border-bottom:1px solid var(--neutral-200)}
-  .site-header img{height:30px; width:auto}
+  /* logo à esquerda, indicação da influenciadora à direita. O logo era centralizado (pedido do
+     designer em 2026-07-15) — com a indicação ocupando a direita, centralizar deixaria o terço
+     esquerdo vazio. A indicação sai de cima da foto: lá era o elemento de menor peso semântico
+     da tela para uma informação que é atribuição comercial, não enfeite. */
+  /* banda branca sangra a viewport; o CONTEÚDO fica preso ao mesmo grid do `.page` e do rodapé
+     (max-width 1160 + gutter), senão o logo encosta na borda da tela enquanto a página começa
+     60px adentro. Mesma estrutura do `.footer__inner`. */
+  .site-header{width:100%; padding:var(--sp-400); background:var(--neutral-50); border-bottom:1px solid var(--neutral-200)}
+  .site-header__inner{width:100%; max-width:1160px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:var(--sp-400)}
+  .site-header img{height:30px; width:auto; flex:none}
+  /* sem blur nem fundo translúcido: aquilo servia para descolar da foto; sobre o header branco
+     o que dá o corpo é o próprio par avatar + nome. */
+  .site-header__ref{display:inline-flex; align-items:center; gap:var(--sp-200); min-width:0;
+    text-decoration:none; border:1px solid var(--neutral-300); border-radius:var(--r-full);
+    padding:4px var(--sp-300) 4px 4px; transition:background .2s ease, border-color .2s ease}
+  .site-header__ref:hover{background:var(--neutral-100); border-color:var(--neutral-400)}
+  .site-header__ref:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
+  .site-header__ref span:last-child{font-size:14px; line-height:18px; font-weight:700; color:var(--neutral-900);
+    min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
   /* ===== barra flutuante do produto — SÓ MOBILE =====
      Portada da peça irmã 07-comparador-premium, com UMA mudança estrutural: lá é uma pílula
      ancorada em `top/right`, e lá mesmo ela foi DESLIGADA no mobile com o motivo no CSS
@@ -88,11 +105,25 @@
   @media (prefers-reduced-motion: reduce){ .float-produto{transition:opacity 240ms linear; transform:none} }
   @media (min-width:1080px){ .float-produto{display:none} }
 
+  /* TESTE: toda a coluna esquerda dentro de um card. O card do CEP achata (vira só o campo),
+     senão fica card dentro de card; a foto perde a borda própria pelo mesmo motivo. */
+  /* margem lateral no mobile: o respiro vinha do padding do `.hero`, que foi zerado ao
+     encapsular — sem ela o card encosta nas bordas e o raio é cortado. No desktop o `.page`
+     já dá o gutter. */
+  /* respiro entre o card e a comparação: no mobile as colunas empilham e o vão vinha do
+     padding do `.cep-wrap`, que foi zerado ao encapsular — sem isto, "Onde comprar" encosta. */
+  .col-left{margin-bottom:var(--sp-800)}
+  .hero-card{background:var(--neutral-50); border:1px solid var(--neutral-300); border-radius:var(--r-500); padding:var(--sp-500); margin:0 var(--sp-400)}
+  .hero-card .hero{padding:0 0 var(--sp-500)}
+  .hero-card .cep-wrap{padding:0; margin-top:0}
+  .hero-card .cep{background:transparent; border:0; border-radius:0; padding:0}
+  .hero-card .hero__media{border:0}
   .hero{display:flex; flex-direction:column; align-items:center; text-align:center; padding:0 var(--sp-400) var(--sp-500); gap:var(--sp-400)}
   /* tilt 3D + brilho na foto — efeito portado da peça irmã 07-comparador-premium.
      A perspectiva mora no WRAPPER, não na foto: o `reveal` (que anima transform) fica no
      wrapper e o tilt na foto, senão o `forwards` do reveal venceria o transform do tilt. */
   .hero__figure{width:100%; position:relative; perspective:1200px}
+  .hero__title{font-family:var(--font-display); font-weight:600; font-size:24px; line-height:32px; letter-spacing:-.01em; padding:0 var(--sp-200)}
   .hero__media{width:100%; border-radius:var(--r-500); overflow:hidden; background:var(--neutral-100); border:1px solid var(--neutral-300); aspect-ratio:1/1; position:relative;
     transform:rotateX(var(--tiltx,0deg)) rotateY(var(--tilty,0deg)); transition:transform .15s ease-out}
   .hero__media img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .8s var(--ease-out)}
@@ -106,13 +137,8 @@
     .hero__glare{display:none}
   }
   .hero__media::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 62%,rgba(5,5,5,.18)); pointer-events:none}
-  .hero__referral{position:absolute; left:var(--sp-300); bottom:var(--sp-300); z-index:1; display:inline-flex; align-items:center; gap:var(--sp-200); background:rgba(255,255,255,.9); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); border-radius:var(--r-full); padding:6px 12px 6px 6px; text-decoration:none; cursor:pointer; transition:background .2s ease}
-  .hero__referral:hover{background:#fff}
-  .hero__referral:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
   .hero__avatar{width:24px; height:24px; border-radius:var(--r-full); background:var(--club-100); color:var(--club-700); display:flex; align-items:center; justify-content:center; flex:none}
   .hero__avatar svg{width:14px; height:14px}
-  .hero__referral span:last-child{font-size:14px; line-height:18px; font-weight:700; color:var(--neutral-900)}
-  .hero__title{font-family:var(--font-display); font-weight:600; font-size:24px; line-height:32px; letter-spacing:-.01em; padding:0 var(--sp-200)}
   /* SKU é chave interna (guarda-corpo de canal na spec), não informação de compra: saiu do fluxo
      abaixo do título — onde custava uma linha inteira de leitura no topo — e virou um chip discreto
      sobre a foto, custo zero de altura. Chip claro garante o contraste, que sobre a foto seria
@@ -126,17 +152,46 @@
   /* CEP */
   .cep-wrap{padding:0 var(--sp-400) var(--sp-500)}
   .cep{background:var(--neutral-50); border:1px solid var(--neutral-300); border-radius:var(--r-400); padding:var(--sp-400)}
-  .cep__lead{display:flex; align-items:center; gap:var(--sp-200); font-size:14px; line-height:18px; font-weight:600; color:var(--neutral-900); margin-bottom:var(--sp-300)}
-  .cep__lead svg{width:18px; height:18px; color:var(--neutral-600); flex:none}
   .cep__form{display:flex; gap:var(--sp-200)}
-  .cep__input{flex:1 1 auto; min-width:0; height:44px; border-radius:var(--r-300); border:1px solid var(--neutral-500); padding:0 var(--sp-400); font-family:var(--font-body); font-size:16px; font-weight:600; color:var(--neutral-900); background:var(--neutral-50)}
+  /* campo com LABEL FLUTUANTE (padrão outlined, tipo Gmail): o label começa dentro do campo,
+     fazendo o papel de placeholder, e sobe apoiado na borda quando o campo recebe foco ou já
+     tem conteúdo — continuando visível, que é o ponto: placeholder como label desaparece ao
+     digitar e deixa o campo sem nome (WCAG 3.3.2). Aqui existe um <label for> de verdade, então
+     o nome acessível não depende do visual.
+     Sem JS: `:placeholder-shown` é o detector de "campo vazio". */
+  /* ícone dentro do campo: `pointer-events:none` faz o clique atravessar para o input, que
+     ocupa a caixa inteira — a área do ícone continua clicável e foca o campo. */
+  .cep__field{position:relative; flex:1 1 auto; min-width:0}
+  .cep__icon{position:absolute; left:var(--sp-300); top:50%; transform:translateY(-50%);
+    width:18px; height:18px; color:var(--neutral-600); pointer-events:none;
+    transition:color 160ms var(--ease-out)}
+  .cep__icon svg{width:100%; height:100%; display:block}
+  .cep__input:focus ~ .cep__icon{color:var(--neutral-900)}
+  .cep--error .cep__icon{color:var(--red-700)}
+  /* padding-left = 12 (ícone) + 18 (largura) + 12 (respiro) */
+  /* borda de repouso em neutral-500 por decisão do designer (2026-08-13): neutral-600 lia como
+     preta. ⚠ 2,18:1 contra o mínimo de 3:1 do WCAG 1.4.11 para contorno de componente — a rampa
+     do DS não tem degrau entre 2,18 e 5,30. Registrado como bloqueio de portão e Δtoken (item 6
+     de pendencias-tokens.md). O foco continua em neutral-900, então o estado ativo é inequívoco. */
+  .cep__input{width:100%; height:44px; border-radius:var(--r-300); border:1px solid var(--neutral-500); padding:0 var(--sp-400) 0 42px; font-family:var(--font-body); font-size:16px; font-weight:600; color:var(--neutral-900); background:var(--neutral-50)}
   .cep__input::placeholder{color:var(--neutral-600); font-weight:400}
+  /* a dica de formato só aparece DEPOIS que o label sobe — senão os dois disputam o mesmo lugar */
+  .cep__input:placeholder-shown:not(:focus)::placeholder{color:transparent}
   .cep__input:focus{outline:none; border-color:var(--neutral-900); box-shadow:0 0 0 3px rgba(30,30,31,.08)}
+  /* label alinhado ao texto do campo (depois do ícone), tanto dentro quanto flutuado */
+  .cep__label{position:absolute; left:38px; top:22px; transform:translateY(-50%);
+    padding:0 4px; background:var(--neutral-50); color:var(--neutral-600);
+    font-family:var(--font-body); font-size:16px; font-weight:600; line-height:1;
+    pointer-events:none; white-space:nowrap;
+    transition:top 160ms var(--ease-out), font-size 160ms var(--ease-out), color 160ms var(--ease-out)}
+  .cep__input:focus ~ .cep__label,
+  .cep__input:not(:placeholder-shown) ~ .cep__label{top:0; font-size:12px; color:var(--neutral-700)}
+  .cep__input:focus ~ .cep__label{color:var(--neutral-900)}
+  @media (prefers-reduced-motion: reduce){ .cep__label{transition:none} }
+  .cep--error .cep__label{color:var(--red-700)}
   .cep__apply{flex:none; min-width:92px; height:44px; border:0; border-radius:var(--r-300); cursor:pointer; font-family:var(--font-body); font-weight:700; font-size:15px; background:var(--neutral-900); color:#fff; display:inline-flex; align-items:center; justify-content:center; gap:6px}
   .cep__apply:hover{background:var(--neutral-700)}
   .cep__apply:focus-visible{outline:2px solid var(--club-400); outline-offset:2px}
-  .cep__note{display:flex; align-items:center; gap:6px; margin-top:var(--sp-300); font-size:12px; line-height:16px; color:var(--neutral-600)}
-  .cep__note svg{width:13px; height:13px; flex:none}
   .cep--error .cep__input{border-color:var(--red-600); box-shadow:0 0 0 3px rgba(207,48,48,.10)}
   .cep__error{display:flex; align-items:center; gap:6px; margin-top:var(--sp-300); font-size:13px; line-height:18px; font-weight:600; color:var(--red-700)}
   .cep__error svg{width:15px; height:15px; flex:none}
@@ -215,7 +270,15 @@
   .channel__row dd.free{color:var(--green-800)}
   /* n500 sobre branco dá 2,18:1 — reprova WCAG AA (4.5:1) e o designer pegou no olho.
      n600 = 5,30:1, o mesmo par já validado no portão do ciclo 1. */
+  /* dois estados vazios, causas diferentes — e agora aparências diferentes:
+     `.pending`  = o dado NÃO EXISTE ("Não informado", "Calculado no checkout") — recuado, cinza.
+     `.await`    = falta uma AÇÃO SUA ("Informe o CEP") — tinta cheia + o mesmo pin do campo de
+                   CEP, que amarra visualmente o valor ao lugar onde se resolve.
+     Não usei sublinhado nem cor de link de propósito: o texto ainda não é clicável, e afordância
+     falsa é pior do que a indistinção que se quer corrigir. */
   .channel__row dd.pending{color:var(--neutral-600); font-weight:600}
+  .channel__row dd.await{display:inline-flex; align-items:center; gap:5px; color:var(--neutral-900); font-weight:600}
+  .channel__row dd.await svg{width:13px; height:13px; flex:none; color:var(--neutral-600)}
   .channel__divider{height:1px; background:var(--neutral-200); margin:var(--sp-300) 0}
   .channel__total{display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:2px}
   .channel__total-label{display:flex; flex-direction:column; align-items:flex-start; gap:6px}
@@ -297,10 +360,18 @@
     padding:var(--sp-1000) var(--sp-400)}
   .footer__inner{width:100%; max-width:1160px; margin:0 auto; padding:0 var(--sp-400);
     display:flex; flex-direction:column; align-items:center; text-align:center; gap:var(--sp-500)}
-  .footer__trust{display:flex; flex-wrap:wrap; justify-content:center; gap:var(--sp-400) var(--sp-600); width:100%}
+  /* garantias em FAIXA própria (branca), sem divisor: saíram do rodapé escuro porque respondem
+     ao passo 3 ("a compra é fechada na loja") — pertencem ao argumento, não à mobília. */
+  /* faixa SEM fundo próprio: o gradiente da página (que é `fixed`) aparece através dela. É
+     literalmente o mesmo tom do topo do site, não uma aproximação — e acompanha o gradiente em
+     vez de brigar com ele. Quem separa da seção branca acima é a troca de opaco para o fundo
+     da página, o mesmo contraste que a área de comparação já tem. */
+  .trust-band{width:100%; background:transparent; padding:var(--sp-1200) var(--sp-400)}
+  .trust-band__inner{width:100%; max-width:1160px; margin:0 auto; padding:0 var(--sp-400);
+    display:flex; flex-wrap:wrap; justify-content:center; gap:var(--sp-400) var(--sp-600); text-align:left}
   .trust__item{flex:1 1 240px; display:flex; align-items:center; justify-content:flex-start; text-align:left; gap:var(--sp-300);
-    font-size:14px; line-height:20px; font-weight:600; color:var(--neutral-200)}
-  .trust__item svg{width:18px; height:18px; color:var(--neutral-200); flex:none}
+    font-size:14px; line-height:20px; font-weight:600; color:var(--neutral-700)}
+  .trust__item svg{width:18px; height:18px; color:var(--neutral-600); flex:none}
   /* selo Reclame Aqui — PLACEHOLDER. A marca e o selo oficial são ativos de terceiro
      (licenciados, servidos pelo próprio RA com link de verificação) e a reputação é dado
      DINÂMICO. Aqui é marcador de posição/layout, não o selo real. Ver pendência #5. */
@@ -320,8 +391,6 @@
   .footer__ra-rep{font-family:var(--font-body); font-size:14px; line-height:1; font-weight:700;
     text-transform:uppercase; color:#4B5963; display:block}
   .footer__ra-logo{width:80px; height:12.75px; display:block}
-  .footer__divider{width:100%; height:1px; background:var(--alfa-10-light);
-    margin-top:calc(var(--sp-200) + var(--sp-500)); margin-bottom:var(--sp-300)}
   .footer__brand{display:flex; flex-direction:column; align-items:center; gap:var(--sp-500)}
   /* altura do logo como fonte única: o alinhamento dos links do rodapé no desktop deriva dela */
   .site-footer__logo{height:var(--footer-logo-h); width:auto}
@@ -365,6 +434,8 @@
     body{padding-bottom:0}
     .page{max-width:1160px; padding:var(--sp-1000) var(--sp-800) var(--sp-2000)}
     .site-header{padding:var(--sp-500) var(--sp-800)}
+    .site-header__inner{padding:0 var(--sp-800)}
+    .howto__inner{padding:0 var(--sp-800)}
     .site-footer{padding:var(--sp-1200) var(--sp-800)}
     .footer__inner{padding:0 var(--sp-800)}
     .trust__item{justify-content:center; text-align:center}
@@ -372,11 +443,12 @@
       display:grid; grid-template-columns:minmax(0,40fr) minmax(0,60fr);
       gap:var(--sp-1000); align-items:start;
     }
-    .col-left{position:sticky; top:var(--sp-800)}
+    .col-left{position:sticky; top:var(--sp-800); margin-bottom:0}
     .hero{padding:0; align-items:flex-start; text-align:left; gap:var(--sp-300)}
     .hero__title{font-size:28px; line-height:36px; padding:0}
     .hero__lead{margin-top:0; max-width:none}
     .cep-wrap{padding:0; margin-top:var(--sp-500)}
+    .hero-card{margin:0}
     .compare{padding:0}
     /* desktop: mesmo card, só a grade de detalhes vira 3 colunas e o CTA não estica */
     .channel__rows{grid-template-columns:repeat(3,1fr)}
@@ -394,16 +466,13 @@
     .footer__inner{display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:start;
       text-align:left; column-gap:var(--sp-1600); row-gap:var(--sp-1200);
       grid-template-areas:
-        "trust trust"
-        "div   div"
         "brand links"
         "copy  ra";}
     /* garantias acompanhando a grid: itens do tamanho do conteúdo e distribuídos ponta a ponta,
        para o 1º encostar na esquerda e o 3º na direita. Com `flex:1 1 240px` as CAIXAS já ficavam
        alinhadas, mas o texto do último parava antes da borda (sobrava caixa à direita dele). */
-    .footer__trust{grid-area:trust; justify-content:space-between; flex-wrap:nowrap; gap:var(--sp-600)}
+    .trust-band__inner{justify-content:space-between; flex-wrap:nowrap; gap:var(--sp-600); padding:0 var(--sp-800)}
     .trust__item{flex:0 1 auto}
-    .footer__divider{grid-area:div; margin:0}
     .footer__brand{grid-area:brand; align-items:flex-start; gap:var(--sp-400)}
     /* links alinhados ao topo do TEXTO, não ao do logo: descem exatamente a altura do logo
        mais o gap do bloco de marca. Deriva de `--footer-logo-h` e do gap real do `.footer__brand`,
@@ -418,7 +487,15 @@
 <body>
 <div class="grain" aria-hidden="true"></div>
 
-<header class="site-header reveal d-0"><img src="pecas/comparador-publico/assets/logo-black.svg" alt="Ybera"></header>
+<header class="site-header reveal d-0">
+ <div class="site-header__inner">
+  <img src="pecas/comparador-publico/assets/logo-black.svg" alt="Ybera">
+  <a class="site-header__ref" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Ver perfil de Camila no Instagram">
+    <span class="hero__avatar" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor" stroke="none"/></svg></span>
+    <span>Indicação de Camila</span>
+  </a>
+ </div>
+</header>
 
 <!-- barra flutuante do produto (só mobile) — aparece quando o hero sai da tela.
      aria-hidden: duplica o <h1>, não deve ser anunciada de novo pelo leitor de tela. -->
@@ -430,22 +507,20 @@
 <div class="page">
   <div class="layout">
    <div class="col-left">
+  <div class="hero-card">
   <section class="hero">
-    <h1 class="hero__title reveal d-0">Óleo de Mirra&nbsp;Reparador 90ml</h1>
+    <h1 class="hero__title reveal d-0">Óleo de Mirra Reparador 90ml</h1>
     <div class="hero__figure reveal d-1">
       <div class="hero__media" id="prodTilt">
         <img src="pecas/comparador-publico/assets/produto-hero.jpg" alt="Óleo de Mirra Reparador 90ml">
         <span class="hero__glare" aria-hidden="true"></span>
         <span class="hero__sku">SKU 150264</span>
-        <a class="hero__referral" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Ver perfil de Camila no Instagram">
-          <span class="hero__avatar" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor" stroke="none"/></svg></span>
-          <span>Indicação de Camila</span>
-        </a>
       </div>
     </div>
   </section>
 
   <div class="cep-wrap reveal d-2"><div id="cepSlot"></div></div>
+  </div>
    </div>
 
    <div class="col-right">
@@ -492,9 +567,8 @@
   </div>
 </section>
 
-<footer class="site-footer">
- <div class="footer__inner">
-  <div class="footer__trust">
+<section class="trust-band" aria-label="Garantias da compra">
+  <div class="trust-band__inner">
     <div class="trust__item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 7.6 8 9 4.5-1.4 8-4 8-9V6l-8-3Z"/></svg>
       Produto original nos canais oficiais
@@ -508,11 +582,14 @@
       Você escolhe onde comprar, sem custo extra
     </div>
   </div>
+</section>
+
+<footer class="site-footer">
+ <div class="footer__inner">
   <!-- Selo de REPUTAÇÃO do Reclame Aqui, reproduzindo o widget oficial (mesmo que está no rodapé
        da KaBuM): caixa 137×48, borda 1px #A4C929, raio 4px, carinha 38px + "ÓTIMO" + wordmark 80px.
        Os dois SVGs são os ARQUIVOS OFICIAIS do RA (s3/raichu-beta), baixados para assets/.
        Em produção isto é um embed servido pelo RA, com link para a página da empresa. Pendência #5. -->
-  <div class="footer__divider" aria-hidden="true"></div>
   <div class="footer__brand">
     <img class="site-footer__logo" src="pecas/comparador-publico/assets/logo-white.svg" alt="Ybera">
     <p class="site-footer__privacy">Você navega sem cadastro, nenhum dado pessoal é coletado nesta página. O CEP, quando informado, não é armazenado.</p>
@@ -671,10 +748,10 @@
         '</div>');
     const freteVal = ch.noFrete
       ? '<dd class="pending">Calculado no checkout</dd>'
-      : !hasCep ? '<dd class="pending">Informe o CEP</dd>' : (info.free ? '<dd class="free">Grátis</dd>' : '<dd>'+info.freight.replace('+ frete ','')+'</dd>');
+      : !hasCep ? '<dd class="await">'+PIN_LEAD+'Informe o CEP</dd>' : (info.free ? '<dd class="free">Grátis</dd>' : '<dd>'+info.freight.replace('+ frete ','')+'</dd>');
     const prazoVal = ch.noPrazo
       ? '<dd class="pending">Não informado</dd>'
-      : !hasCep ? '<dd class="pending">Informe o CEP</dd>' : '<dd>'+info.prazo+'</dd>';
+      : !hasCep ? '<dd class="await">'+PIN_LEAD+'Informe o CEP</dd>' : '<dd>'+info.prazo+'</dd>';
     /* .channel__panel: no card comum é um wrapper sem estilo; no card melhor é o painel branco
        de raio nos 4 cantos, recuado dentro da moldura preta. */
     el.innerHTML =
@@ -696,9 +773,18 @@
     if(which === 'ref'){
       cepSlot.innerHTML =
         '<div class="cep">'+
-          '<div class="cep__lead">'+PIN_LEAD+'Consultar valor do frete</div>'+
-          '<div class="cep__form"><input class="cep__input" inputmode="numeric" placeholder="00000-000" aria-label="Seu CEP" id="cepInput">'+
-          '<button class="cep__apply" id="cepApply">Ver frete</button></div>'+
+          /* sem aria-label: o <label for> visível é o nome acessível — aria-label o sobreporia
+             e o que o leitor de tela anuncia deixaria de ser o que está na tela.
+             O ícone vem DEPOIS do input no DOM para o seletor `:focus ~ .cep__icon` alcançá-lo,
+             e é decorativo (aria-hidden): quem nomeia o campo é o <label>. */
+          '<div class="cep__form">'+
+            '<div class="cep__field">'+
+              '<input class="cep__input" id="cepInput" inputmode="numeric" autocomplete="postal-code" placeholder="00000-000">'+
+              '<label class="cep__label" for="cepInput">CEP para o frete</label>'+
+              '<span class="cep__icon" aria-hidden="true">'+PIN_LEAD+'</span>'+
+            '</div>'+
+            '<button class="cep__apply" id="cepApply">Ver frete</button>'+
+          '</div>'+
         '</div>';
       document.getElementById('cepApply').addEventListener('click', applyFromInput);
       document.getElementById('cepInput').addEventListener('keydown', e=>{ if(e.key==='Enter') applyFromInput(); });

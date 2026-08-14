@@ -80,8 +80,23 @@
 - **Impacto:** rodapé do comparador público — superfície voltada ao cliente final, onde credencial
   incorreta vira risco de confiança, não só de layout.
 
+## 6. Rampa neutral não tem degrau para BORDA DE CAMPO acessível
+- **Origem:** ciclo 3 de `comparador-publico` (2026-08-13), no campo de CEP.
+- **Problema:** o WCAG 1.4.11 exige **3:1** para contorno de componente de UI. Contra o branco:
+  `neutral-400` = 1,66:1 · `neutral-500` = **2,18:1** · `neutral-600` = **5,30:1**. Não existe
+  degrau entre 2,18 e 5,30 — ou a borda reprova, ou ela fica visivelmente escura (o designer leu
+  `neutral-600` a 1px como "borda preta", e tem razão: é o mesmo tom do texto secundário).
+- **Estado atual da peça:** `neutral-500` por decisão do designer, ou seja **reprovando 1.4.11**.
+  Registrado também como bloqueio candidato no portão do ciclo 3.
+- **Decisão pendente:** criar um degrau de borda por volta de `#8A8A8E` (~3,4:1), ou um token
+  semântico `border/field` que resolva o caso sem escurecer a moldura visualmente. Fills não
+  resolvem: campo branco sobre card branco dá 1,03:1, e tingir o campo mudaria a direção visual.
+- **Dono:** guardião do DS. **Impacto:** todo input com borda sobre superfície clara, em qualquer
+  superfície Ybera — não é específico desta peça.
+
 ---
 Changelog:
+- 2026-08-13 — +item 6 (borda de campo acessível) no ciclo 3 de `comparador-publico`.
 - 2026-08-13 — +item 5 (selo Reclame Aqui) na fase 02 do ciclo 3 de `comparador-publico`.
 - 2026-08-13 — +item 4 (sombra de hover) durante a fase 02 do ciclo 3 de `comparador-publico`.
 - 2026-07-14 — criado no fechamento do ciclo `comparador-publico` (Fase 04).

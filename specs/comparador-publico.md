@@ -1417,3 +1417,193 @@ tocar o desktop, onde a grade é de 3 colunas e cada campo tem a sua. Não mexi 
 no checkout" é a redação decidida na premissa 15 (copy segue a causa), então o ajuste tinha que ser
 de layout. Medido a 375px: célula do Frete 301px (era ~145) e valor em **1 linha** nos 3 canais.
 A 1280px: 3 colunas de 189px, `grid-column:auto`, tudo na mesma linha, sem regressão.
+
+[2026-08-13] [fase 05→06 · ciclo 3] Crítica externa (formato senior product designer) trazida pelo
+designer, tratada **por etapas**, a pedido dele. Duas decisões desta etapa:
+- **CEP NÃO muda para a coluna da direita** (recusado pelo designer): empurraria os cards para
+  baixo, reduzindo quantos canais cabem na primeira dobra — que é o ativo da página. O achado da
+  crítica (o card diz "Informe o CEP" e o campo está ~1000px à esquerda) continua **válido e em
+  aberto**; a correção de menor custo, ainda não aplicada, é tornar o próprio "Informe o CEP" um
+  controle que dá foco no campo existente.
+- **Campo de CEP reconstruído com LABEL FLUTUANTE** (padrão outlined, referência Gmail, pedido do
+  designer) resolvendo junto o achado de acessibilidade: o placeholder fazia papel de label, e
+  placeholder desaparece ao digitar, deixando o campo sem nome (WCAG 3.3.2). Agora existe
+  `<label for="cepInput">CEP</label>` de verdade; **removi o `aria-label="Seu CEP"`** que existia,
+  porque ele sobreporia o label visível e o leitor de tela anunciaria algo diferente do que está na
+  tela. Adicionado `autocomplete="postal-code"`.
+Implementação sem JS: `:placeholder-shown` é o detector de "campo vazio", e a dica de formato
+(`00000-000`) só aparece **depois** que o label sobe — senão os dois disputariam o mesmo lugar.
+`prefers-reduced-motion` desliga a transição. Estado de erro tinge o label de `red-700`.
+**Verificado nos 4 estados** (medido; ver nota de método abaixo): vazio+sem foco → label dentro do
+campo, centro a 22px do topo (= centro do campo), 16px, `neutral-600`, placeholder transparente ·
+com foco → label em cima da borda (desvio **0**), 12px, `neutral-900`, placeholder "00000-000"
+aparece · preenchido+sem foco → segue em cima da borda, 12px, `neutral-700` · esvaziou → desce de
+volta. Console limpo.
+**Nota de método (nova, vale para as próximas verificações):** `:focus` não casa quando
+`document.hasFocus()` é false — a aba do painel nasce sem foco de janela, então `input.focus()` via
+JS mudava o `activeElement` mas NÃO ativava as regras `:focus` do CSS. Cheguei a medir "o label não
+sobe no foco" e era falso negativo. Foi preciso um clique real no documento para dar foco de janela
+antes de medir. Terceiro artefato de método deste ciclo, junto do rAF congelado e do viewport zero.
+**Efeito colateral declarado:** a borda do campo passou de `neutral-500` (2,18:1) para `neutral-600`
+(5,30:1), fechando o bloqueio WCAG 1.4.11 que eu havia registrado como candidato de portão — o
+mínimo para contorno de componente de UI é 3:1. Não foi pedido explicitamente; é o mesmo defeito da
+família que o designer já mandou corrigir duas vezes hoje, e eu estava reconstruindo o campo.
+
+[2026-08-13] [fase 06 · ciclo 3] **Bloco de CEP compactado + ícone dentro do campo.** Saiu a linha
+"Consultar valor do frete" (o label dentro do campo assumiu o papel) e o pin virou ícone interno,
+reaproveitando a constante `PIN_LEAD` — que teria virado órfã. Bloco de **106px → 78px**. Removido
+também o CSS de `.cep__note`, morto desde que a microcopy de LGPD saiu.
+Desdobramento apontado pelo designer: com a linha fora, o campo passou a dizer só *o que preencher*,
+não *o que resolve*. Medi o espaço útil dentro do campo e a copy foi para o próprio label. Precisou
+de **dois passos**: "CEP para calcular o frete" cabia no desktop (180px em 230 úteis) mas **não no
+mobile** (151px úteis) — o label passava por baixo do botão "Ver frete", verificado no render.
+Ficou **"CEP para o frete"** (119px), que cabe nos dois. Lição: medir o espaço útil no breakpoint
+MAIS APERTADO antes de decidir copy que vive dentro de um componente.
+
+[2026-08-13] [fase 06 · ciclo 3] **Indicação da influenciadora saiu de cima da foto e foi para o
+header, à direita.** Atende o achado da crítica externa: a atribuição comercial estava no elemento de
+menor peso semântico da tela, sobreposta à imagem como se fosse enfeite. No header ela é estrutura.
+Ganhou **borda** (`neutral-300`, pílula) a pedido do designer, para ler como badge; perdeu o blur e o
+fundo translúcido, que existiam só para descolar da foto. **O logo voltou para a esquerda** —
+reverte o pedido de centralizar de 2026-07-15, agora que a direita tem conteúdo.
+Registro de um mal-entendido meu, para não se repetir: interpretei "levar para o canto direito do
+header" como sendo o NOME DO PRODUTO e cheguei a movê-lo, junto com CSS morto e um H1 no masthead.
+O designer corrigiu — era o badge de indicação. Desfeito por inteiro: o `<h1>` voltou ao hero acima
+da imagem, `.hero__title` restaurado, e as 4 regras de `.hero__referral` (o pill sobre a foto)
+removidas por já não terem uso.
+**Pergunta do designer ainda EM ABERTO, não respondida:** "levar o nome do produto para baixo da
+imagem seria ganho de UX?".
+**Header agora respeita a grade do site** (pedido do designer): era banda full-bleed com padding
+próprio, começando a 32px da viewport, enquanto o conteúdo da página começa a 92px no desktop —
+desalinhado em 60px. Ganhou `.site-header__inner` com `max-width:1160px` e gutter igual ao do `.page`
+e do `.footer__inner`. Medido a 1280: logo em **92px** = início da coluna esquerda; badge terminando
+em **1188px** = fim da coluna direita; desalinhamento **0** nos dois lados, e o rodapé (que já
+seguia a grade) confirma o mesmo 92px. A 375px: 0 nos dois lados também.
+
+[2026-08-13] [fase 06 · ciclo 3] **Nome do produto movido para ABAIXO da imagem** — e vale registrar
+como a decisão foi tomada, porque eu errei o método antes de acertar. O designer perguntou se havia
+ganho de UX; respondi de princípio, sem olhar, que não haveria. Ele cobrou se eu tinha de fato
+avaliado. Não tinha. Montei as duas versões na página e medi:
+- **Empatam no que é mensurável:** altura do hero 443px nas duas, "Onde comprar" começa em y=640 nas
+  duas, e o órfão do "90ml" continua em 2 linhas nas duas (é largura de coluna contra 28px, não
+  posição — isso da minha resposta original se sustentou).
+- **O que muda:** a imagem sobe 80px e passa a ser a primeira coisa depois do header.
+**Veredicto revisado:** vale mover, não por métrica (elas empataram) mas por **coerência com a
+direção estética registrada** — "calor editorial de marca de beleza" e "parece a vitrine da própria
+influenciadora". Foto liderando é entrada editorial; nome liderando é ficha de e-commerce. O nome
+vira legenda da foto. Decisão do designer: aplicar.
+Ajuste que veio junto: com a troca, imagem→nome era 16px e nome→CEP 20px — quase iguais, e o nome
+flutuava entre os dois sem pertencer a nenhum. Virou **12px / 32px** nos dois breakpoints, que é o
+que faz o nome ler como legenda da imagem em vez de rótulo do campo de CEP.
+Os delays do `reveal` trocaram junto (figura d-0, nome d-1) para o page-load orquestrado seguir a
+nova ordem de leitura em vez de acender o nome antes da foto que ele legenda.
+**Lição de método registrada:** "avaliar" não é argumentar de princípio. Duas versões renderizadas e
+medidas custaram uma rodada e mudaram minha recomendação.
+
+[2026-08-13] [fase 06 · ciclo 3] **Os dois estados vazios deixaram de ser gêmeos visuais.** Achado
+da crítica: "Informe o CEP" e "Não informado" eram ambos `neutral-600` — um pede AÇÃO do cliente,
+o outro informa que o dado NÃO EXISTE, e ao olho eram idênticos. A copy já estava certa (é a regra
+da premissa 15, agora exigida também pelo brief v1.9); faltava o visual acompanhar.
+- `.pending` (dado ausente: "Não informado", "Calculado no checkout") — inalterado, `neutral-600`.
+- `.await` (falta ação: "Informe o CEP") — `neutral-900` + o **mesmo pin do campo de CEP**, que
+  amarra visualmente o valor ao lugar onde ele se resolve.
+**Recusei a sugestão original de dar cara de link** (sublinhado / cor de link): o texto ainda não é
+clicável, e afordância falsa é defeito pior do que a indistinção que se queria corrigir. Se e quando
+o "Informe o CEP" virar controle que foca o campo (prioridade 1 da crítica, ainda não aplicada),
+aí a cara de link passa a ser honesta.
+
+[2026-08-13] [fase 06 · ciclo 3] **Órfão do "90ml" resolvido com `text-wrap:balance`**, uma
+declaração, no lugar de `&nbsp;` cravado. Medido linha a linha com Range (a caixa do H1 mede a
+largura total e esconderia o efeito): **sem balance 295px + 61px** — o "90ml" sozinho numa linha —,
+**com balance 161px + 196px**, duas linhas equilibradas. Escolhi `balance` em vez de `&nbsp;` porque
+o dataset de produto muda: `&nbsp;` conserta ESTE nome e quebra no próximo; `balance` é o browser
+distribuindo, e continua valendo para qualquer nome.
+
+[2026-08-13] [fase 06 · ciclo 3] **Borda do campo de CEP no estado de repouso: `neutral-600` →
+`neutral-500`**, por decisão do designer ("está com borda preta"). Ele tem razão na leitura:
+`neutral-600` é o mesmo tom do texto secundário, e a 1px lê como preto.
+**Consequência assumida, não escondida:** a borda cai de 5,30:1 para **2,18:1**, abaixo do mínimo de
+3:1 do WCAG 1.4.11 para contorno de componente. É uma REGRESSÃO consciente do bloqueio que eu mesmo
+tinha fechado horas antes ao reconstruir o campo. Fica como bloqueio candidato no portão.
+A causa raiz não é a peça, é o DS: contra o branco, a rampa neutral oferece 1,66 · 2,18 · 5,30 —
+**não existe degrau perto de 3:1**. Ou a borda reprova, ou fica visivelmente escura. Registrado como
+**item 6 de `pendencias-tokens.md`** (proposta: degrau ~`#8A8A8E` ≈ 3,4:1, ou um token semântico
+`border/field`), com dono no guardião do DS e impacto em todo input com borda sobre superfície clara
+— não é específico desta peça. Fills não resolvem: campo branco sobre card branco dá 1,03:1.
+Mitigação que permanece: o **foco** continua em `neutral-900` com halo, então repouso × ativo seguem
+inequívocos; o que reprova é só a identificação do campo em repouso.
+
+[2026-08-13] [fase 06 · ciclo 3] **Nome do produto REVERTIDO para acima da imagem**, por preferência
+do designer depois de ver as duas versões no ar. Fica o registro de que a decisão foi tomada
+olhando, não argumentando — que é o critério certo, e valeu para os dois lados: eu argumentei
+contra mover, depois medi e mudei de recomendação, e o designer testou e preferiu o original.
+Revertido também o espaçamento 12/32 (mobile), que existia só para o nome funcionar como legenda da
+foto — voltou ao 16/20 original; no desktop o gap de 12px é o valor de ciclos anteriores e não foi
+tocado. **`text-wrap:balance` MANTIDO**: resolve o órfão independentemente da posição, e com o nome
+no topo as linhas ficam 188px + 228px em vez de 295px + 61px.
+Aprendizado que sobra da ida e volta: mover um elemento e não recalibrar a tipografia deixa a
+mudança pela metade — o nome desceu como "legenda" mas continuou com 28px de título, e foi isso que
+o designer sentiu como coluna esquerda errada antes mesmo de identificar a causa.
+
+[2026-08-13] [fase 06 · ciclo 3] **`text-wrap:balance` removido do título** — quebra natural, a
+pedido do designer. Linhas voltam a 345px + 72px ("90ml" sozinho na segunda). Isso **reverte a
+correção do órfão** apontado na crítica: o item sai da lista de pendências e passa a ser decisão
+registrada do designer, não defeito em aberto. Se alguém reabrir o assunto numa rodada futura, a
+resposta é esta entrada.
+
+[2026-08-13] [fase 06 · ciclo 3] **Garantias viraram FAIXA branca própria, entre "Como funciona" e o
+rodapé** (designer). Pergunta dele era "antes ou depois da seção?" — resposta: já estavam depois, o
+que mudava o peso era o BLOCO. No rodapé escuro elas eram lidas como letra miúda; agora fecham o
+argumento, respondendo ao passo 3 ("a compra é fechada na loja"). Removidos: o divisor que eu tinha
+posto acima delas e o divisor do rodapé, que ficou órfão quando a barra saiu (era ele que separava
+garantias de marca — sem elas, não separava nada). Cores invertidas para fundo claro:
+texto `neutral-700` (8,04:1) e ícone `neutral-600` (5,30:1).
+**Correção de grade descoberta no caminho:** "Como funciona" estava a **76px** da borda enquanto
+página, header e rodapé estão a **92px** — 16px fora, defeito que eu introduzi ao criar a seção
+(usei o gutter de mobile no desktop). Corrigido; a faixa nova nasceu já alinhada. Os quatro blocos
+agora batem em 92px.
+**Redundância que a aproximação expõe** (avisada antes de mover, mantida por decisão de olhar
+primeiro): "canais oficiais" aparece no passo 1 e na garantia 1; "loja/canal" reaparece em quase
+todas. Continua em aberto.
+**Nota de processo, por honestidade:** fiz o recorte do bloco com regex e **corrompi o markup** —
+itens ficaram órfãos dentro da seção e sobrou `</div>` solto. Detectado por asserção de DOM (3
+`.trust__item` na página, 1 dentro da faixa), não por acaso. Reescrevi o trecho inteiro à mão e
+validei o balanceamento (51 `<div>` / 51 `</div>`). Lição: recorte estrutural de HTML por regex em
+arquivo com indentação irregular é frágil — reescrever o bloco sai mais barato que remendar.
+
+[2026-08-13] [fase 06 · ciclo 3] **TESTE: coluna esquerda inteira dentro de um card** (pedido do
+designer). `.hero-card` envolve título + foto + campo de CEP, com fundo `neutral-50`, borda
+`neutral-300` e raio `--r-500`. Para não virar card dentro de card, o card do CEP **achatou**
+(fundo transparente, sem borda, sem padding — vira só o campo) e a foto perdeu a borda própria.
+Bug corrigido na verificação: no mobile o card nascia com **375px**, encostado nas duas bordas e com
+o raio cortado — o respiro lateral vinha do padding do `.hero`, que eu zerei ao encapsular. Ganhou
+`margin:0 var(--sp-400)` no mobile (343px, gutter 16/16) e `margin:0` no desktop, onde o `.page`
+já dá o gutter. Aguardando veredicto do designer sobre adotar ou reverter o card.
+
+[2026-08-13] [fase 06 · ciclo 3] **Faixa das garantias ganhou tom próprio: `neutral-200`.** O
+designer apontou que branco sobre branco não destacava — a seção "Como funciona" também é branca.
+Escolha feita com medição, não no olho: distância de luminância até o branco de cada token
+candidato — `neutral-100` 4,9% (some), `club-50` 10,1%, **`neutral-200` 16,5%**, `neutral-300`
+24,3% (pesa como bloco). `neutral-200` vence porque é **o tom que o fundo da página já alcança**:
+a faixa lê como a página aparecendo entre dois blocos sólidos, não como cor nova — e não gasta o
+rosa, que a direção reserva para CTA e veredicto. Ganhou padding em cima também (`sp-1200`), já que
+virou bloco próprio e não mais o rodapé da seção.
+Sequência de fundos da página agora: gradiente (comparação) → **branco** (como funciona) →
+**cinza claro** (garantias) → **preto** (rodapé).
+
+[2026-08-13] [fase 06 · ciclo 3] **Respiro entre o card da coluna esquerda e "Onde comprar" no
+mobile.** Estava em **0px** — regressão do encapsulamento: os 20px vinham do `padding-bottom` do
+`.cep-wrap`, zerado ao achatá-lo dentro do `.hero-card`. Corrigido com `margin-bottom` de 32px na
+`.col-left` (zerada no desktop, onde as colunas são lado a lado). Medido depois: **44px**, somando o
+gutter do bloco de comparação.
+
+[2026-08-13] [fase 06 · ciclo 3] **Faixa das garantias: `neutral-200` → SEM fundo próprio.** O
+designer achou o cinza escuro demais e pediu "o mesmo tom do topo do site". Em vez de escolher um
+token que se pareça com aquele tom, tirei o fundo da faixa: o gradiente do `body` (que é `fixed`)
+atravessa. É literalmente o mesmo fundo, não uma aproximação — e acompanha o gradiente em vez de
+brigar com ele quando a página rola. Medido no ponto da faixa: **#F8F7FA**, contra o branco puro da
+seção acima. A separação vem da troca de opaco para o fundo da página, o mesmo contraste que a área
+de comparação já usa.
+Fica registrado que este é o **terceiro tratamento** da mesma faixa em poucas rodadas (dentro do
+rodapé escuro → faixa branca → cinza → sem fundo). O que estabilizou foi parar de escolher cor e
+passar a usar o fundo que a página já tem.
