@@ -141,7 +141,7 @@ estados). Desvio consciente registrado: convenção de chip "Aprovado" do app re
 (bg positive-30 + texto positive-20) reprova contraste AA — POC usa pares -10/-40 da
 mesma rampa (padrão "Pendente" do próprio app). Candidato a feedback para o time do app.
 [2026-07-15] [fase 02] Peça 01 (linha de canal, 3 estados) gerada em `pecas/
-atualizacao-poc-referencia/01-linha-canal.html`. Decisões: (a) anatomia logo + nome +
+influenciadora/01-linha-canal.html`. Decisões: (a) anatomia logo + nome +
 frase de estado + chip + ação; (b) estado "nunca vinculou" SEM cor de erro — chip neutro
 + link contextual rosa (primary) no padrão do brief ("Como vincular TikTok ao seu Hub");
 (c) "expirado" em âmbar com frase "Sua conexão com a Shopee expirou — refaça a
@@ -204,7 +204,7 @@ APROVAR. Bloqueios saneados com evidência (contrastes calculados PASS; estados 
 verificados no browser; percurso completo já verificado na geração da 06). Ciclo segue
 para a entrega (fase 04).
 [2026-07-15] [fase 04] ENTREGA fechada, carimbo DEMO. Pacote em `pecas/
-atualizacao-poc-referencia/entrega/` (6 peças + assets reais da captura + spec + LEIA-ME
+influenciadora/entrega/` (6 peças + assets reais da captura + spec + LEIA-ME
 com 8 pendências carimbadas, cada uma com dono). Corrigido no empacotamento: peça 01
 referenciava assets do ciclo anterior por caminho relativo — apontada para os assets
 locais. Aprendizados roteados: Δtokens → item 3 novo em `design-system/
@@ -405,3 +405,59 @@ confirmado que os 8 novos têm SVG (não `img`), cor e `aria-label` corretos cad
 capturas de tela que renderizaram (linha 1 e 2) confirmam visualmente ícones limpos e
 distintos; sem erros de console. Aplicado em `06-fluxo-completo.html` e seu espelho em
 `entrega/` (idênticos, confirmado por `diff`).
+
+- **[2026-08-14] [pós-entrega] Pasta de peças renomeada: `pecas/atualizacao-poc-referencia/`
+  → `pecas/influenciadora/`.** Decisão do designer, ao separar as três superfícies do projeto.
+  O nome antigo é o da DEMANDA de julho; o novo diz de quem é a tela. Feito com `git mv`, então
+  o histórico de cada arquivo segue rastreável. **A spec e o nome do ciclo não mudam** — a
+  demanda continua sendo `atualizacao-poc-referencia`, e é assim que ela aparece em
+  `design-system/pendencias-tokens.md` e no `aprendizados.md`.
+  A entrega carimbada (`entrega/`, demo de 15/07) foi movida junto, **sem uma linha alterada**:
+  o carimbo é sobre o conteúdo, não sobre o endereço.
+  Consequência a saber: URLs antigas do tipo `/pecas/atualizacao-poc-referencia/...` deixam de
+  existir quando isto for para produção.
+
+- **[2026-08-14] [organização] Arquivo final renomeado para o padrão `hub-<superfície>`:**
+  `06-fluxo-completo.html` → **`hub-escritorio-influenciadora.html`**, com o `<title>` virando
+  **"HUB Ybera — Escritório Virtual da influenciadora"**. As peças intermediárias foram para
+  `componentes/` e mantiveram os nomes numerados — lá a sequência ainda significa alguma coisa.
+  O espelho carimbado em `entrega/` **não** foi renomeado: é snapshot de 15/07 e fica como está.
+
+- **[2026-08-16] [fase 01 · ciclo 2] Repasse do fluxo inteiro contra o Brief v1.10 + DRP v2.7**
+  (pedido do designer: "repassar por todo fluxo e completar com o que ainda falta"). A Tela 8
+  (Padrão de Vinculação) está "sem mudança" no brief — painel de 3 estados e Modais A/B seguem
+  válidos. O diff achou **dois becos sem saída no coração do JTBD** ("compartilhar um único
+  link"): (1) o botão **Copiar não copia nada** — a capacidade 2 do DRP (link único
+  `hub.ybera.com/r/{slug}`, gerado e exibido pelo Escritório) não tinha demonstração nenhuma;
+  (2) o CTA **"HUB Ybera" não abre nada** — mesmo defeito de "link morto" que o portão do admin
+  já tinha condenado. Achado menor: (3) o card do Óleo de Mirra usava SKU 336774 (placeholder
+  de julho), divergindo do 150264 que o comparador e o admin usam — fere a fonte única de dados
+  entre as três superfícies. Notas sem ação de UI: R-01 retratado (refresh de token já existe
+  pronto) torna o estado "expirado" mais raro, não errado — Modal B continua necessário para
+  revogação/falha; Q-18 (Open Collaboration) não muda esta tela; RF-12 conferido presente no
+  comparador. Escopo do ciclo 2: consertar (1), (2) e (3) — só na peça viva; `entrega/` é
+  snapshot congelado de 15/07 e não recebe nada.
+
+- **[2026-08-16] [fase 02 · ciclo 2] Os três consertos aplicados.** (1) **Copiar copia de
+  verdade**: o link único do produto no formato fechado pelo DRP (Q-09 — slug encurtado, canal
+  fora do link: `hub.ybera.com/r/{sku}`) vai para a área de transferência onde o navegador
+  permite, o botão vira "Link copiado" por 2s e um toast (`role="status"`, aria-live)
+  confirma com o link — tudo sem sair da Tela A, como a spec exige. (2) **"HUB Ybera" navega**:
+  no card do Óleo de Mirra virou um `<a>` de verdade para o comparador público (nova aba) —
+  e o motivo de ser `<a>` está comentado no código: a peça tem uma função global `open()`
+  (a dos modais) que SOMBREIA `window.open`; a primeira implementação por JS chamava o abridor
+  de modal com uma string e quebrava (defeito meu, pego na verificação). Nos outros 8 produtos
+  (fictícios, sem página no comparador), o botão avisa via toast "Nesta POC, só o Óleo de
+  Mirra tem página no comparador" — aviso honesto em vez de link morto ou mentira de dados.
+  (3) **SKU do card 1: 336774 → 150264**, o mesmo do comparador e do admin (fonte única).
+  `.btn` ganhou `text-decoration:none` para o `<a>`-botão. `entrega/` intocada.
+- **[2026-08-16] [fase 03 · ciclo 2] Verificado em carga limpa, por medição:** bateria
+  completa sem um erro de console (listener de `error` na página + console do navegador);
+  Copiar → rótulo troca e volta em 2s, toast "Link do Hub copiado: hub.ybera.com/r/150264";
+  CTA do Mirra é `<a href="../../index.html" target="_blank" rel="noopener">` com o mesmo
+  visual dos botões irmãos (cor, borda e altura medidas iguais; sem sublinhado) e o destino
+  responde OK; aviso da POC nos produtos fictícios; toast com contraste 14,89; regressão
+  completa do ciclo 1 — Modal A e B abrem/fecham, vinculação simulada atualiza card e contador
+  ("3 de 3"), devbar alterna carregado/loading/erro. Aguardando o veredicto do designer.
+- **[2026-08-16] [fase 03 · ciclo 2] VEREDICTO DO DESIGNER: APROVADO** ("ta tudo aprovado").
+  Ciclo 2 fechado.

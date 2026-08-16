@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HUB Ybera — Protótipos</title>
+<!-- Índice de navegação entre as três superfícies do HUB (pedido do designer, 16/08/2026).
+     Não é peça de produto: é porta de entrada para quem recebe os protótipos. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:hsl(345 71% 51%);
+    --primary-40:hsl(344 76% 41%);
+    --neutral:hsl(0 0% 100%);
+    --neutral-20:hsl(240 5% 96%);
+    --neutral-30:hsl(240 6% 90%);
+    --neutral-60:hsl(240 4% 46%);
+    --neutral-70:hsl(240 5% 34%);
+    --neutral-90:hsl(240 4% 16%);
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{
+    font-family:'Nunito','Open Sans',system-ui,sans-serif; background:var(--neutral-20);
+    color:var(--neutral-70); min-height:100vh; display:flex; align-items:center;
+    justify-content:center; padding:24px; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{width:100%; max-width:680px}
+  h1{font-size:22px; font-weight:800; color:var(--neutral-90)}
+  .sub{font-size:14px; color:var(--neutral-60); margin-top:4px; margin-bottom:24px}
+  .cards{display:flex; flex-direction:column; gap:12px}
+  .card{
+    display:block; background:var(--neutral); border:1px solid var(--neutral-30);
+    border-radius:16px; padding:20px; text-decoration:none; color:inherit;
+    transition:border-color .15s ease, transform .08s ease;
+  }
+  .card:hover{border-color:var(--primary)}
+  .card:active{transform:scale(.995)}
+  .card:focus-visible{outline:2px solid var(--primary); outline-offset:2px}
+  .card b{display:block; font-size:16px; font-weight:800; color:var(--primary-40)}
+  .card span{display:block; font-size:14px; line-height:1.5; margin-top:6px}
+  .card small{display:block; font-size:12px; color:var(--neutral-60); margin-top:8px}
+  footer{margin-top:24px; font-size:12px; color:var(--neutral-60); line-height:1.6}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>HUB Ybera — Protótipos</h1>
+  <p class="sub">As três superfícies do produto, uma por link. Brief Design v1.10 · DRP v2.7.</p>
+
+  <nav class="cards" aria-label="Protótipos">
+    <a class="card" href="./">
+      <b>Comparador público</b>
+      <span>O que o cliente final vê ao abrir o link da influenciadora: preço, frete e prazo
+      do mesmo produto nos três canais.</span>
+      <small>Informe um CEP para ver o frete e a reordenação por menor custo.</small>
+    </a>
+    <a class="card" href="pecas/admin/hub-painel-administrativo.html">
+      <b>Painel administrativo</b>
+      <span>A operação de catálogo no Escritório Virtual: habilitar produtos, tags por oferta,
+      substituição de campos da API com prazo, e timer de escassez.</span>
+      <small>O tour aparece na primeira visita (<code>#tour</code> reabre); <code>#falha</code>
+      simula erro de salvamento.</small>
+    </a>
+    <a class="card" href="pecas/influenciadora/hub-escritorio-influenciadora.html">
+      <b>Escritório da influenciadora</b>
+      <span>Onde a influenciadora vincula os canais de venda e copia o link único que garante
+      a comissão dela em qualquer canal.</span>
+      <small>Teste "Reconectar Shopee" e "Como vincular TikTok" — e o Copiar de qualquer produto.</small>
+    </a>
+  </nav>
+
+  <footer>
+    Protótipos de validação, com dados de demonstração. Os contratos de cada peça vivem em
+    <code>specs/</code> no repositório.
+  </footer>
+</main>
+</body>
+</html>

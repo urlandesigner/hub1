@@ -42,15 +42,43 @@ ou porque quer destacar algo, não como rotina diária.
     para relançamento de produto existente —, com a mesma mecânica de TTL e com tratamento que
     deixe claro ser escolha manual
   - **Estados da tela**: campo sem override (só API) · override ativo · override perto de
-    expirar · override expirado (o campo voltou para a API) · campo oculto por override ·
-    campo sem dado de API para exibir
+    expirar · campo oculto por override · campo sem dado de API para exibir · **salvando** ·
+    **erro de salvamento** (os dois últimos entraram no portão do ciclo 1, item 1).
+    O estado "override expirado" foi REMOVIDO no portão do ciclo 1: sem trilha de auditoria
+    (decisão do Head, DRP §13), expirar É voltar ao estado "só API" — não existe informação
+    para desenhá-lo. Se o Produto quiser um rastro transitório ("voltou para a API há N dias"),
+    isso é dado novo e volta como premissa — ver Rastro
   - Moldura do Escritório Virtual (sidebar + navegação do catálogo), como réplica
-- Fora (deste ciclo, mas do mesmo domínio — candidatos a ciclos seguintes):
-  - **Tela 2 — habilitação de produto no Hub** e **Tela 3 — tags por oferta**: o brief marca
-    ambas "sem mudança nesta versão". São o passo anterior da jornada e outra tarefa principal
-  - **Tela 6 — timer de escassez**: sem mudança no brief
-  - **Tela 9 — tour/modal de onboarding administrativo**: outro momento do mesmo usuário (ele
-    está aprendendo, não operando) e depende destas telas existirem para ter o que ensinar
+- Dentro (ciclo 2 — 2026-08-16, a pedido do designer: "a tela completa seguindo o brief mais
+  atual, exatamente o que o brief pede"):
+  - **Tela 9 — tour/modal de onboarding administrativo** (🆕 no v1.9, com coordenadas
+    completas): quando o admin ganha uma capacidade nova dentro do catálogo do Escritório,
+    um modal com tour rápido explicando o que mudou e como usar. **Não bloqueante** — dá para
+    fechar e operar sem completar. Componente pensado para reúso em novidades futuras, não só
+    no Hub (ata de 05/08/2026). A razão do ciclo 1 para deixá-la fora ("não tem o que
+    ensinar") caducou: as Telas 4 e 5 existem, e são exatamente a capacidade que o tour ensina
+- Dentro (ciclo 3 — 2026-08-16, desbloqueado pela chegada do Brief v1.10 + DRP v2.7):
+  - **Tela 2 — Produtos no Hub** (DRP §7/RF-13): habilitar/desabilitar produto individualmente
+    para o comparador — gate opt-in obrigatório; nenhum produto aparece sem habilitação. Métrica
+    operacional associada: taxa de habilitados sobre o catálogo (DRP §9)
+  - **Tela 3 — Tags por oferta** (DRP §7/RF-13): cadastrar tags configuráveis por
+    oferta/plataforma — exemplos do próprio DRP: "desconto no Pix", "mais brinde", "desconto
+    progressivo"
+  - **Tela 6 — Timer de escassez** (DRP §7/RF-13): configurar timer por oferta (tempo de
+    permanência exibido no card público); **sem vínculo com garantia de preço**; coexiste com o
+    disclaimer de variação (Q-22, decisão de Design)
+  - **Revisão da Tela 4 pelo v1.10/v2.7:** (a) **Frete vira campo overridável** em Shopee/TikTok
+    (sem motivo) — Wake é exato via CEP real, sem override; Shopee sempre "Aproximado"; TikTok:
+    valor manual "Aproximado", OU referenciar o frete de outro canal, OU sem informação;
+    (b) badge de override ganha **quem inseriu** (HT-08: autoria+timestamp no registro);
+    (c) **Avaliação no TikTok é manual definitiva** (Q-H/HT-04: não existe API em lugar nenhum) —
+    com motivo obrigatório também na inserção; a copy "a API ainda não envia" (transitória) fica
+    errada; (d) **Volume de Vendas unificado**: TikTok agora TEM API (Open Collaboration,
+    acumulado); Wake NUNCA tem (gap real, sempre manual); (e) **Estoque via API no TikTok é
+    booleano** — "Últimas unidades" é inalcançável pelo cálculo automático nesse canal (só
+    Disponível/Indisponível); o dado da peça não pode mostrar o que a API não produz
+- Fora (nota histórica): estas três telas estiveram bloqueadas por documento entre 2026-08-16
+  (manhã) e a chegada do DRP v2.7 — ver premissa 11, resolvida
 - Fora (da demanda):
   - **Trilha de auditoria / histórico de alterações** — decisão fechada do Head (DRP §13):
     não existe. Design não desenha tela de histórico
@@ -133,12 +161,39 @@ Da spec do comparador (ciclo 3), que este painel governa:
 |---|----------|-------------|-----------|------|-------|
 | 1 | O painel vive **dentro do Escritório Virtual**, sob o DS do Escritório — e não como tela própria do HUB | alta (define toda a peça) | inferência forte: a Tela 9 situa a capacidade "dentro do catálogo do Escritório"; o brief lista os dois DS como dependência sem dizer qual rege esta tela. Decisão do designer em 2026-08-14 | Produto/Engenharia referendar | antes do handoff |
 | 2 | Os tokens `b2c-*` capturados em 2026-07-15 ainda descrevem o app real | média | dado, mas com um mês de idade | Designer — recapturar via `dev-mode-virtual-office` na entrada da fase 02 | fase 02 |
-| 3 | **O chassi do Escritório já existe replicado; a navegação do admin, não.** `pecas/atualizacao-poc-referencia/05-tela-a-completa.html` traz sidebar, tokens `b2c-*` e estrutura de página verificados contra o app real — a peça herda essa moldura. Mas é a conta da INFLUENCIADORA (Meus saques, Minhas metas, botão "Comprar"); o menu que o admin vê ao entrar é desconhecido | média (era alta antes de 2026-08-14 — o chassi apareceu) | dado, para a moldura; palpite, para a navegação do admin | Designer herda o chassi; Produto confirma o menu do admin | menu do admin: antes do handoff. Não trava a fase 02 |
+| 3 | **O chassi do Escritório já existe replicado; a navegação do admin, não.** `pecas/influenciadora/componentes/05-tela-a-completa.html` traz sidebar, tokens `b2c-*` e estrutura de página verificados contra o app real — a peça herda essa moldura. Mas é a conta da INFLUENCIADORA (Meus saques, Minhas metas, botão "Comprar"); o menu que o admin vê ao entrar é desconhecido | média (era alta antes de 2026-08-14 — o chassi apareceu) | dado, para a moldura; palpite, para a navegação do admin | Designer herda o chassi; Produto confirma o menu do admin | menu do admin: antes do handoff. Não trava a fase 02 |
 | 4 | **"Ocultar campo" tem contrato indefinido com o comparador.** O brief oferece "ocultar" como opção do override, mas não diz o que o card público mostra no lugar. A spec do comparador tem estados de vazio com causa declarada (`Não informado` = dado não veio) — um campo ocultado de propósito não é nenhum dos casos previstos | **alta** (contrato entre as duas telas; falso, a tela mente para o cliente) | achado desta leitura cruzada, verificado nas duas specs | Produto + Design | antes da fase 02 fechar |
 | 5 | **Imagem sob override por canal contradiz o comparador atual.** O brief lista Imagem como campo overridável por canal; a peça pública mantém UMA imagem de produto no hero (premissa 13 da spec irmã), não imagem por canal. Ou o card ganha imagem por canal, ou o override de Imagem não tem onde aparecer | **alta** | achado desta leitura cruzada, verificado nas duas specs | Produto | antes da fase 02 fechar |
 | 6 | Os defaults de TTL do brief são **faixas** (48–72h, 15–30 dias), mas o campo pré-preenchido precisa de UM número | baixa-média | dado (o brief é explícito na faixa e omisso no valor) | Produto — a peça assume o menor da faixa (48h / 15 dias) como padrão conservador até resposta | próxima rodada de brief |
 | 7 | O "admin" é operador interno de catálogo da Ybera, não o papel Admin/Admin2 da rede Club descrito na Wiki B2C | média (muda linguagem e modelo de permissão) | palpite | Produto | antes do handoff |
 | 8 | **H-UX-12 — "Lançamento" dispensa motivo obrigatório.** Produto não decidiu; o próprio brief recomenda dispensar, por não afirmar volume de vendas | média (é entregável de Design deste ciclo) | recomendação registrada no brief | Design responde neste ciclo; Produto referenda | fim do ciclo 1 |
+| 9 | **A documentação do repositório contradiz o brief.** DRF, DRP e brief v1.1 — os únicos insumos completos que existem aqui — marcam "Painel de admin no HUB" como **Won't Have / fora de escopo**; o brief v1.9 o trata como prioridade desde a v1.7. Provável defasagem (DRF/DRP derivam do DRP v1.8; o brief, do v2.6), mas as versões que resolveriam isso (v1.6–v1.8, DRP v2.x) não estão no repositório | média (não muda a peça; muda a autoridade do contrato) | contradição verificada nos três insumos (achado do portão do ciclo 1, item 7) | Produto — reconciliar e versionar os insumos | próxima rodada de brief |
+| 10 | **Rastro transitório pós-expiração.** Ao remover o estado "override expirado" (irrepresentável sem trilha — portão, item 2), fica a pergunta: o Produto quer que a tela diga "voltou para a API há N dias" por um período? Isso exige guardar um mínimo de histórico, o que tangencia a decisão do Head de não ter trilha | baixa-média (a tela funciona sem; muda o quanto o admin percebe reversões) | pergunta aberta pelo portão | Produto | próxima rodada de brief |
+| 11 | **Telas 2, 3 e 6 não têm especificação disponível.** O brief v1.9 as marca "sem mudança — ver Brief v1.6"; v1.6, v1.7, v1.8 e o DRP v2.6 (fonte do RF-13) não existem no repositório, e o DRP local (v1.8, 10/07) termina no RF-11 | **alta** (bloqueia o "painel completo" pedido pelo designer em 2026-08-16) | verificada por busca em todos os insumos do repositório | Designer/Produto — obter o Brief v1.6 ou o DRP v2.6 (colar no chat resolve, como foi feito com o v1.9) | antes de abrir os ciclos das Telas 2, 3 e 6 |
+
+**Resoluções de premissas (2026-08-16 — chegada do Brief v1.10 + DRP v2.7, salvos em `insumos/`):**
+- ✅ **Premissa 1 resolvida:** confirmado pelo DRP (Persona 5, decisão do Head, v2.3): a interface administrativa
+  é **alocada no Escritório Virtual**, roles Admin/Admin2. A aposta da superfície estava certa.
+- ✅ **Premissa 4 respondida pelo Produto:** DRP §7, literal — ocultar = "não exibe nem o valor da API nem um
+  valor manual — **o campo simplesmente não aparece no card**". Não é "Não informado". A copy da peça ("some do
+  comparador") já estava compatível. A pendência migra para a spec do comparador: o card precisa suportar ausência
+  de campo sem rótulo de vazio.
+- ✅ **Premissa 5 respondida:** DRP §7 — imagem é **por canal** nos 3 canais, com fallback para a imagem do produto
+  de referência (Wake) no topo. O contrato existe; quem está divergente é o card público (uma imagem só) — pendência
+  migra para a spec do comparador.
+- ✅ **Premissa 7 resolvida — a suposição estava ERRADA:** o admin é exatamente o papel **Admin/Admin2 do
+  Escritório Virtual** (Persona 5 do DRP), não um "operador interno" distinto. JTBD registrado no DRP §4.
+- ✅ **Premissa 9 esclarecida:** a linhagem completa chegou (v1.10 ← DRP v2.7; RF-13 nasceu na v2.3 do DRP,
+  05/08/2026). O "Won't Have" do brief v1.1 era de antes do RF-13 existir. Reconciliada.
+- ✅ **Premissa 11 resolvida:** o DRP v2.7 §7 + RF-13 trazem as coordenadas funcionais das Telas 2, 3 e 6 —
+  habilitação (gate opt-in por produto), tags por oferta/plataforma (exemplos: "desconto no Pix", "mais brinde",
+  "desconto progressivo") e timer de escassez por oferta (tempo de permanência no card, sem vínculo com garantia
+  de preço, coexiste com o disclaimer — Q-22). Ciclos desbloqueados.
+- ⏳ Premissas 2, 3 (menu real), 6 (TTL: faixas seguem sem número único), 8 (H-UX-12 segue aberta no v1.10) e 10
+  permanecem como estavam.
+- 🆕 **Premissa 12 — TTL de frete não especificado.** O v1.10 lista Frete como overridável (Shopee/TikTok, sem
+  motivo), mas a mecânica de TTL é descrita só para os 4 campos originais. A peça assume a MESMA mecânica de prazo
+  (coerência do painel) | média | lacuna do brief v1.10, verificada | Produto | próxima rodada |
 
 ## Quebra de tarefas
 De dentro pra fora, uma peça por vez:
@@ -204,7 +259,7 @@ O portão (fase 03) confere, olhando a peça renderizada:
   significa que partes do contrato desta demanda não estão legíveis em lugar nenhum.
 - **[2026-08-14] [fase 01] Premissa 3 rebaixada de alta para média — o chassi já existe.** Eu
   havia declarado que nada no repositório mostrava o Escritório replicado; o designer apontou
-  `pecas/atualizacao-poc-referencia/`. Verificado renderizando a peça 05: a moldura (sidebar,
+  `pecas/influenciadora/`. Verificado renderizando a peça 05: a moldura (sidebar,
   tokens `b2c-*` do bundle real, estrutura de página) está lá e a peça deste ciclo **herda** essa
   moldura em vez de recriá-la. O que segue desconhecido é só a navegação do admin — a peça é a
   conta da influenciadora (Meus saques, Minhas metas, botão "Comprar" nos cards), e não existe
@@ -271,8 +326,162 @@ O portão (fase 03) confere, olhando a peça renderizada:
   brief registrou, mas nenhuma foi pedida.
 - **[2026-08-14] [fase 02] Contrastes dos elementos novos medidos no renderizado:** `.since`
   7,24:1 · contagem 7,73:1 · destaque da contagem 5,07:1. Nenhum valor novo de token.
+- **[2026-08-14] [fase 02] Pasta do admin ficou com um arquivo só.** O `00-chassi-herdado.html`
+  — a cópia intacta da Tela A da influenciadora, de onde parti — foi removido a pedido do
+  designer, depois de cumprir a função. Ele era byte a byte igual a um arquivo que continua
+  existindo em `pecas/influenciadora/`, e sua presença fazia a pasta do admin parecer ter duas
+  peças. O comentário no topo de `01-tela-override.html` continua nomeando a origem do chassi.
+- **[2026-08-14] [fase 02] Referências de caminho atualizadas** após o designer renomear
+  `pecas/atualizacao-poc-referencia/` para `pecas/influenciadora/`. O nome da DEMANDA irmã
+  (`atualizacao-poc-referencia`) permanece — é ela que aparece em `specs-irmas` e nas
+  Restrições como precedente de captura dos tokens `b2c-*`. O que mudou foi só o endereço das
+  peças. Mesma situação já registrada aqui para `pecas/admin/` vs. a demanda
+  `override-administrativo`: neste projeto a pasta passa a nomear a superfície, e a spec
+  continua nomeando a demanda.
 - **[2026-08-14] [fase 01] Portão de saída da fase 01:** critério de sucesso checável olhando ✔ ·
   nenhuma premissa crítica sem dono ✔ · fronteira explícita do que está fora ✔. Spec **ativa**.
-  A fase 02 pode começar: a moldura vem herdada da peça 05 de `atualizacao-poc-referencia`.
+  A fase 02 pode começar: a moldura vem herdada da peça 05 de `pecas/influenciadora/`.
   As premissas 4 e 5 (ocultar campo · imagem por canal) seguem como as duas que precisam de
   resposta do Produto antes do ciclo fechar — são contrato com o comparador que já está no ar.
+
+- **[2026-08-14] [organização] `LEIA-ME.md` na pasta e caminho do chassi corrigido.** Quando as
+  peças intermediárias das outras duas superfícies foram para `componentes/`, o chassi herdado
+  mudou de endereço: agora é `pecas/influenciadora/componentes/05-tela-a-completa.html`. O
+  comentário no topo de `01-tela-override.html` e a premissa 3 apontam para o lugar certo.
+
+- **[2026-08-14] [organização] Arquivo final renomeado para o padrão `hub-<superfície>`:**
+  `01-tela-override.html` → **`hub-painel-administrativo.html`**. A numeração era resto da
+  sequência de peças e não dizia nada a quem recebe o arquivo solto. O `<title>` acompanhou:
+  de "Peça 01 — Override de campos com TTL" para **"HUB Ybera — Painel administrativo de
+  catálogo"**, que é o que aparece na aba do navegador de quem abrir.
+
+- **[2026-08-14] [fase 03] PORTÃO RODADO — primeiro do ciclo 1. Veredicto do designer: EDITAR.**
+  Rubric v4 + crivo de acessibilidade aplicados sobre o renderizado, por medição (screenshots
+  intermitentemente pretos nesta sessão — artefato já registrado). Aprovado no diagnóstico:
+  percurso principal completo, rótulos idênticos ao comparador no ar, contrastes ≥ 4,5:1,
+  alvos 36×34, zero valor inventado, direção estética cumprida. Reprovado: 7 itens — (1) sem
+  estado de salvando/erro [3.2, bloqueio]; (2) estado "override expirado" irrepresentável
+  [1.2/5.1 → Δspec]; (3) foco perdido após salvar/remover + modal sem trava de Tab [4.3];
+  (4) matriz sem semântica de tabela + contagem sem aria-live [fora do rubric — candidato a
+  Δrubric na fase 04]; (5) links mortos no menu e no breadcrumb [3.3/3.4]; (6) Google Fonts
+  sem comentário-pendência [7.1, nota]; (7) insumos do repositório marcam o painel admin como
+  Won't Have, contradizendo o brief v1.9 [nota → premissa 9].
+- **[2026-08-14] [fase 02] Rota EDITAR executada — correções cirúrgicas dos itens 1, 3, 4, 5
+  e 6, verificadas no renderizado:**
+  (1) Salvar virou assíncrono (~650ms simulados): botão "Salvando…", Cancelar e Esc travados
+  durante a espera, e **nada é aplicado ao dado antes da resposta**; erro de salvamento com
+  `role="alert"` ("Não foi possível salvar. Nada mudou no comparador — tente de novo."),
+  contraste 7,78:1 em club-700/club-50 — valores capturados da marca, porque **a captura b2c
+  não tem token de erro** (pendência anotada aqui; candidata ao item de captura no fechamento
+  do ciclo). Demo do erro: `#falha` na URL (hash, não query — o servidor estático descarta a
+  query no redirect de `.html`; descoberto no teste, primeira tentativa com `?falha` falhou).
+  (2 → fase 01) Estado "override expirado" removido do escopo com justificativa; estados
+  "salvando" e "erro de salvamento" adicionados; premissa 10 aberta (rastro transitório
+  pós-expiração — Produto).
+  (3) Trava de Tab no modal (testada nos dois sentidos) e foco devolvido à célula editada após
+  salvar/remover (testado: foco termina no botão da célula reconstruída).
+  (4) Matriz com `role="table"` real — linhas em wrappers `display:contents` (role=row),
+  4 columnheaders + 4 rowheaders + 12 cells, layout pixel-idêntico (células da mesma linha
+  conferidas no mesmo topo); contagem com `aria-live="polite"`.
+  (5) Menu: Telas 2, 3 e 6 viram itens inertes com selo "em breve" (contraste 7,03:1) e a
+  Tela 3 (Tags por oferta) entrou no mapa — o menu agora espelha as 4 telas navegáveis do
+  brief; a Tela 9 (tour) fica fora por ser modal, não destino. Breadcrumb-mãe virou texto.
+  Os links da moldura (Produtos, Marcas, Usuários) permanecem como réplica inerte, mesma
+  convenção da peça da influenciadora.
+  (6) Comentário-pendência do Google Fonts adicionado (mesma convenção da peça irmã).
+  Reverificado após tudo: percurso com sucesso e com falha, dado intacto na falha, mobile
+  375px sem rolagem lateral e com o canal rotulado em cada célula, console limpo.
+- **[2026-08-14] [fase 03] Reverificação pós-edição: itens 1, 3, 4, 5 e 6 fechados por
+  medição; item 2 resolvido por Δspec; item 7 vira premissa 9 (dono: Produto).** Diagnóstico
+  desta rodada: **sem bloqueios remanescentes conhecidos**. O veredicto de aprovação é do
+  designer — pendente. Candidatos a Δrubric na fase 04: semântica de tabela/aria-live em
+  ferramenta de operação (item 4) e "estado listado na spec precisa ser representável com a
+  informação que existe" (item 2).
+
+- **[2026-08-14] [fase 03] Reauditoria a pedido do designer ("certeza que ficou tudo correto?")
+  — a rodada anterior NÃO tinha pego 4 defeitos,** todos no caminho imagem/erro, achados
+  tentando quebrar as combinações não testadas: (a) banner de erro de uma falha anterior
+  persistia ao abrir o modal de OUTRO campo — toda abertura agora limpa o erro; (b) destravar
+  a imagem oculta sem escolher arquivo salvava `src=null` (imagem quebrada) — agora cai para a
+  imagem da API; (c) a copy "ela está escondida do cliente" aparecia com a imagem visível —
+  agora distingue oculta de visível; (d) "Volta para assets/produto.jpg em 15 dias" vazava
+  caminho de arquivo — agora "Volta para a imagem da API". Regressão completa reexecutada
+  após as correções: sucesso, falha (#falha), dado intacto na falha, trap de Tab nos dois
+  sentidos, foco devolvido à célula, roles de tabela, 375px, zero imagem quebrada visível,
+  console limpo. Lição para o rubric (Δrubric candidato, fase 04): o portão testou cada
+  estado isolado, mas não as TRANSIÇÕES entre estados (falha→outro campo; oculto→visível) —
+  foi nas transições que os 4 moravam.
+
+- **[2026-08-16] [fase 01] Mudança de escopo a pedido do designer: "a tela completa seguindo
+  o brief mais atual — exatamente o que o brief pede, sem decidir nada diferente".** Releitura
+  integral do v1.9 contra o pedido: das seis telas administrativas, o brief só carrega
+  coordenadas funcionais para as Telas 4 e 5 (feitas no ciclo 1) e para a **Tela 9** (🆕, tour
+  de onboarding). As Telas 2, 3 e 6 remetem ao Brief v1.6, ausente do repositório junto com
+  v1.7, v1.8 e o DRP v2.6 — e o DRP local (v1.8) termina antes do RF-13 existir.
+  Consequência registrada: **Tela 9 entra no escopo (ciclo 2)**; Telas 2, 3 e 6 ficam
+  bloqueadas por documento (premissa 11) — segui-las "exatamente" é impossível sem o texto
+  que as especifica, e inventá-las violaria o próprio pedido.
+
+- **[2026-08-16] [fase 01] Chegaram o Brief v1.10 e o DRP v2.7** (colados no chat pelo designer;
+  salvos em `insumos/brief-design-v1.10.md` e `insumos/drp-v2.7.md` — extraídos do transcript da
+  sessão, verificados íntegros do título à nota final). O v1.10 **supersede o v1.9**, que era o
+  contrato deste ciclo até aqui. Efeitos: premissas 1, 4, 5, 7, 9 e 11 resolvidas (ver bloco de
+  resoluções na tabela); premissa 12 aberta (TTL de frete); **ciclo 3 aberto** — Telas 2, 3 e 6
+  (coordenadas do DRP §7/RF-13) + revisão da Tela 4 (frete overridável com "Aproximado",
+  quem inseriu, Avaliação TikTok definitiva, Volume unificado, estoque TikTok booleano).
+  Consequências para a OUTRA demanda registradas lá: o comparador público ganhou coordenadas
+  novas (tag "Aproximado", exclusão do ranking sem frete — H-UX-16, imagem por canal, campo
+  ocultado sem rótulo de vazio) — fora do escopo desta spec.
+
+- **[2026-08-16] [fase 02] Ciclo 3 gerado na mesma peça** — as 4 telas do menu Hub viraram
+  **vistas navegáveis** (a Tela 4 deixou de ser a única; os "em breve" saíram do menu; o
+  breadcrumb "Produtos no Hub" virou link de verdade; no mobile o menu Hub vira barra
+  horizontal, para as telas continuarem alcançáveis). O que cada tela seguiu do DRP §7/RF-13:
+  Tela 2 com gate opt-in explícito (nota: "produto desabilitado não existe para o cliente") e
+  contagem habilitados/total (métrica do DRP §9); Tela 3 com as três sugestões literais do
+  DRP como atalhos; Tela 6 com o aviso "não segura o preço" convivendo com o disclaimer
+  (Q-22). Revisão da Tela 4: linha de **Frete** (Wake exata sem controle; Shopee "Aproximado"
+  substituível; TikTok manual OU referência a outro canal OU sem informação — e a célula avisa
+  que sem frete o canal sai do ranking); **por Ana Ribeiro** no carimbo de cada override
+  (HT-08); copy do TikTok sem "ainda" (Q-H é definitiva); estoque do TikTok virou EXEMPLO de
+  override ("Últimas unidades" à mão sobre API booleana que só diz "Disponível" — ressalva de
+  Engenharia tornada visível); tour atualizado (sem "em breve"; cita as 4 telas). Decisões de
+  Design registradas: só o Óleo de Mirra leva à tela de campos (link honesto — os demais
+  produtos não têm matriz nesta POC); nomes de produto do catálogo são fictícios plausíveis.
+- **[2026-08-16] [fase 03] Verificação do ciclo 3, por medição:** matriz 5 rowheaders + 15
+  cells (roles de tabela preservados); frete Wake sem ação, Shopee com "Aproximado", TikTok
+  Definir → radio valor/referência (foco inicial no radio; "Usar o frete de outro canal"
+  esconde o campo R$ e mostra o select com "Shopee (R$ 19,90)"); salvar referência fecha,
+  marca âmbar, "Frete da Shopee · Aproximado", autoria "por Ana Ribeiro", foco devolvido à
+  célula; Remover devolve ao vazio (ref e por limpos); resumo recontou 5→6→5. Telas novas:
+  toggle habilitar/desabilitar recontando "3 de 6"→"4 de 6" com foco preservado; tag adicionar
+  (sugestão e input+Enter) e remover com foco no input do canal; timer ligar/remover por
+  canal. Contrastes novos AA: aviso do timer 4,75 · chip "Fora do comparador" 7,03 ·
+  sugestões 7,73 · tagchip 7,78 · "Aproximado" 7,73. Mobile 375px: barra Hub horizontal
+  visível, moldura escondida, sem rolagem lateral, vistas trocam. Regressões: `#falha` mostra
+  erro sem aplicar (dado conferido intacto), tour abre/percorre/fecha com a copy nova,
+  console limpo nas duas cargas. Screenshots desktop (Tela 2) e mobile conferidos.
+  **Pendências deste ciclo para o veredicto do designer:** premissa 12 (TTL de frete —
+  assumida a mecânica comum) e a nota de que Telas 2/3/6 seguem coordenadas estratégicas do
+  DRP (o brief de Design nunca as detalhou além dele).
+- **[2026-08-16] [fase 03] VEREDICTO DO DESIGNER: APROVADO** ("ta tudo aprovado") — cobre os
+  ciclos 1, 2 e 3 (Telas 2, 3, 4, 5, 6 e 9). Ciclos fechados; a demanda segue para a fase 04
+  (entrega e roteamento dos aprendizados) quando o trabalho subir para o git.
+- **[2026-08-16] [fase 02] Tela 9 gerada dentro da peça existente** (um modal não merece
+  arquivo próprio — é a mesma superfície). Coordenadas do brief cumpridas literalmente:
+  gatilho "capacidade nova no catálogo" (a seção Hub), tour rápido de 3 passos explicando o
+  que mudou e como usar, **não bloqueante** (Fechar, Esc e clique fora funcionam em qualquer
+  passo; nada da tela depende de completar), componente genérico para reúso (passos são
+  dados, mecanismo é neutro). Decisões de Design, como o brief delega: 3 passos (seção nova →
+  como ler a matriz → prazo e motivo), copy com as palavras da própria tela, passo final
+  "Começar a usar". A copy do passo 1 admite os itens "em breve" do menu — o tour não promete
+  o que o menu não abre. Aparece uma vez (localStorage) e `#tour` na URL reabre — com
+  `hashchange` ouvido, porque digitar um hash em página aberta não recarrega nada (defeito
+  achado e corrigido na verificação; o `#falha` nunca sofreu disso por ser checado no salvar).
+- **[2026-08-16] [fase 03] Verificação do ciclo 2, tudo por medição:** abre na primeira
+  visita e não volta depois de visto; `#tour` reabre no load E via hashchange; 3 passos com
+  contador visível ("passo 1 de 3"); Esc, clique no fundo e botão Fechar encerram; trap de
+  Tab nos dois sentidos (só 2 focáveis); foco devolvido ao título da matriz ao fechar;
+  contraste kicker 6,45 · corpo 7,73 · negrito 14,89 (AA folgado); 375px sem rolagem lateral
+  (modal 327px, botões 40px ≥ alvo 24px); regressão do modal de substituição verde (abre,
+  fecha, não coexiste com o tour); console limpo. Screenshot desktop conferido visualmente.

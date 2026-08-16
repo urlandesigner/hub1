@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HUB Ybera — Painel administrativo de catálogo</title>
+<!--
+  DEMANDA: override-administrativo · ciclos 1–3 · fase 02
+  Ciclo 1: Telas 4 e 5 do brief (matriz de overrides + "Lançamento").
+  Ciclo 2: Tela 9 (tour de onboarding administrativo).
+  Ciclo 3 (Brief v1.10 + DRP v2.7): Telas 2 (Produtos no Hub), 3 (Tags por oferta) e
+  6 (Timer de escassez) como vistas navegáveis, + revisão da Tela 4 (Frete "Aproximado",
+  quem inseriu, Avaliação TikTok manual definitiva, estoque booleano no TikTok).
+  Chassi herdado de pecas/influenciadora/componentes/05-tela-a-completa.html:
+  sidebar, topbar, cards raio 16px, tokens b2c-* capturados do bundle real, Nunito.
+
+  DUAS COISAS QUE SÃO PROPOSTA, NÃO RÉPLICA (premissa 3 da spec):
+  1. o menu da sidebar — a captura que temos é da conta da INFLUENCIADORA (Meus saques,
+     Minhas metas). O menu do admin ninguém viu. O daqui espelha as telas do próprio brief.
+  2. o usuário do rodapé da sidebar.
+
+  DADOS: os mesmos do comparador que está no ar (Óleo de Mirra Reparador 90ml, SKU 150264,
+  Ybera 4,8 / Shopee 4,6 / TikTok 4,3, tiers idênticos). Peça-fonte única de dados — se o
+  admin lê um rótulo e o cliente vê outro, o override vira adivinhação.
+-->
+<!-- Fontes: Nunito via Google Fonts NA POC; produção usa o self-host do app (rubric 7.1). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --b2c-primary:hsl(345 71% 51%);
+    --b2c-primary-40:hsl(344 76% 41%);
+    --b2c-neutral:hsl(0 0% 100%);
+    --b2c-neutral-20:hsl(240 5% 96%);
+    --b2c-neutral-30:hsl(240 6% 90%);
+    --b2c-neutral-40:hsl(240 5% 84%);
+    --b2c-neutral-50:hsl(240 5% 65%);
+    --b2c-neutral-60:hsl(240 4% 46%);
+    --b2c-neutral-70:hsl(240 5% 34%);
+    --b2c-neutral-90:hsl(240 4% 16%);
+    --b2c-positive-10:hsl(136 65% 97%);
+    --b2c-positive-20:hsl(136 61% 85%);
+    --b2c-positive-40:hsl(137 56% 29%);
+    --b2c-warning-10:hsl(40 67% 96%);
+    --b2c-warning-20:hsl(39 67% 83%);
+    --b2c-warning-40:hsl(25 61% 40%);
+    --b2c-info-10:hsl(206 88% 97%);
+    --b2c-info-50:hsl(214 58% 33%);
+    --club-50:#FEF0F4; --club-100:#FEC8D8; --club-700:#980B38;
+    --radius:.5rem;
+    --font-ui:'Nunito','Open Sans',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:var(--font-ui); background:var(--b2c-neutral-20); color:var(--b2c-neutral-60);
+    -webkit-font-smoothing:antialiased; font-size:14px;
+  }
+  .app{display:grid; grid-template-columns:240px 1fr; min-height:100vh}
+
+  /* ================= SIDEBAR (chassi real; itens são proposta) ================= */
+  .sidebar{background:var(--b2c-neutral); display:flex; flex-direction:column}
+  .sidebar__logo{padding:16px}
+  .sidebar__logo img{height:16px; width:auto; object-fit:contain; display:block; margin:0 8px}
+  .sidebar__menu{flex:1; overflow-y:auto; padding:0 16px 16px}
+  .sidebar__section{margin-bottom:16px}
+  .sidebar__section > p{margin:8px; font-size:12px; font-weight:600; line-height:16px; color:var(--b2c-neutral-60)}
+  .sidebar__item{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 8px; border-radius:8px; cursor:pointer;
+    color:var(--b2c-neutral-60); text-decoration:none;
+  }
+  .sidebar__item:hover{background:var(--b2c-neutral-20)}
+  .sidebar__item.is-active{background:var(--club-50); color:var(--b2c-primary-40); font-weight:700}
+  .sidebar__item:focus-visible{outline:2px solid var(--b2c-primary); outline-offset:2px}
+  .sidebar__item .lbl{display:flex; align-items:center; gap:12px; font-size:14px}
+  .sidebar__item svg{width:18px; height:18px; flex:none}
+  /* telas do brief que ainda não existem: item inerte e sinalizado, não link morto */
+  .sidebar__item.is-soon{cursor:default}
+  .sidebar__item.is-soon:hover{background:none}
+  .pill-breve{
+    background:var(--b2c-neutral-20); color:var(--b2c-neutral-70); font-size:10px;
+    font-weight:800; border:1px solid var(--b2c-neutral-40); border-radius:12px;
+    padding:2px 8px; white-space:nowrap;
+  }
+  .sidebar__user{border-top:1px solid var(--b2c-neutral-30); padding:12px 16px; display:flex; align-items:center; gap:10px}
+  .sidebar__avatar{
+    width:32px; height:32px; border-radius:9999px; flex:none;
+    background:var(--club-100); color:var(--club-700); font-weight:800; font-size:13px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .sidebar__user b{display:block; font-size:13px; color:var(--b2c-neutral-70); line-height:16px}
+  .sidebar__user small{font-size:11px; color:var(--b2c-neutral-60)}
+
+  /* ================= COLUNA PRINCIPAL ================= */
+  .main{padding:16px; max-width:1160px; width:100%}
+  .topbar{
+    background:var(--b2c-neutral); border-radius:16px;
+    display:flex; align-items:center; justify-content:flex-end; gap:16px;
+    padding:12px 16px; margin-bottom:16px; min-height:48px;
+  }
+  .topbar__icon{position:relative; color:var(--b2c-neutral-60); cursor:pointer; background:none; border:0; padding:4px}
+  .topbar__icon:hover{color:var(--b2c-neutral-70)}
+  .topbar__icon:focus-visible{outline:2px solid var(--b2c-primary); outline-offset:2px; border-radius:4px}
+  .topbar__icon svg{width:18px; height:18px; display:block}
+
+  .crumb{display:flex; align-items:center; gap:8px; margin:8px 4px 12px; font-size:13px}
+  .crumb a{color:var(--b2c-neutral-60); text-decoration:none}
+  .crumb a:hover{color:var(--b2c-primary-40); text-decoration:underline}
+  .crumb svg{width:14px; height:14px; color:var(--b2c-neutral-50)}
+  .crumb b{color:var(--b2c-neutral-70); font-weight:700}
+
+  /* ================= CABEÇALHO DO PRODUTO ================= */
+  .prod{
+    background:var(--b2c-neutral); border-radius:16px; padding:16px;
+    display:flex; align-items:center; gap:16px; margin-bottom:16px;
+  }
+  .prod__photo{
+    width:72px; height:72px; border-radius:12px; overflow:hidden; flex:none;
+    background:var(--b2c-neutral-20); display:flex; align-items:center; justify-content:center;
+  }
+  .prod__photo img{width:100%; height:100%; object-fit:cover}
+  .prod__body{flex:1; min-width:0}
+  .prod__name{font-size:20px; font-weight:700; color:var(--b2c-neutral-70); line-height:28px}
+  .prod__meta{display:flex; align-items:center; gap:12px; margin-top:6px; flex-wrap:wrap}
+  .prod__sku{font-size:12px; font-weight:700; color:var(--b2c-neutral-60); letter-spacing:.02em}
+  .prod__link{
+    font-size:13px; font-weight:700; color:var(--b2c-primary); text-decoration:underline;
+    text-underline-offset:3px; display:inline-flex; align-items:center; gap:6px;
+  }
+  .prod__link:hover{color:var(--b2c-primary-40)}
+  .prod__link:focus-visible{outline:2px solid var(--b2c-primary); outline-offset:2px; border-radius:4px}
+  .prod__link svg{width:13px; height:13px}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px; border-radius:9999px;
+    border:1px solid transparent; padding:4px 10px; font-size:12px; font-weight:700; white-space:nowrap;
+  }
+  .chip svg{width:12px; height:12px; flex:none}
+  .chip--ok{background:var(--b2c-positive-10); color:var(--b2c-positive-40); border-color:var(--b2c-positive-20)}
+
+  /* ================= MATRIZ CAMPO × CANAL ================= */
+  .matrix{background:var(--b2c-neutral); border-radius:16px; padding:16px}
+  .matrix__head{
+    display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+    padding:0 4px 12px; flex-wrap:wrap;
+  }
+  .matrix__title{font-size:16px; font-weight:800; color:var(--b2c-neutral-70)}
+  .matrix__count{font-size:12px; font-weight:700; color:var(--b2c-neutral-70); margin-top:4px}
+  .matrix__count b{color:var(--b2c-warning-40); font-weight:800}
+  .legend{display:flex; align-items:center; gap:16px; font-size:12px; font-weight:600; color:var(--b2c-neutral-60); flex-wrap:wrap}
+  .legend span{display:inline-flex; align-items:center; gap:6px}
+  .dot{width:8px; height:8px; border-radius:9999px; flex:none}
+  .dot--api{background:var(--b2c-neutral-50)}
+  .dot--over{background:var(--b2c-warning-40)}
+
+  .grid{display:grid; grid-template-columns:148px repeat(3, minmax(0,1fr)); gap:8px}
+  .gridrow{display:contents}
+  .gh{padding:8px 4px; display:flex; align-items:center; gap:8px}
+  .gh__logo{
+    width:24px; height:24px; border-radius:6px; flex:none;
+    background:var(--b2c-neutral-20); border:1px solid var(--b2c-neutral-30);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .gh__logo img{width:14px; height:14px; object-fit:contain}
+  .gh__name{font-size:13px; font-weight:800; color:var(--b2c-neutral-70)}
+  .rowlabel{
+    display:flex; flex-direction:column; align-items:flex-start; padding:16px 4px 0;
+    font-size:13px; font-weight:700; color:var(--b2c-neutral-70);
+  }
+  .rowlabel small{display:block; font-weight:600; font-size:11px; color:var(--b2c-neutral-60); margin-top:2px}
+
+  /* --- célula --- */
+  .cell{
+    border:1px solid var(--b2c-neutral-30); border-radius:12px; padding:12px;
+    display:flex; flex-direction:column; gap:6px; background:var(--b2c-neutral); min-width:0;
+  }
+  .cell--over{background:var(--b2c-warning-10); border-color:var(--b2c-warning-20)}
+  .cell--empty{background:var(--b2c-neutral-20); border-style:dashed}
+  .src{
+    display:inline-flex; align-items:center; gap:6px; align-self:flex-start;
+    font-size:11px; font-weight:700; letter-spacing:.02em; color:var(--b2c-neutral-60);
+  }
+  .src--over{color:var(--b2c-warning-40)}
+  .val{font-size:15px; font-weight:800; color:var(--b2c-neutral-90); line-height:20px}
+  .val--muted{color:var(--b2c-neutral-60); font-weight:700}
+  .stars{display:inline-flex; align-items:center; gap:4px}
+  .stars svg{width:14px; height:14px; fill:var(--b2c-warning-40); flex:none}
+  .thumb{
+    width:100%; height:64px; border-radius:8px; overflow:hidden;
+    background:var(--b2c-neutral-20); display:flex; align-items:center; justify-content:center;
+  }
+  .thumb img{width:100%; height:100%; object-fit:cover}
+  .thumb--hidden{
+    border:1px dashed var(--b2c-neutral-40); color:var(--b2c-neutral-60);
+    font-size:12px; font-weight:700; background:none;
+  }
+  /* o valor da API nunca some: quando há override, ele fica na linha de baixo */
+  .was{font-size:12px; line-height:16px; color:var(--b2c-warning-40)}
+  .was b{font-weight:800}
+  .until{font-size:12px; line-height:16px; color:var(--b2c-neutral-70); font-weight:600}
+  .until b{font-weight:800; color:var(--b2c-neutral-90)}
+  /* "há quanto tempo" — exigido duas vezes pelo brief (Tela 4 e mitigação do risco de
+     override esquecido). Sem trilha de auditoria, é a única idade que o campo tem. */
+  .since{font-size:12px; line-height:16px; color:var(--b2c-neutral-70)}
+  .since b{font-weight:700}
+  .why{
+    font-size:12px; line-height:16px; color:var(--b2c-neutral-70); font-style:italic;
+    border-left:2px solid var(--b2c-warning-20); padding-left:8px;
+  }
+  .hint{font-size:12px; line-height:16px; color:var(--b2c-neutral-60)}
+  /* sobre b2c-neutral-20 o neutral-60 cai para 4,40:1 — escurece um degrau (7,24:1) */
+  .cell .hint{color:var(--b2c-neutral-70)}
+  .cell__acts{display:flex; gap:12px; margin-top:auto; padding-top:6px}
+  .linkbtn{
+    background:none; border:0; font-family:inherit; font-size:13px; font-weight:700;
+    color:var(--b2c-primary); cursor:pointer; padding:8px 0; min-height:32px;
+    text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px;
+  }
+  .linkbtn:hover{color:var(--b2c-primary-40)}
+  .linkbtn:focus-visible{outline:2px solid var(--b2c-primary); outline-offset:2px; border-radius:4px}
+  .linkbtn--quiet{color:var(--b2c-neutral-60)}
+  .linkbtn--quiet:hover{color:var(--b2c-neutral-70)}
+  /* sobre o âmbar do override o rosa de ação cai para 4,41:1 — usa o degrau escuro da marca */
+  .cell--over .linkbtn{color:var(--b2c-primary-40)}
+  .cell--over .linkbtn--quiet{color:var(--b2c-neutral-70)}
+
+  /* ================= MODAL DE SUBSTITUIÇÃO ================= */
+  .backdrop{
+    position:fixed; inset:0; background:hsl(240 4% 16% / .45);
+    display:none; align-items:center; justify-content:center; padding:24px; z-index:50;
+  }
+  .backdrop.is-open{display:flex}
+  .modal{
+    background:var(--b2c-neutral); border-radius:16px; width:100%; max-width:520px;
+    max-height:90vh; overflow-y:auto; padding:24px;
+  }
+  .modal__head{margin-bottom:16px}
+  .modal__title{font-size:18px; font-weight:800; color:var(--b2c-neutral-70)}
+  .modal__sub{font-size:13px; color:var(--b2c-neutral-60); margin-top:4px}
+  .modal__now{
+    background:var(--b2c-neutral-20); border-radius:12px; padding:12px;
+    font-size:13px; color:var(--b2c-neutral-70); margin-bottom:16px;
+  }
+  .modal__now b{color:var(--b2c-neutral-90); font-weight:800}
+  .field{margin-bottom:16px}
+  .field > label, .field > .lbl{
+    display:block; font-size:13px; font-weight:700; color:var(--b2c-neutral-70); margin-bottom:8px;
+  }
+  .req{color:var(--b2c-primary); font-weight:800}
+  .opts{display:flex; flex-direction:column; gap:8px}
+  .opt{
+    display:flex; align-items:flex-start; gap:10px; padding:10px 12px;
+    border:1px solid var(--b2c-neutral-30); border-radius:10px; cursor:pointer;
+  }
+  .opt:hover{background:var(--b2c-neutral-20)}
+  .opt:has(input:checked){border-color:var(--b2c-primary); background:var(--club-50)}
+  .opt input{margin-top:2px; accent-color:var(--b2c-primary); width:16px; height:16px; flex:none}
+  .opt b{display:block; font-size:13px; font-weight:700; color:var(--b2c-neutral-70)}
+  .opt small{display:block; font-size:12px; color:var(--b2c-neutral-60); margin-top:2px}
+  .inp, .sel, .txt{
+    width:100%; border:1px solid var(--b2c-neutral-40); border-radius:var(--radius);
+    padding:10px 12px; font-family:inherit; font-size:14px; color:var(--b2c-neutral-70);
+    background:var(--b2c-neutral);
+  }
+  .inp:focus, .sel:focus, .txt:focus{outline:2px solid var(--b2c-primary); outline-offset:1px; border-color:var(--b2c-primary)}
+  .txt{min-height:72px; resize:vertical}
+  .days{display:flex; align-items:center; gap:8px}
+  .days .inp{width:88px}
+  .days span{font-size:13px; color:var(--b2c-neutral-60)}
+  /* seletor de imagem — o único campo cujo "novo valor" não é texto nem número */
+  .imgpick{display:flex; gap:12px; align-items:flex-start}
+  .imgpick__prev{
+    width:88px; height:88px; border-radius:10px; overflow:hidden; flex:none;
+    background:var(--b2c-neutral-20); border:1px solid var(--b2c-neutral-30);
+  }
+  .imgpick__prev img{width:100%; height:100%; object-fit:cover}
+  .imgpick__body{flex:1; min-width:0}
+  .imgpick__body .btn{height:36px}
+  .imgpick__body .hint{margin-top:8px}
+  .visually-hidden{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
+  }
+  .visually-hidden:focus-visible + .btn{outline:2px solid var(--b2c-primary); outline-offset:2px}
+  .note{
+    display:flex; gap:8px; background:var(--b2c-info-10); border-radius:10px; padding:10px 12px;
+    font-size:12px; line-height:16px; color:var(--b2c-info-50); margin-top:8px;
+  }
+  .note svg{width:14px; height:14px; flex:none; margin-top:1px}
+  /* erro de salvamento — a captura b2c não tem token de erro; club-700/club-50 são valores
+     capturados da marca (mesmos do avatar). Falta de token semântico registrada no Rastro. */
+  .modal__error{
+    display:flex; gap:8px; background:var(--club-50); border:1px solid var(--club-100);
+    border-radius:10px; padding:10px 12px; font-size:13px; line-height:1.45;
+    color:var(--club-700); margin-top:16px;
+  }
+  .modal__error svg{width:15px; height:15px; flex:none; margin-top:2px}
+  .modal__acts{display:flex; justify-content:flex-end; gap:8px; margin-top:24px}
+  .btn{
+    height:40px; padding:0 16px; border-radius:var(--radius); font-family:inherit;
+    font-size:14px; font-weight:700; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    transition:background .2s ease, transform .08s ease;
+  }
+  .btn:active{transform:scale(.985)}
+  .btn:focus-visible{outline:2px solid var(--b2c-primary); outline-offset:2px}
+  .btn--outline{background:none; border:1px solid var(--b2c-neutral-40); color:var(--b2c-neutral-70)}
+  .btn--outline:hover{background:var(--b2c-neutral-20)}
+  .btn--primary{background:var(--b2c-primary); border:0; color:#fff}
+  .btn--primary:hover{background:var(--b2c-primary-40)}
+  .btn[disabled]{opacity:.5; cursor:not-allowed}
+  .btn[disabled]:active{transform:none}
+
+  /* ============ VISTAS — Telas 2, 3, 4/5 e 6 na mesma peça (ciclo 3) ============ */
+  .view{display:none}
+  .view.is-on{display:block}
+
+  .panel{background:var(--b2c-neutral); border-radius:16px; padding:16px}
+  .panel__head{padding:0 4px 12px}
+  .panel__title{font-size:16px; font-weight:800; color:var(--b2c-neutral-70)}
+  .panel__sub{font-size:12px; font-weight:700; color:var(--b2c-neutral-60); margin-top:4px}
+  .panel__sub b{color:var(--b2c-neutral-90)}
+
+  /* ---- Tela 2 — Produtos no Hub ---- */
+  .prow{display:flex; align-items:center; gap:12px; padding:12px 4px; border-top:1px solid var(--b2c-neutral-30); flex-wrap:wrap}
+  .prow__name{flex:1; min-width:180px}
+  .prow__name b{display:block; font-size:14px; color:var(--b2c-neutral-70); font-weight:700}
+  .prow__name small{font-size:12px; color:var(--b2c-neutral-60)}
+  .chip--off{background:var(--b2c-neutral-20); color:var(--b2c-neutral-70); border-color:var(--b2c-neutral-40)}
+  .btn--sm{height:32px; padding:0 12px; font-size:13px}
+
+  /* ---- Tela 3 — Tags por oferta ---- */
+  .tagcanal{padding:12px 4px; border-top:1px solid var(--b2c-neutral-30)}
+  .tagcanal__head{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; color:var(--b2c-neutral-70)}
+  .tagcanal__head img{width:16px; height:16px; object-fit:contain}
+  .tagchips{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+  .tagchip{
+    display:inline-flex; align-items:center; gap:2px; border-radius:9999px;
+    background:var(--club-50); border:1px solid var(--club-100); color:var(--club-700);
+    font-size:12px; font-weight:700; padding:2px 4px 2px 10px;
+  }
+  .tagchip button{
+    background:none; border:0; cursor:pointer; color:inherit; font:inherit; font-size:14px;
+    width:24px; height:24px; border-radius:9999px;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .tagchip button:hover{background:var(--club-100)}
+  .tagchip button:focus-visible{outline:2px solid var(--b2c-primary)}
+  .tagadd{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap}
+  .tagadd .inp{max-width:280px}
+  .tagsug{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px}
+  .tagsug button{
+    background:none; border:1px dashed var(--b2c-neutral-40); border-radius:9999px;
+    color:var(--b2c-neutral-70); font:inherit; font-size:12px; font-weight:700;
+    padding:4px 10px; cursor:pointer;
+  }
+  .tagsug button:hover{background:var(--b2c-neutral-20)}
+  .tagsug button:focus-visible{outline:2px solid var(--b2c-primary)}
+
+  /* ---- Tela 6 — Timer de escassez ---- */
+  .trow{display:flex; align-items:center; gap:12px; padding:12px 4px; border-top:1px solid var(--b2c-neutral-30); flex-wrap:wrap}
+  .trow__ch{display:flex; align-items:center; gap:8px; width:150px; font-size:13px; font-weight:800; color:var(--b2c-neutral-70)}
+  .trow__ch img{width:16px; height:16px; object-fit:contain}
+  .trow__st{flex:1; min-width:200px; font-size:13px; line-height:1.5}
+  .trow__st b{color:var(--b2c-warning-40)}
+  .trow__form{display:flex; align-items:center; gap:8px}
+  .trow__form .inp{width:72px}
+  .trow__form span{font-size:13px}
+  .aviso{
+    display:flex; gap:8px; background:var(--b2c-warning-10); border:1px solid var(--b2c-warning-20);
+    border-radius:10px; padding:10px 12px; font-size:12px; line-height:1.5; color:var(--b2c-warning-40);
+    margin:0 4px 12px;
+  }
+  .aviso svg{width:14px; height:14px; flex:none; margin-top:2px}
+  .nota-gate{margin:0 4px 12px}
+
+  /* ---- tag "Aproximado" do frete (coordenada do brief v1.10, Q-E/Q-F) ---- */
+  .tag-aprox{
+    display:inline-block; font-size:10px; font-weight:800; letter-spacing:.02em;
+    text-transform:uppercase; color:var(--b2c-neutral-70);
+    border:1px solid var(--b2c-neutral-40); border-radius:9999px; padding:1px 8px;
+    vertical-align:2px; margin-left:6px;
+  }
+
+  /* ================= TELA 9 — TOUR DE ONBOARDING (brief v1.9, item 9) ================= */
+  .modal--tour{max-width:460px}
+  .tour__kicker{
+    font-size:12px; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--b2c-primary-40); margin-bottom:8px;
+  }
+  .tour__body{font-size:14px; line-height:1.55; color:var(--b2c-neutral-70); margin-top:10px}
+  .tour__body p + p{margin-top:8px}
+  .tour__body b{color:var(--b2c-neutral-90); font-weight:700}
+  .tour__foot{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:24px}
+  .tour__dots{display:flex; gap:6px}
+  .tour__dots i{width:8px; height:8px; border-radius:50%; background:var(--b2c-neutral-30)}
+  .tour__dots i.is-on{background:var(--b2c-primary)}
+  .tour__acts{display:flex; gap:8px}
+
+  .is-hidden{display:none !important}
+
+  /* a única animação com função: ao salvar, o valor da API desce em vez de sumir */
+  @keyframes settle{from{opacity:0; transform:translateY(-4px)} to{opacity:1; transform:none}}
+  .cell--just .was, .cell--just .until{animation:settle .28s ease-out both}
+  @media (prefers-reduced-motion: reduce){
+    .cell--just .was, .cell--just .until{animation:none}
+    .btn:active{transform:none}
+  }
+
+  @media (max-width:1080px){
+    .app{grid-template-columns:1fr}
+    /* no estreito a sidebar vira barra horizontal só com a seção Hub — as quatro
+       telas continuam alcançáveis; a moldura réplica (Catálogo, Operação) sai */
+    .sidebar{border-bottom:1px solid var(--b2c-neutral-30)}
+    .sidebar__logo, .sidebar__user, .sidebar__section:not(.sidebar__section--hub){display:none}
+    .sidebar__menu{padding:8px 12px; overflow:visible}
+    .sidebar__section--hub{margin:0; display:flex; gap:4px; overflow-x:auto}
+    .sidebar__section--hub > p{display:none}
+    .sidebar__item{white-space:nowrap; padding:8px 10px; flex:none}
+    .grid{grid-template-columns:1fr}
+    .rowlabel{padding:16px 4px 4px; border-top:1px solid var(--b2c-neutral-30); margin-top:8px}
+    .gh{display:none}
+    .cell::before{
+      content:attr(data-canal); font-size:11px; font-weight:800; letter-spacing:.02em;
+      color:var(--b2c-neutral-60); text-transform:uppercase;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ============ SIDEBAR — chassi real, itens propostos (premissa 3) ============ -->
+  <aside class="sidebar">
+    <div class="sidebar__logo"><img src="assets/logo-ybera-club.png" alt="Ybera Club"></div>
+    <nav class="sidebar__menu">
+      <div class="sidebar__section">
+        <p>Catálogo</p>
+        <a class="sidebar__item" href="#"><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l2-3h12l2 3M4 7h16v13H4zM9 11h6"/></svg>Produtos</span></a>
+        <a class="sidebar__item" href="#"><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 8z"/></svg>Marcas</span></a>
+      </div>
+      <div class="sidebar__section sidebar__section--hub">
+        <p>Hub</p>
+        <!-- As 4 telas navegáveis do brief (2, 3, 4/5 e 6) — navegação real entre as vistas
+             da peça desde o ciclo 3 (DRP v2.7 §7/RF-13 trouxe as coordenadas que faltavam).
+             A Tela 9 (tour) não entra: é um modal sobre as outras telas, não um destino. -->
+        <a class="sidebar__item" href="#" data-view="produtos">
+          <span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Produtos no Hub</span>
+        </a>
+        <a class="sidebar__item" href="#" data-view="tags">
+          <span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 12 22l-8.6-8.6a2 2 0 0 1-.6-1.4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 1.4.6l6.4 6.4a2 2 0 0 1 0 2.8z" transform="scale(.9) translate(1.3 1.3)"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor" stroke="none"/></svg>Tags por oferta</span>
+        </a>
+        <a class="sidebar__item is-active" href="#" data-view="campos" aria-current="page"><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Campos e overrides</span></a>
+        <a class="sidebar__item" href="#" data-view="timer">
+          <span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Timer de escassez</span>
+        </a>
+      </div>
+      <div class="sidebar__section">
+        <p>Operação</p>
+        <a class="sidebar__item" href="#"><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M4 20c0-3 2.2-5 5-5s5 2 5 5"/><circle cx="17" cy="9" r="2.2"/><path d="M15.5 15.2c2.6.2 4.5 2 4.5 4.8"/></svg>Usuários</span></a>
+      </div>
+    </nav>
+    <div class="sidebar__user">
+      <span class="sidebar__avatar" aria-hidden="true">A</span>
+      <!-- premissa 7 resolvida (DRP v2.7, Persona 5): o papel é Admin do Escritório Virtual -->
+      <div><b>Ana Ribeiro</b><small>Admin · Escritório Virtual</small></div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="topbar">
+      <button class="topbar__icon" aria-label="Notificações">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>
+      </button>
+    </div>
+
+    <!-- ============ TELA 4/5 — CAMPOS E OVERRIDES ============ -->
+    <div class="view is-on" id="view-campos">
+    <nav class="crumb" aria-label="Você está em">
+      <!-- a tela-mãe (Tela 2) existe desde o ciclo 3 — o breadcrumb navega de verdade -->
+      <a href="#" data-goto="produtos">Produtos no Hub</a>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+      <b>Óleo de Mirra Reparador 90ml</b>
+    </nav>
+
+    <!-- ===== cabeçalho do produto ===== -->
+    <section class="prod">
+      <div class="prod__photo"><img src="assets/produto.jpg" alt=""></div>
+      <div class="prod__body">
+        <h1 class="prod__name">Óleo de Mirra Reparador 90ml</h1>
+        <div class="prod__meta">
+          <span class="prod__sku">SKU 150264</span>
+          <span class="chip chip--ok">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            Habilitado no Hub
+          </span>
+          <a class="prod__link" href="../../index.html" target="_blank" rel="noopener">
+            Ver como o cliente vê
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== matriz campo × canal ===== -->
+    <section class="matrix" aria-labelledby="mx-title">
+      <header class="matrix__head">
+        <div>
+          <!-- tabindex=-1: alvo do foco quando o tour (Tela 9) fecha -->
+          <h2 class="matrix__title" id="mx-title" tabindex="-1">Campos por canal</h2>
+          <p class="matrix__count" id="mx-count" aria-live="polite"></p>
+        </div>
+        <div class="legend">
+          <span><i class="dot dot--api"></i>Valor da API</span>
+          <span><i class="dot dot--over"></i>Substituído por você</span>
+        </div>
+      </header>
+
+      <!-- role=table sobre grid CSS: as linhas são wrappers display:contents, para o leitor
+           de tela associar cada célula a campo × canal sem mudar o layout (portão, item 4) -->
+      <div class="grid" id="mx" role="table" aria-label="Campos do produto por canal">
+        <div class="gridrow" role="row">
+          <div role="columnheader"><span class="visually-hidden">Campo</span></div>
+          <div class="gh" role="columnheader"><span class="gh__logo"><img src="assets/ybera.svg" alt=""></span><span class="gh__name">Ybera.com</span></div>
+          <div class="gh" role="columnheader"><span class="gh__logo"><img src="assets/Shopee.svg" alt=""></span><span class="gh__name">Shopee</span></div>
+          <div class="gh" role="columnheader"><span class="gh__logo"><img src="assets/tiktok.svg" alt=""></span><span class="gh__name">TikTok Shop</span></div>
+        </div>
+      </div>
+    </section>
+    </div>
+
+    <!-- ============ TELA 2 — PRODUTOS NO HUB (DRP v2.7 §7/RF-13: gate opt-in) ============ -->
+    <div class="view" id="view-produtos">
+      <nav class="crumb" aria-label="Você está em"><b>Produtos no Hub</b></nav>
+      <section class="panel">
+        <header class="panel__head">
+          <h2 class="panel__title" id="pd-title" tabindex="-1">Produtos no Hub</h2>
+          <p class="panel__sub" id="pd-count" aria-live="polite"></p>
+        </header>
+        <p class="note nota-gate">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+          O comparador público só mostra o que você habilitar aqui. Produto desabilitado não existe para o cliente — nem com dados completos na API.
+        </p>
+        <div id="plist"></div>
+      </section>
+    </div>
+
+    <!-- ============ TELA 3 — TAGS POR OFERTA (DRP v2.7 §7/RF-13) ============ -->
+    <div class="view" id="view-tags">
+      <nav class="crumb" aria-label="Você está em">
+        <a href="#" data-goto="produtos">Produtos no Hub</a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+        <b>Tags por oferta</b>
+      </nav>
+      <section class="panel">
+        <header class="panel__head">
+          <h2 class="panel__title" id="tg-title" tabindex="-1">Tags por oferta</h2>
+          <p class="panel__sub"><b>Óleo de Mirra Reparador 90ml</b> · SKU 150264 — a etiqueta aparece no card do canal, no comparador público.</p>
+        </header>
+        <div id="taglist"></div>
+      </section>
+    </div>
+
+    <!-- ============ TELA 6 — TIMER DE ESCASSEZ (DRP v2.7 §7/RF-13) ============ -->
+    <div class="view" id="view-timer">
+      <nav class="crumb" aria-label="Você está em">
+        <a href="#" data-goto="produtos">Produtos no Hub</a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+        <b>Timer de escassez</b>
+      </nav>
+      <section class="panel">
+        <header class="panel__head">
+          <h2 class="panel__title" id="tm-title" tabindex="-1">Timer de escassez</h2>
+          <p class="panel__sub"><b>Óleo de Mirra Reparador 90ml</b> · SKU 150264 — o card do canal mostra por quanto tempo a oferta fica no ar.</p>
+        </header>
+        <p class="aviso">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 21h20zM12 10v5M12 18.5h.01"/></svg>
+          <span>O timer cria urgência, mas <b>não segura o preço</b> — os canais podem mudar preço e condições a qualquer momento, e o aviso de variação continua no card, junto do timer.</span>
+        </p>
+        <div id="tmlist"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- ============ MODAL DE SUBSTITUIÇÃO (Telas 4 e 5) ============ -->
+<div class="backdrop" id="bd" role="dialog" aria-modal="true" aria-labelledby="md-title">
+  <div class="modal">
+    <div class="modal__head">
+      <h2 class="modal__title" id="md-title">Substituir</h2>
+      <p class="modal__sub" id="md-sub"></p>
+    </div>
+
+    <p class="modal__now" id="md-now"></p>
+
+    <div class="field">
+      <label for="md-val" id="md-val-lbl">Novo valor</label>
+      <select class="sel" id="md-val"></select>
+      <input class="inp is-hidden" id="md-num" type="number" min="0" max="5" step="0.1" aria-labelledby="md-val-lbl">
+      <div class="imgpick is-hidden" id="md-imgwrap">
+        <!-- sem src no HTML: `src=""` faz o navegador requisitar a própria página como imagem.
+             Quem preenche é o abrir(), com a imagem que está no ar naquele canal. -->
+        <div class="imgpick__prev"><img id="md-imgprev" alt=""></div>
+        <div class="imgpick__body">
+          <input id="md-img" type="file" accept="image/*" class="visually-hidden">
+          <label class="btn btn--outline" for="md-img">Escolher imagem</label>
+          <p class="hint" id="md-imgname">Nenhuma imagem escolhida — o cliente segue vendo a da API.</p>
+        </div>
+      </div>
+      <!-- frete (Q-E/Q-F, brief v1.10): valor manual sempre sai com a marca "Aproximado";
+           no TikTok há também a opção de referenciar o frete de outro canal -->
+      <div class="is-hidden" id="md-fretewrap">
+        <div class="opts" id="md-fsrc">
+          <label class="opt"><input type="radio" name="fsrc" value="valor" checked>
+            <span><b>Informar o valor do frete</b><small>Aparece no card com a marca "Aproximado".</small></span></label>
+          <label class="opt"><input type="radio" name="fsrc" value="ref">
+            <span><b>Usar o frete de outro canal</b><small>O card mostra o valor do canal escolhido, também como "Aproximado".</small></span></label>
+        </div>
+        <div class="days" id="md-moeda-wrap"><span>R$</span><input class="inp" id="md-moeda" type="number" min="0" step="0.1" aria-label="Valor do frete em reais"></div>
+        <select class="sel is-hidden" id="md-refsel" aria-label="Canal de referência do frete"></select>
+      </div>
+      <div class="note is-hidden" id="md-launch">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg>
+        <span><b>Lançamento é uma marcação sua.</b> Não existe cálculo por data de cadastro por trás dela — o canal continua enviando o volume real, e ele volta assim que esta marcação vencer. Serve também para <b>relançar</b> um produto que já esteve no catálogo.</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="lbl">Até quando vale</span>
+      <div class="opts">
+        <label class="opt">
+          <input type="radio" name="ttl" value="dias" checked>
+          <span>
+            <b>Por um período</b>
+            <small id="md-ttl-hint">Depois disso o campo volta sozinho para o valor da API.</small>
+            <span class="days" style="margin-top:8px">
+              <input class="inp" id="md-days" type="number" min="1" max="365" value="2" aria-label="Dias até expirar">
+              <span>dias</span>
+            </span>
+          </span>
+        </label>
+        <label class="opt">
+          <input type="radio" name="ttl" value="sem">
+          <span><b>Sem expiração</b><small>Fica até você remover. Não há histórico depois — só o que esta tela mostra.</small></span>
+        </label>
+        <label class="opt">
+          <input type="radio" name="ttl" value="ocultar">
+          <span><b>Ocultar este campo</b><small>O campo deixa de aparecer no comparador para este canal.</small></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="field" id="md-why-wrap">
+      <label for="md-why">Motivo <span class="req" id="md-why-req">obrigatório</span></label>
+      <textarea class="txt" id="md-why" placeholder="Por que este valor está sendo substituído?"></textarea>
+      <p class="hint" style="margin-top:6px">Fica só aqui, para você e para quem abrir esta tela depois.</p>
+    </div>
+
+    <div class="modal__error is-hidden" id="md-err" role="alert">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+      <span>Não foi possível salvar. Nada mudou no comparador — tente de novo.</span>
+    </div>
+
+    <div class="modal__acts">
+      <button class="btn btn--outline" id="md-cancel">Cancelar</button>
+      <button class="btn btn--primary" id="md-save">Salvar substituição</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TELA 9 — TOUR DE ONBOARDING ADMINISTRATIVO (brief v1.9, item 9) ============
+     Gatilho do brief: "quando o admin ganha uma nova capacidade dentro do catálogo do
+     Escritório" — aqui, a seção Hub. NÃO BLOQUEANTE por coordenada: Fechar, Esc e clique
+     fora encerram em qualquer passo, e nada da tela depende de completar o tour.
+     Componente genérico (os passos são dados; o mecanismo serve para novidades futuras,
+     como pedido na ata de 05/08/2026). -->
+<div class="backdrop" id="tour" role="dialog" aria-modal="true" aria-labelledby="tour-title">
+  <div class="modal modal--tour" aria-live="polite">
+    <p class="tour__kicker" id="tour-kicker"></p>
+    <h2 class="modal__title" id="tour-title"></h2>
+    <div class="tour__body" id="tour-body"></div>
+    <div class="tour__foot">
+      <div class="tour__dots" id="tour-dots" aria-hidden="true"></div>
+      <div class="tour__acts">
+        <button class="btn btn--outline" id="tour-close">Fechar</button>
+        <button class="btn btn--primary" id="tour-next">Próximo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===========================================================================
+   DADOS — os mesmos que estão no ar no comparador (index.html).
+   Ybera.com 4,8 · Shopee 4,6 · TikTok 4,3 · TikTok em "Últimas unidades"
+   e "Lançamento" (tag manual) · Shopee "Campeão de vendas".
+   =========================================================================== */
+var CANAIS = [
+  {id:'ybera',  nome:'Ybera.com',   logo:'assets/ybera.svg'},
+  {id:'shopee', nome:'Shopee',      logo:'assets/Shopee.svg'},
+  {id:'tiktok', nome:'TikTok Shop', logo:'assets/tiktok.svg'}
+];
+
+/* rótulos idênticos aos do comparador público — critério de verificação 6 da spec */
+var TIER_ESTOQUE = ['Disponível','Últimas unidades','Indisponível'];
+var TIER_VOLUME  = ['Campeão de vendas','Mais vendido','Lançamento','Sem selo'];
+
+var CAMPOS = [
+  {id:'estoque', nome:'Estoque',           sub:'tier',          tipo:'tier',   opcoes:TIER_ESTOQUE, motivo:false, ttl:2},
+  {id:'volume',  nome:'Volume de Vendas',  sub:'tier',          tipo:'tier',   opcoes:TIER_VOLUME,  motivo:true,  ttl:15},
+  {id:'nota',    nome:'Avaliação',         sub:'nota real',     tipo:'nota',   opcoes:null,         motivo:true,  ttl:15},
+  {id:'imagem',  nome:'Imagem',            sub:'',              tipo:'imagem', opcoes:null,         motivo:false, ttl:15},
+  /* Frete entrou como campo do painel no brief v1.10 (Q-E/Q-F): substituível só em
+     Shopee/TikTok, sem motivo; valor manual sempre sai rotulado "Aproximado" no card.
+     A mecânica de prazo é a mesma dos demais — premissa 12 da spec (o brief não a define). */
+  {id:'frete',   nome:'Frete',             sub:'depende do CEP', tipo:'frete', opcoes:null,         motivo:false, ttl:2}
+];
+
+/* estado: por campo, por canal.
+   fonte: 'api' | 'over' | 'vazio'   ·   api: o que a API diz (nunca some da tela)
+   desde/desdeDias: há quanto tempo o override está de pé — exigência do brief (Tela 4 e
+   mitigação do risco "override sem trilha de auditoria"). Fixos no dataset, e não
+   calculados de new Date(), para a peça não envelhecer sozinha entre uma revisão e outra. */
+/* `por`: quem inseriu o override — o brief v1.10 pede junto do badge (HT-08: autoria e
+   timestamp ficam estampados no próprio registro; é o que existe de rastro, sem trilha). */
+var D = {
+  estoque:{
+    ybera:  {fonte:'api',  valor:'Disponível', api:'Disponível'},
+    shopee: {fonte:'api',  valor:'Disponível', api:'Disponível'},
+    /* a API do TikTok só diz tem/não tem (booleano — ressalva de Engenharia no DRP v2.7):
+       "Últimas unidades" nesse canal só existe por override do admin, como aqui */
+    tiktok: {fonte:'over', valor:'Últimas unidades', api:'Disponível', dias:2,
+             desde:'15/08', desdeDias:1, por:'Ana Ribeiro',
+             motivo:'A API do TikTok só diz se tem ou não tem estoque — fim do lote de agosto marcado à mão.'}
+  },
+  volume:{
+    /* Wake não envia volume de vendas — gap real, sempre manual (DRP v2.7, Q-19) */
+    ybera:  {fonte:'vazio', valor:null, api:null, nota:'A Wake não envia volume de vendas.'},
+    shopee: {fonte:'over',  valor:'Campeão de vendas', api:'Mais vendido', dias:1,
+             desde:'02/08', desdeDias:12, por:'Ana Ribeiro',
+             motivo:'Destaque do live do dia 12 — segurar até o fim da campanha de agosto.'},
+    /* TikTok tem API desde a Q-18 (Open Collaboration, acumulado — mesma lógica da Shopee) */
+    tiktok: {fonte:'over',  valor:'Lançamento', api:'Sem selo', dias:null,
+             desde:'21/07', desdeDias:24, por:'Ana Ribeiro', motivo:null}
+  },
+  nota:{
+    ybera:  {fonte:'api', valor:'4,8', api:'4,8'},
+    shopee: {fonte:'api', valor:'4,6', api:'4,6'},
+    /* TikTok não tem avaliação por API em lugar nenhum — manual DEFINITIVO (Q-H/HT-04),
+       com motivo obrigatório também na inserção */
+    tiktok: {fonte:'over', valor:'4,3', api:null, dias:12, desde:'02/08', desdeDias:12,
+             por:'Ana Ribeiro',
+             motivo:'Média das avaliações do app, conferida manualmente em 02/08.'}
+  },
+  imagem:{
+    ybera:  {fonte:'api', valor:'assets/produto.jpg', api:'assets/produto.jpg'},
+    shopee: {fonte:'api', valor:'assets/produto.jpg', api:'assets/produto.jpg'},
+    tiktok: {fonte:'over', valor:null, api:'assets/produto.jpg', dias:null, oculto:true,
+             desde:'28/07', desdeDias:17, por:'Ana Ribeiro', motivo:null}
+  },
+  frete:{
+    /* Q-E/Q-F (v1.10): Wake é exato pelo CEP real — sem substituição; Shopee vem da API
+       sempre como estimativa ("Aproximado"); TikTok não tem API — manual, referência, ou nada */
+    ybera:  {fonte:'api',   valor:null, api:null, exato:true},
+    shopee: {fonte:'api',   valor:'R$ 19,90', api:'R$ 19,90'},
+    tiktok: {fonte:'vazio', valor:null, api:null,
+             nota:'O TikTok não envia frete. Sem um valor seu (ou o de outro canal como referência), este canal fica fora do ranking "menor preço + frete".'}
+  }
+};
+
+/* --------------------------- helpers de texto --------------------------- */
+function prazoTexto(d){
+  if(d === null || d === undefined) return null;
+  if(d <= 0) return 'hoje';
+  if(d === 1) return 'amanhã';
+  return 'em ' + d + ' dias';
+}
+function idadeTexto(s){
+  var t;
+  if(s.desdeDias === 0 || s.desde === 'hoje') t = 'Ativo <b>desde hoje</b>';
+  else if(s.desdeDias === 1) t = 'Ativo desde ontem · <b>há 1 dia</b>';
+  else t = 'Ativo desde ' + s.desde + ' · <b>há ' + s.desdeDias + ' dias</b>';
+  /* quem inseriu — v1.10 pede junto do badge (autoria estampada no registro, HT-08) */
+  if(s.por) t += ' · por ' + s.por;
+  return t;
+}
+function estrelas(){
+  return '<svg viewBox="0 0 24 24"><path d="m12 3 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.2l5.9-.9z"/></svg>';
+}
+
+/* ------------------------------ render ---------------------------------- */
+function celula(campo, canal){
+  var s = D[campo.id][canal.id];
+  var cls = 'cell' + (s.fonte === 'over' ? ' cell--over' : (s.fonte === 'vazio' ? ' cell--empty' : ''));
+  var h = '<div class="' + cls + '" role="cell" data-canal="' + canal.nome + '" data-campo="' + campo.id + '" data-ch="' + canal.id + '">';
+
+  /* procedência — sempre, em toda célula: a pergunta "de onde veio" nunca fica sem resposta */
+  if(s.fonte === 'over'){
+    h += '<span class="src src--over"><i class="dot dot--over"></i>Substituído por você</span>';
+  } else if(s.fonte === 'vazio'){
+    h += '<span class="src">Sem valor</span>';
+  } else {
+    h += '<span class="src"><i class="dot dot--api"></i>Da API</span>';
+  }
+
+  /* valor exibido ao cliente */
+  if(s.oculto){
+    h += '<div class="thumb thumb--hidden">Oculto no comparador</div>';
+  } else if(campo.tipo === 'imagem'){
+    h += '<div class="thumb"><img src="' + s.valor + '" alt=""></div>';
+  } else if(campo.tipo === 'nota'){
+    h += '<div class="val"><span class="stars">' + estrelas() + s.valor + '</span></div>';
+  } else if(campo.tipo === 'frete' && s.exato){
+    /* Wake cota ao vivo com o CEP real do cliente — não há valor único para mostrar */
+    h += '<div class="val">Exato, pelo CEP do cliente</div>';
+    h += '<div class="hint">A Wake cota na hora, frete a frete — não há o que substituir.</div>';
+  } else if(campo.tipo === 'frete' && s.ref){
+    h += '<div class="val">Frete da ' + canalPorId(s.ref).nome + '<span class="tag-aprox">Aproximado</span></div>';
+  } else if(campo.tipo === 'frete' && s.valor !== null){
+    h += '<div class="val">' + s.valor + '<span class="tag-aprox">Aproximado</span></div>';
+  } else if(s.valor === null){
+    h += '<div class="val val--muted">' + (campo.tipo === 'frete' ? 'Sem informação' : 'Nenhum selo') + '</div>';
+  } else {
+    h += '<div class="val">' + s.valor + '</div>';
+  }
+
+  /* o valor da API nunca some — fica na linha de baixo */
+  if(s.fonte === 'over'){
+    if(s.api === null){
+      /* sem "ainda": para Avaliação no TikTok e Volume na Wake isso é definitivo (v1.10) */
+      h += '<div class="was">O ' + canal.nome + ' não envia este campo por API — o valor é sempre seu.</div>';
+    } else if(campo.tipo === 'imagem'){
+      h += '<div class="was">' + (s.oculto
+        ? 'A API envia uma imagem — ela está escondida do cliente.'
+        : 'A imagem da API fica guardada por baixo.') + '</div>';
+    } else {
+      h += '<div class="was">A API diz <b>' + s.api + '</b></div>';
+    }
+    var p = prazoTexto(s.dias);
+    if(p === null){
+      h += '<div class="until">Sem expiração — fica até você remover</div>';
+    } else if(s.api === null){
+      h += '<div class="until">Este campo <b>some do comparador ' + p + '</b></div>';
+    } else if(s.oculto){
+      h += '<div class="until">Volta a aparecer ' + p + '</div>';
+    } else if(campo.tipo === 'imagem'){
+      /* o valor de API de imagem é um caminho de arquivo — nunca imprimir na tela */
+      h += '<div class="until">Volta para a imagem da API ' + p + '</div>';
+    } else {
+      h += '<div class="until">Volta para <b>' + s.api + '</b> ' + p + '</div>';
+    }
+    /* há quanto tempo — o brief pede isso junto com "quando expira", e é o que reduz
+       o risco de um override ficar esquecido de pé sem ninguém lembrar por quê */
+    h += '<div class="since">' + idadeTexto(s) + '</div>';
+    if(s.motivo){ h += '<div class="why">' + s.motivo + '</div>'; }
+  } else if(s.fonte === 'vazio' && s.nota){
+    h += '<div class="hint">' + s.nota + '</div>';
+  }
+
+  /* ações — o frete exato da Wake é o único sem controle: não existe override ali (Q-E) */
+  if(!s.exato){
+    h += '<div class="cell__acts">';
+    if(s.fonte === 'over'){
+      h += '<button class="linkbtn" data-act="edit">Editar</button>';
+      h += '<button class="linkbtn linkbtn--quiet" data-act="undo">Remover</button>';
+    } else {
+      h += '<button class="linkbtn" data-act="edit">' + (s.fonte === 'vazio' ? 'Definir' : 'Substituir') + '</button>';
+    }
+    h += '</div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+function render(){
+  var g = document.getElementById('mx');
+  /* mantém a linha de cabeçalho (1º nó) e redesenha as linhas de campo */
+  while(g.children.length > 1){ g.removeChild(g.lastChild); }
+  var html = '';
+  CAMPOS.forEach(function(campo){
+    html += '<div class="gridrow" role="row">';
+    html += '<div class="rowlabel" role="rowheader">' + campo.nome + (campo.sub ? '<small>' + campo.sub + '</small>' : '') + '</div>';
+    CANAIS.forEach(function(canal){ html += celula(campo, canal); });
+    html += '</div>';
+  });
+  g.insertAdjacentHTML('beforeend', html);
+  resumo();
+}
+
+/* devolve o foco do teclado à célula editada depois que o render a reconstrói —
+   sem isto, salvar ou remover jogava o foco para o body (portão, item 3) */
+function focarCelula(campoId, chId){
+  var btn = document.querySelector('.cell[data-campo="' + campoId + '"][data-ch="' + chId + '"] .linkbtn');
+  if(btn) btn.focus();
+}
+
+/* "quais campos estão sob override ativo" — o brief pede a indicação no painel.
+   A matriz já responde célula a célula; a contagem responde antes da varredura. */
+function resumo(){
+  var n = 0, vencendo = 0, semPrazo = 0;
+  CAMPOS.forEach(function(campo){
+    CANAIS.forEach(function(canal){
+      var s = D[campo.id][canal.id];
+      if(s.fonte !== 'over') return;
+      n++;
+      if(s.dias === null || s.dias === undefined) semPrazo++;
+      else if(s.dias <= 3) vencendo++;
+    });
+  });
+  var el = document.getElementById('mx-count');
+  if(n === 0){ el.innerHTML = 'Nenhum campo substituído — tudo vem da API.'; return; }
+  var t = n === 1 ? '1 campo substituído' : n + ' campos substituídos';
+  var extras = [];
+  if(vencendo) extras.push('<b>' + (vencendo === 1 ? '1 vence' : vencendo + ' vencem') + ' em até 3 dias</b>');
+  if(semPrazo) extras.push((semPrazo === 1 ? '1 sem prazo' : semPrazo + ' sem prazo') + ' para voltar');
+  el.innerHTML = t + (extras.length ? ' · ' + extras.join(' · ') : '');
+}
+render();
+
+/* ------------------------------ interação -------------------------------- */
+var bd = document.getElementById('bd');
+var mdTitle = document.getElementById('md-title');
+var mdSub = document.getElementById('md-sub');
+var mdNow = document.getElementById('md-now');
+var mdVal = document.getElementById('md-val');
+var mdNum = document.getElementById('md-num');
+var mdLaunch = document.getElementById('md-launch');
+var mdDays = document.getElementById('md-days');
+var mdTtlHint = document.getElementById('md-ttl-hint');
+var mdWhyWrap = document.getElementById('md-why-wrap');
+var mdWhy = document.getElementById('md-why');
+var mdWhyReq = document.getElementById('md-why-req');
+var mdSave = document.getElementById('md-save');
+var mdImgWrap = document.getElementById('md-imgwrap');
+var mdImg = document.getElementById('md-img');
+var mdImgPrev = document.getElementById('md-imgprev');
+var mdImgName = document.getElementById('md-imgname');
+var mdFreteWrap = document.getElementById('md-fretewrap');
+var mdFsrc = document.getElementById('md-fsrc');
+var mdMoedaWrap = document.getElementById('md-moeda-wrap');
+var mdMoeda = document.getElementById('md-moeda');
+var mdRefsel = document.getElementById('md-refsel');
+var alvo = null, ultimoFoco = null, imgNova = null;
+
+/* frete no TikTok: valor manual OU referência a outro canal — os dois "Aproximado" */
+function sincronizarFrete(){
+  var ref = mdFsrc.querySelector('input[value="ref"]').checked && !mdFsrc.classList.contains('is-hidden');
+  mdMoedaWrap.classList.toggle('is-hidden', ref);
+  mdRefsel.classList.toggle('is-hidden', !ref);
+}
+mdFsrc.addEventListener('change', sincronizarFrete);
+
+mdImg.addEventListener('change', function(){
+  var f = mdImg.files && mdImg.files[0];
+  if(!f) return;
+  imgNova = URL.createObjectURL(f);
+  mdImgPrev.src = imgNova;
+  mdImgName.textContent = f.name;
+});
+
+function campoPorId(id){ return CAMPOS.filter(function(c){ return c.id === id; })[0]; }
+function canalPorId(id){ return CANAIS.filter(function(c){ return c.id === id; })[0]; }
+
+function abrir(campoId, chId, btn){
+  var campo = campoPorId(campoId), canal = canalPorId(chId), s = D[campoId][chId];
+  alvo = {campo:campo, canal:canal};
+  ultimoFoco = btn;
+
+  mdTitle.textContent = (s.fonte === 'vazio' ? 'Definir ' : 'Substituir ') + campo.nome;
+  mdSub.textContent = canal.nome + ' · Óleo de Mirra Reparador 90ml';
+  /* erro de uma tentativa anterior não pertence a esta abertura */
+  mdErr.classList.add('is-hidden');
+
+  if(s.api === null){
+    /* definitivo, não transitório — Q-H/HT-04 fechadas no v1.10 */
+    mdNow.innerHTML = 'O ' + canal.nome + ' <b>não envia este campo por API</b>. O que você definir aqui é o único valor que o cliente vê.';
+  } else if(campo.tipo === 'imagem'){
+    mdNow.innerHTML = 'A API envia uma imagem para este canal.';
+  } else if(campo.tipo === 'frete'){
+    mdNow.innerHTML = 'A API diz <b>' + s.api + '</b> — estimativa do canal, sem o CEP do comprador. Qualquer valor aqui sai com a marca <b>"Aproximado"</b>.';
+  } else {
+    mdNow.innerHTML = 'A API diz <b>' + s.api + '</b>' + (s.fonte === 'over' ? ' — hoje o cliente vê <b>' + (s.valor || 'nada') + '</b>' : '') + '.';
+  }
+
+  /* controle de valor conforme o tipo do campo */
+  mdVal.classList.add('is-hidden');
+  mdNum.classList.add('is-hidden');
+  mdImgWrap.classList.add('is-hidden');
+  mdFreteWrap.classList.add('is-hidden');
+  if(campo.tipo === 'tier'){
+    mdVal.classList.remove('is-hidden');
+    mdVal.innerHTML = campo.opcoes.map(function(o){
+      return '<option' + (o === s.valor ? ' selected' : '') + '>' + o + '</option>';
+    }).join('');
+  } else if(campo.tipo === 'nota'){
+    mdNum.classList.remove('is-hidden');
+    mdNum.value = (s.valor || '4,0').replace(',', '.');
+  } else if(campo.tipo === 'imagem'){
+    mdImgWrap.classList.remove('is-hidden');
+    mdImg.value = '';
+    imgNova = null;
+    mdImgPrev.src = s.valor || s.api || '';
+    mdImgName.textContent = 'Nenhuma imagem escolhida — o cliente segue vendo a da API.';
+  } else if(campo.tipo === 'frete'){
+    mdFreteWrap.classList.remove('is-hidden');
+    /* referenciar outro canal é opção só de quem não tem API (TikTok, Q-F) */
+    var podeRef = (s.api === null);
+    mdFsrc.classList.toggle('is-hidden', !podeRef);
+    mdRefsel.innerHTML = CANAIS.filter(function(c){
+      return c.id !== canal.id && !D.frete[c.id].exato && D.frete[c.id].valor !== null;
+    }).map(function(c){
+      return '<option value="' + c.id + '"' + (s.ref === c.id ? ' selected' : '') + '>' + c.nome + ' (' + D.frete[c.id].valor + ')</option>';
+    }).join('');
+    mdFsrc.querySelector('input[value="' + (s.ref ? 'ref' : 'valor') + '"]').checked = true;
+    mdMoeda.value = s.valor ? s.valor.replace('R$', '').trim().replace(',', '.') : '24.90';
+    sincronizarFrete();
+  }
+
+  mdDays.value = s.dias || campo.ttl;
+  mdTtlHint.textContent = s.api === null
+    ? 'Depois disso o campo some do comparador, porque não há valor de API para voltar.'
+    : 'Depois disso o campo volta sozinho para o valor da API.';
+  bd.querySelector('input[name="ttl"][value="dias"]').checked = true;
+  mdWhy.value = s.motivo || '';
+
+  sincronizarMotivo();
+  bd.classList.add('is-open');
+  /* primeiro controle visível de cada tipo */
+  if(campo.tipo === 'nota') mdNum.focus();
+  else if(campo.tipo === 'frete') (mdFsrc.classList.contains('is-hidden') ? mdMoeda : mdFsrc.querySelector('input:checked')).focus();
+  else if(campo.tipo === 'imagem') mdImg.focus();
+  else mdVal.focus();
+}
+
+/* H-UX-12 — "Lançamento" é a exceção: não afirma volume, então dispensa motivo.
+   Registrado na spec como resposta de Design, pendente de referendo do Produto. */
+function ehLancamento(){
+  return alvo && alvo.campo.id === 'volume' && mdVal.value === 'Lançamento';
+}
+function sincronizarMotivo(){
+  if(!alvo) return;
+  var lanc = ehLancamento();
+  mdLaunch.classList.toggle('is-hidden', !lanc);
+  var exige = alvo.campo.motivo && !lanc;
+  /* O brief só exige motivo em Avaliação e Volume de Vendas. O campo fica disponível em
+     TODOS, opcional — como não há trilha de auditoria, esta é a única linha onde o admin
+     pode deixar dito por que fez o que fez. Decisão de Design, não requisito do brief. */
+  mdWhyReq.textContent = exige ? 'obrigatório' : 'opcional';
+  mdWhyReq.style.color = exige ? '' : 'var(--b2c-neutral-60)';
+  mdSave.disabled = exige && mdWhy.value.trim() === '';
+}
+mdVal.addEventListener('change', sincronizarMotivo);
+mdWhy.addEventListener('input', sincronizarMotivo);
+
+function fechar(){
+  bd.classList.remove('is-open');
+  if(ultimoFoco && document.body.contains(ultimoFoco)) ultimoFoco.focus();
+  alvo = null;
+}
+document.getElementById('md-cancel').addEventListener('click', fechar);
+bd.addEventListener('click', function(e){ if(e.target === bd && !salvando) fechar(); });
+document.addEventListener('keydown', function(e){
+  if(!bd.classList.contains('is-open')) return;
+  if(e.key === 'Escape' && !salvando){ fechar(); return; }
+  /* prende o Tab dentro do modal enquanto aberto (portão, item 3) */
+  if(e.key === 'Tab'){
+    var f = [].slice.call(bd.querySelectorAll('button, input, select, textarea'))
+      .filter(function(el){ return !el.disabled && el.offsetParent; });
+    if(!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  }
+});
+
+/* Salvar é assíncrono: em produção é uma chamada de rede. A demo simula ~650ms de
+   espera; com `#falha` no fim da URL o salvamento SEMPRE falha, para revisar o estado
+   de erro (portão, item 1). É hash, e não query string, porque o servidor estático
+   redireciona `.html` e descarta a query. Nada é aplicado ao dado antes da resposta. */
+var salvando = false;
+function falhaDemo(){ return location.hash === '#falha' || /[?&]falha/.test(location.search); }
+var mdErr = document.getElementById('md-err');
+var mdCancel = document.getElementById('md-cancel');
+
+mdSave.addEventListener('click', function(){
+  if(!alvo || salvando) return;
+  var s = D[alvo.campo.id][alvo.canal.id];
+  var modo = bd.querySelector('input[name="ttl"]:checked').value;
+  var novo = {
+    oculto: (modo === 'ocultar'),
+    dias: (modo === 'dias') ? parseInt(mdDays.value, 10) : null,
+    motivo: mdWhy.value.trim() || null
+  };
+  if(alvo.campo.tipo === 'nota'){ novo.valor = String(mdNum.value).replace('.', ','); }
+  else if(alvo.campo.tipo === 'tier'){ novo.valor = mdVal.value === 'Sem selo' ? null : mdVal.value; }
+  /* sem imagem nova escolhida, vale a que já está no ar; se o campo estava oculto
+     (valor null) e foi destravado, volta a imagem da API — nunca um src vazio */
+  else if(alvo.campo.tipo === 'imagem'){ novo.valor = imgNova || s.valor || s.api; }
+  else if(alvo.campo.tipo === 'frete'){
+    var usarRef = !mdFsrc.classList.contains('is-hidden')
+      && mdFsrc.querySelector('input[value="ref"]').checked;
+    if(usarRef){ novo.ref = mdRefsel.value; novo.valor = null; }
+    else { novo.ref = null; novo.valor = 'R$ ' + Number(mdMoeda.value || 0).toFixed(2).replace('.', ','); }
+  }
+
+  salvando = true;
+  mdErr.classList.add('is-hidden');
+  mdSave.disabled = true; mdCancel.disabled = true;
+  mdSave.textContent = 'Salvando…';
+
+  setTimeout(function(){
+    salvando = false;
+    mdSave.disabled = false; mdCancel.disabled = false;
+    mdSave.textContent = 'Salvar substituição';
+    if(falhaDemo()){
+      /* nada foi aplicado: o dado só muda com resposta de sucesso */
+      mdErr.classList.remove('is-hidden');
+      return;
+    }
+    s.fonte = 'over';
+    s.oculto = novo.oculto;
+    if(novo.valor !== undefined) s.valor = novo.valor;
+    if('ref' in novo) s.ref = novo.ref;
+    s.dias = novo.dias;
+    s.motivo = novo.motivo;
+    s.desde = 'hoje'; s.desdeDias = 0;
+    s.por = 'Ana Ribeiro'; /* autoria estampada no registro (HT-08) */
+
+    fechar();
+    render();
+    var nova = document.querySelector('.cell[data-campo="' + alvo0.campo + '"][data-ch="' + alvo0.canal + '"]');
+    if(nova) nova.classList.add('cell--just');
+    focarCelula(alvo0.campo, alvo0.canal);
+  }, 650);
+});
+
+/* guarda o alvo antes de fechar, para animar a célula certa depois do render */
+var alvo0 = {};
+document.addEventListener('click', function(e){
+  var btn = e.target.closest('[data-act]');
+  if(!btn) return;
+  var cell = btn.closest('.cell');
+  var campoId = cell.dataset.campo, chId = cell.dataset.ch;
+  alvo0 = {campo:campoId, canal:chId};
+
+  if(btn.dataset.act === 'undo'){
+    var s = D[campoId][chId];
+    if(s.api === null){ s.fonte = 'vazio'; s.valor = null; }
+    else { s.fonte = 'api'; s.valor = s.api; }
+    s.dias = null; s.motivo = null; s.oculto = false; s.desde = null; s.desdeDias = null;
+    s.ref = null; s.por = null;
+    render();
+    focarCelula(campoId, chId);
+    return;
+  }
+  abrir(campoId, chId, btn);
+});
+
+/* ===========================================================================
+   TELAS 2, 3 e 6 — ciclo 3 (coordenadas do DRP v2.7, §7/RF-13)
+   =========================================================================== */
+
+/* --- troca de vista: as 4 telas do menu Hub são vistas da mesma peça --- */
+var VISTAS = ['produtos', 'tags', 'campos', 'timer'];
+var FOCO_VISTA = {produtos:'pd-title', tags:'tg-title', campos:'mx-title', timer:'tm-title'};
+function trocarView(v){
+  VISTAS.forEach(function(id){
+    document.getElementById('view-' + id).classList.toggle('is-on', id === v);
+  });
+  [].slice.call(document.querySelectorAll('.sidebar__item[data-view]')).forEach(function(a){
+    var on = a.dataset.view === v;
+    a.classList.toggle('is-active', on);
+    if(on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  });
+  var t = document.getElementById(FOCO_VISTA[v]);
+  if(t) t.focus();
+}
+[].slice.call(document.querySelectorAll('.sidebar__item[data-view]')).forEach(function(a){
+  a.addEventListener('click', function(e){ e.preventDefault(); trocarView(a.dataset.view); });
+});
+
+/* --- Tela 2 — Produtos no Hub: o gate opt-in (nada aparece sem habilitação) --- */
+var PRODUTOS = [
+  {nome:'Óleo de Mirra Reparador 90ml',        sku:'150264', on:true, atual:true},
+  {nome:'Máscara Reparação Profunda 500g',     sku:'150318', on:true},
+  {nome:'Kit Fashion Gloss Progressiva',       sku:'149902', on:true},
+  {nome:'Sérum Reconstrutor de Pontas 60ml',   sku:'150411', on:false},
+  {nome:'Shampoo Antirresíduos 300ml',         sku:'150122', on:false},
+  {nome:'Condicionador Nutrição Diária 300ml', sku:'150123', on:false}
+];
+function renderProdutos(){
+  var el = document.getElementById('plist');
+  el.innerHTML = PRODUTOS.map(function(p, i){
+    return '<div class="prow">' +
+      '<div class="prow__name"><b>' + p.nome + '</b><small>SKU ' + p.sku + '</small></div>' +
+      (p.on
+        ? '<span class="chip chip--ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>No comparador</span>'
+        : '<span class="chip chip--off">Fora do comparador</span>') +
+      /* só o produto com dados nesta POC leva à tela de campos — link honesto */
+      (p.atual ? '<button class="linkbtn" data-goto="campos">Campos e overrides</button>' : '') +
+      '<button class="btn btn--outline btn--sm" data-hab="' + i + '">' + (p.on ? 'Desabilitar' : 'Habilitar') + '</button>' +
+    '</div>';
+  }).join('');
+  var n = PRODUTOS.filter(function(p){ return p.on; }).length;
+  document.getElementById('pd-count').innerHTML =
+    '<b>' + n + ' de ' + PRODUTOS.length + '</b> produtos habilitados no comparador';
+}
+
+/* --- Tela 3 — Tags por oferta: exemplos literais do DRP §7 como sugestões --- */
+var TAG_SUGESTOES = ['desconto no Pix', 'mais brinde', 'desconto progressivo'];
+var TAGS = {ybera:['mais brinde'], shopee:['desconto no Pix'], tiktok:[]};
+function renderTags(){
+  document.getElementById('taglist').innerHTML = CANAIS.map(function(c){
+    var lista = TAGS[c.id];
+    var chips = lista.length
+      ? lista.map(function(t, i){
+          return '<span class="tagchip">' + t +
+            '<button data-tagdel="' + c.id + ':' + i + '" aria-label="Remover a tag ' + t + ' do ' + c.nome + '">×</button></span>';
+        }).join('')
+      : '<span class="hint">Nenhuma tag — o card deste canal aparece sem etiqueta.</span>';
+    var sugs = TAG_SUGESTOES.filter(function(t){ return lista.indexOf(t) < 0; })
+      .map(function(t){ return '<button data-tagadd="' + c.id + '" data-tag="' + t + '">+ ' + t + '</button>'; }).join('');
+    return '<div class="tagcanal">' +
+      '<div class="tagcanal__head"><img src="' + c.logo + '" alt="">' + c.nome + '</div>' +
+      '<div class="tagchips">' + chips + '</div>' +
+      '<div class="tagadd">' +
+        '<input class="inp" data-taginp="' + c.id + '" placeholder="Nova tag — ex.: cupom de 10%" aria-label="Nova tag para o ' + c.nome + '">' +
+        '<button class="btn btn--outline btn--sm" data-tagok="' + c.id + '">Adicionar</button>' +
+      '</div>' +
+      (sugs ? '<div class="tagsug">' + sugs + '</div>' : '') +
+    '</div>';
+  }).join('');
+}
+function addTagDoInput(ch){
+  var inp = document.querySelector('[data-taginp="' + ch + '"]');
+  var v = (inp.value || '').trim();
+  if(!v){ inp.focus(); return; }
+  if(TAGS[ch].indexOf(v) < 0) TAGS[ch].push(v);
+  renderTags();
+  var novo = document.querySelector('[data-taginp="' + ch + '"]');
+  if(novo) novo.focus();
+}
+
+/* --- Tela 6 — Timer de escassez: urgência com prazo, nunca garantia de preço --- */
+var TIMER = {ybera:null, shopee:{dias:2}, tiktok:null};
+function renderTimer(){
+  document.getElementById('tmlist').innerHTML = CANAIS.map(function(c){
+    var t = TIMER[c.id];
+    var st = t
+      ? 'No ar — o card avisa que a oferta <b>sai ' + (t.dias === 1 ? 'em 1 dia' : 'em ' + t.dias + ' dias') + '</b>.'
+      : '<span class="hint">Sem timer — o card não mostra prazo nenhum.</span>';
+    return '<div class="trow">' +
+      '<div class="trow__ch"><img src="' + c.logo + '" alt="">' + c.nome + '</div>' +
+      '<div class="trow__st">' + st + '</div>' +
+      '<div class="trow__form">' +
+        (t
+          ? '<button class="btn btn--outline btn--sm" data-tmoff="' + c.id + '">Remover timer</button>'
+          : '<label class="visually-hidden" for="tm-' + c.id + '">Dias de oferta no ' + c.nome + '</label>' +
+            '<input class="inp" id="tm-' + c.id + '" type="number" min="1" max="30" value="2"><span>dias</span>' +
+            '<button class="btn btn--outline btn--sm" data-tmon="' + c.id + '">Ligar timer</button>') +
+      '</div></div>';
+  }).join('');
+}
+
+/* --- interação das três telas (delegada; convive com a da matriz) --- */
+document.addEventListener('click', function(e){
+  var el;
+  if((el = e.target.closest('[data-goto]'))){ e.preventDefault(); trocarView(el.dataset.goto); return; }
+  if((el = e.target.closest('[data-hab]'))){
+    var p = PRODUTOS[+el.dataset.hab];
+    p.on = !p.on;
+    renderProdutos();
+    var nb = document.querySelector('[data-hab="' + el.dataset.hab + '"]');
+    if(nb) nb.focus();
+    return;
+  }
+  if((el = e.target.closest('[data-tagdel]'))){
+    var pp = el.dataset.tagdel.split(':');
+    TAGS[pp[0]].splice(+pp[1], 1);
+    renderTags();
+    var alvoFoco = document.querySelector('[data-taginp="' + pp[0] + '"]');
+    if(alvoFoco) alvoFoco.focus();
+    return;
+  }
+  if((el = e.target.closest('[data-tagadd]'))){
+    TAGS[el.dataset.tagadd].push(el.dataset.tag);
+    renderTags();
+    var inpFoco = document.querySelector('[data-taginp="' + el.dataset.tagadd + '"]');
+    if(inpFoco) inpFoco.focus();
+    return;
+  }
+  if((el = e.target.closest('[data-tagok]'))){ addTagDoInput(el.dataset.tagok); return; }
+  if((el = e.target.closest('[data-tmon]'))){
+    var d = parseInt(document.getElementById('tm-' + el.dataset.tmon).value, 10);
+    TIMER[el.dataset.tmon] = {dias: d > 0 ? d : 1};
+    renderTimer();
+    return;
+  }
+  if((el = e.target.closest('[data-tmoff]'))){ TIMER[el.dataset.tmoff] = null; renderTimer(); return; }
+});
+document.addEventListener('keydown', function(e){
+  if(e.key !== 'Enter') return;
+  var inp = e.target.closest && e.target.closest('[data-taginp]');
+  if(inp){ e.preventDefault(); addTagDoInput(inp.dataset.taginp); }
+});
+
+renderProdutos();
+renderTags();
+renderTimer();
+
+/* ===== Tela 9 — tour de onboarding (brief v1.9, item 9) =====
+   Aparece uma vez, na primeira visita depois de a capacidade chegar (guardado no navegador);
+   com #tour na URL aparece sempre, para revisão. A copy fala só do que existe na tela —
+   inclusive dos itens "em breve", para o tour não prometer o que o menu não abre. */
+var TOUR_PASSOS = [
+  { titulo: 'O catálogo ganhou a seção Hub',
+    corpo: '<p>Os produtos que você habilita passam a aparecer no <b>comparador público</b>, onde o cliente compara preço, frete e prazo entre Ybera.com, Shopee e TikTok Shop.</p><p>Pela seção você controla o que entra no comparador (<b>Produtos no Hub</b>), as etiquetas de cada oferta (<b>Tags</b>), os valores que a API calcula (<b>Campos e overrides</b>) e o prazo de urgência do card (<b>Timer de escassez</b>).</p>' },
+  { titulo: 'Cada campo mostra o que a API calculou',
+    corpo: '<p>Em Campos e overrides, a tabela cruza os campos substituíveis — Estoque, Volume de Vendas, Avaliação, Imagem e, onde o canal permite, o Frete — com os três canais. Cada célula diz de onde o valor veio.</p><p>Onde você substituiu, a célula fica marcada em âmbar e guarda <b>o valor da API logo abaixo</b> — ele nunca some.</p>' },
+  { titulo: 'Toda substituição tem prazo para voltar',
+    corpo: '<p>Ao substituir, você escolhe o novo valor e por quantos dias ele vale — depois disso o campo <b>volta sozinho</b> para o que a API diz. Em Avaliação e Volume de Vendas, dizer o motivo é obrigatório.</p><p>Substituir muda só o que o cliente vê no card — <b>não muda a ordem</b> dos canais no comparador.</p>' }
+];
+
+var tourBd = document.getElementById('tour');
+var tourKicker = document.getElementById('tour-kicker');
+var tourTitle = document.getElementById('tour-title');
+var tourBody = document.getElementById('tour-body');
+var tourDots = document.getElementById('tour-dots');
+var tourClose = document.getElementById('tour-close');
+var tourNext = document.getElementById('tour-next');
+var tourPasso = 0;
+
+/* localStorage pode não existir (file://, navegação privada) — na dúvida, não insistir */
+function tourJaVisto(){ try { return localStorage.getItem('hub-tour-visto') === '1'; } catch(e){ return true; } }
+function tourMarcarVisto(){ try { localStorage.setItem('hub-tour-visto', '1'); } catch(e){} }
+
+function tourRender(){
+  var p = TOUR_PASSOS[tourPasso];
+  tourKicker.textContent = 'Novidade no catálogo — passo ' + (tourPasso + 1) + ' de ' + TOUR_PASSOS.length;
+  tourTitle.textContent = p.titulo;
+  tourBody.innerHTML = p.corpo;
+  tourDots.innerHTML = TOUR_PASSOS.map(function(_, i){
+    return '<i' + (i === tourPasso ? ' class="is-on"' : '') + '></i>';
+  }).join('');
+  tourNext.textContent = tourPasso === TOUR_PASSOS.length - 1 ? 'Começar a usar' : 'Próximo';
+}
+function tourAbrir(){
+  tourPasso = 0;
+  tourRender();
+  tourBd.classList.add('is-open');
+  tourNext.focus();
+}
+function tourFechar(){
+  tourBd.classList.remove('is-open');
+  tourMarcarVisto();
+  var t = document.getElementById('mx-title');
+  if(t) t.focus();
+}
+tourNext.addEventListener('click', function(){
+  if(tourPasso < TOUR_PASSOS.length - 1){ tourPasso++; tourRender(); tourNext.focus(); }
+  else tourFechar();
+});
+tourClose.addEventListener('click', tourFechar);
+tourBd.addEventListener('click', function(e){ if(e.target === tourBd) tourFechar(); });
+document.addEventListener('keydown', function(e){
+  if(!tourBd.classList.contains('is-open')) return;
+  if(e.key === 'Escape'){ tourFechar(); return; }
+  if(e.key === 'Tab'){
+    /* só dois focáveis: prende o Tab entre eles nos dois sentidos */
+    if(e.shiftKey && document.activeElement === tourClose){ e.preventDefault(); tourNext.focus(); }
+    else if(!e.shiftKey && document.activeElement === tourNext){ e.preventDefault(); tourClose.focus(); }
+  }
+});
+if(location.hash === '#tour' || !tourJaVisto()) tourAbrir();
+/* digitar #tour numa página já aberta não recarrega nada — reagir ao hash na hora,
+   como o #falha já faz (lá a checagem é no salvar; aqui precisa ser no evento) */
+window.addEventListener('hashchange', function(){ if(location.hash === '#tour') tourAbrir(); });
+</script>
+</body>
+</html>

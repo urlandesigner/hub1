@@ -1633,3 +1633,22 @@ não tem degrau utilizável entre 2,18:1 e 5,30:1.
   Depois: 430pt → página 430px, card 398px com 16px de margem, respiro do topo 16px, sem
   rolagem horizontal. Conferido também em 375px (card 343px, margem 16px) e 768px.
   Espelho `10-elevada.html` sincronizado. **Não passou pelo portão.**
+
+- **[2026-08-14] [organização] Peças intermediárias movidas para `componentes/`.** A pedido do
+  designer, que não estava conseguindo achar qual arquivo era a peça atual entre 12 HTMLs
+  numerados — e com razão: havia dois arquivos começando em `10-`. Agora a pasta tem **um**
+  HTML na raiz, `10-elevada.html`, e as 11 peças dos ciclos 1 e 2 ficam em `componentes/`.
+  Movidas com `git mv` (histórico preservado) e com `assets/` reescrito para `../assets/` —
+  as 82 referências de imagem do projeto foram conferidas uma a uma e todas resolvem.
+  As entradas antigas deste Rastro citam os caminhos de antes; foram deixadas como estavam,
+  porque são registro do que aconteceu, não instrução de onde procurar. Este item é o mapa.
+  Somado a isso, um `LEIA-ME.md` em cada pasta de peça diz qual arquivo abrir.
+
+- **[2026-08-14] [organização] Espelho renomeado: `10-elevada.html` →
+  `hub-comparador-publico.html`,** dentro do padrão `hub-<superfície>` adotado para as três
+  peças finais. O comando de sincronização com o `index.html` foi atualizado no `LEIA-ME.md`
+  da pasta, e os dois seguem byte a byte idênticos (conferido).
+  **O `<title>` NÃO foi mexido, e isso é um defeito conhecido, não um esquecimento:** a página
+  em produção ainda se chama "Peça 10 · elevada (craft dentro dos tokens)" na aba do navegador.
+  É nome interno de trabalho exposto ao cliente final em `hub1-drab.vercel.app`. Corrigir é
+  mudar copy de página viva — fica para decisão do designer, não para um ajuste de arrumação.

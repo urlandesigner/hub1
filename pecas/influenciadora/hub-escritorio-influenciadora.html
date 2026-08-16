@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Peça 06 — Fluxo montado (link → modal → estado atualizado)</title>
+<title>HUB Ybera — Escritório Virtual da influenciadora</title>
 <!-- Fontes: Nunito via Google Fonts NA POC; produção usa o self-host do app (rubric 7.1). -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -240,6 +240,7 @@
     height:40px; border-radius:var(--radius); font-family:inherit;
     font-size:14px; font-weight:700; cursor:pointer;
     display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    text-decoration:none; /* o CTA do comparador é um <a> com cara de botão */
     transition:background .2s ease, transform .08s ease;
   }
   .btn:active{transform:scale(.985)}
@@ -249,6 +250,16 @@
   .btn--outline:hover{background:var(--b2c-neutral-20)}
   .btn--primary{background:var(--b2c-primary); border:0; color:#fff}
   .btn--primary:hover{background:var(--b2c-primary-40)}
+  /* confirmação de "Link copiado" e avisos rápidos — sem sair da Tela A (restrição da spec) */
+  .toast{
+    position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(8px);
+    background:var(--b2c-neutral-90); color:#fff; font-size:13px; font-weight:700;
+    padding:10px 16px; border-radius:9999px; opacity:0; pointer-events:none;
+    transition:opacity .18s ease, transform .18s ease; z-index:60; max-width:90vw; text-align:center;
+  }
+  .toast.on{opacity:1; transform:translateX(-50%)}
+  @media (prefers-reduced-motion: reduce){ .toast{transition:none} }
+
   /* CTA para o HUB — precedente "🔗 HUB Ybera" (rótulo em validação neste ciclo) */
   .btn--hub{
     grid-column:1 / -1;
@@ -503,7 +514,8 @@
       <article class="product">
         <button class="product__fav" aria-label="Favoritar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 8z"/></svg></button>
         <div class="product__photo"><img src="assets/produto.jpg" alt="Óleo de Mirra Reparador 90ml"></div>
-        <h3 class="product__name">336774 Óleo de Mirra Reparador 90ml</h3>
+        <!-- SKU 150264: o mesmo do comparador público e do painel admin — fonte única de dados -->
+        <h3 class="product__name">150264 Óleo de Mirra Reparador 90ml</h3>
         <div class="product__chips">
           <span class="pchip pchip--info">Comissão: 15%</span>
           <span class="pchip pchip--pink">Minhas Vendas: 0</span>
@@ -515,7 +527,10 @@
         <div class="product__actions">
           <button class="btn btn--outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar</button>
           <button class="btn btn--primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M3 3h2l2.4 12.2a1.5 1.5 0 0 0 1.5 1.3h7.9a1.5 1.5 0 0 0 1.5-1.2L20 8H6"/></svg>Comprar</button>
-          <button class="btn btn--hub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>HUB Ybera</button>
+          <!-- navega de verdade: a página deste produto no comparador (na produção, hub.ybera.com/r/150264).
+               É <a>, não <button>: além do semanticamente certo, a peça tem uma função global open()
+               (a dos modais) que SOMBREIA window.open — chamar window.open aqui abriria o modal errado. -->
+          <a class="btn btn--hub" href="../../index.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>HUB Ybera</a>
         </div>
       </article>
 
@@ -820,7 +835,49 @@
   document.getElementById('auth-shopee').addEventListener('click', ()=>{
     close(modalB); setLinked('row-shopee');
   });
+
+  // ===== Link único do Hub (ciclo 2) — capacidade 2 do DRP: um link por produto, =====
+  // ===== o canal é decidido pelo cliente depois, na página de comparação.        =====
+  let toastTimer = null;
+  function avisar(msg){
+    // o elemento vive no fim do body — busca na hora do uso, não na carga
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>toast.classList.remove('on'), 2400);
+  }
+  const CHECKMINI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+  document.querySelectorAll('.product').forEach(card=>{
+    const sku = (card.querySelector('.product__name').textContent.trim().match(/^\d+/) || ['produto'])[0];
+    // formato do link fechado no DRP (Q-09): slug encurtado, canal fora do link
+    const link = 'hub.ybera.com/r/' + sku;
+    const copiar = card.querySelector('.btn--outline');
+    const hub = card.querySelector('.btn--hub');
+    if(copiar){
+      const rotulo = copiar.innerHTML;
+      let volta = null;
+      copiar.addEventListener('click', ()=>{
+        // clipboard real onde o navegador deixa; a POC confirma visualmente de todo jeito
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText('https://' + link).catch(()=>{});
+        }
+        copiar.innerHTML = CHECKMINI + 'Link copiado';
+        avisar('Link do Hub copiado: ' + link);
+        clearTimeout(volta);
+        volta = setTimeout(()=>{ copiar.innerHTML = rotulo; }, 2000);
+      });
+    }
+    // o CTA do Óleo de Mirra é um <a> e navega sozinho; os demais produtos não têm
+    // página de comparador nesta POC — o botão avisa em vez de ficar morto
+    if(hub && hub.tagName === 'BUTTON'){
+      hub.addEventListener('click', ()=>{
+        avisar('Nesta POC, só o Óleo de Mirra tem página no comparador.');
+      });
+    }
+  });
 </script>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 
 <!-- Barra de estados — DEV ONLY, removida na entrega -->
