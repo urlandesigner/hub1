@@ -481,6 +481,8 @@ O portão (fase 03) confere, olhando a peça renderizada:
   sem input); Timer com 4 linhas (ML sem botão); o modal de frete do TikTok NÃO oferece o ML
   como referência (só Shopee); salvar/desfazer regredidos verdes; selo "em breve" com
   contraste 7,03; zero erros de console. Aguardando o veredicto do designer.
+- **[2026-08-16] [fase 03 · ciclo 4] VEREDICTO DO DESIGNER: APROVADO** ("ok"). Publicado em
+  produção (commit 2195d20).
 - **[2026-08-16] [fase 02] Tela 9 gerada dentro da peça existente** (um modal não merece
   arquivo próprio — é a mesma superfície). Coordenadas do brief cumpridas literalmente:
   gatilho "capacidade nova no catálogo" (a seção Hub), tour rápido de 3 passos explicando o
