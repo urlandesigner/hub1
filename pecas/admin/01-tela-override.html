@@ -412,7 +412,9 @@
       <select class="sel" id="md-val"></select>
       <input class="inp is-hidden" id="md-num" type="number" min="0" max="5" step="0.1" aria-labelledby="md-val-lbl">
       <div class="imgpick is-hidden" id="md-imgwrap">
-        <div class="imgpick__prev"><img id="md-imgprev" src="" alt=""></div>
+        <!-- sem src no HTML: `src=""` faz o navegador requisitar a própria página como imagem.
+             Quem preenche é o abrir(), com a imagem que está no ar naquele canal. -->
+        <div class="imgpick__prev"><img id="md-imgprev" alt=""></div>
         <div class="imgpick__body">
           <input id="md-img" type="file" accept="image/*" class="visually-hidden">
           <label class="btn btn--outline" for="md-img">Escolher imagem</label>
