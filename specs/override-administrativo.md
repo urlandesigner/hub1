@@ -467,6 +467,20 @@ O portão (fase 03) confere, olhando a peça renderizada:
 - **[2026-08-16] [fase 03] VEREDICTO DO DESIGNER: APROVADO** ("ta tudo aprovado") — cobre os
   ciclos 1, 2 e 3 (Telas 2, 3, 4, 5, 6 e 9). Ciclos fechados; a demanda segue para a fase 04
   (entrega e roteamento dos aprendizados) quando o trabalho subir para o git.
+
+- **[2026-08-16] [fase 02 · ciclo 4] O canal futuro (Mercado Livre) entrou na origem de
+  canais do admin** — extensão da decisão do designer na peça da influenciadora ("conteúdo
+  com origem"): a lista de canais é UMA, com "em breve" como estado no dado (`breve:true`),
+  e cada tela decide a apresentação. Na **matriz**, o canal futuro NÃO vira coluna (seriam 5
+  células mortas na varredura do operador) — vira uma nota de rodapé gerada do dado
+  ("Mercado Livre chega na próxima fase..."). Em **Tags** e **Timer**, que são listas por
+  canal, ele aparece como linha inerte com selo "em breve", sem controles falsos. Fora do
+  alcance dele: matriz, resumo e a referência de frete filtram por `CANAIS_ATIVOS`.
+- **[2026-08-16] [fase 03 · ciclo 4] Verificado por medição:** matriz intacta (15 células,
+  resumo inalterado); nota do canal futuro renderizada do dado; Tags com 4 blocos (ML inerte,
+  sem input); Timer com 4 linhas (ML sem botão); o modal de frete do TikTok NÃO oferece o ML
+  como referência (só Shopee); salvar/desfazer regredidos verdes; selo "em breve" com
+  contraste 7,03; zero erros de console. Aguardando o veredicto do designer.
 - **[2026-08-16] [fase 02] Tela 9 gerada dentro da peça existente** (um modal não merece
   arquivo próprio — é a mesma superfície). Coordenadas do brief cumpridas literalmente:
   gatilho "capacidade nova no catálogo" (a seção Hub), tour rápido de 3 passos explicando o

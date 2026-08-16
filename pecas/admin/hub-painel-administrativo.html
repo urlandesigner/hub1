@@ -374,6 +374,9 @@
   .aviso svg{width:14px; height:14px; flex:none; margin-top:2px}
   .nota-gate{margin:0 4px 12px}
 
+  /* nota de canal futuro no rodapé da matriz */
+  .mx-futuros{padding:12px 4px 0; margin-top:8px; border-top:1px solid var(--b2c-neutral-30)}
+
   /* ---- tag "Aproximado" do frete (coordenada do brief v1.10, Q-E/Q-F) ---- */
   .tag-aprox{
     display:inline-block; font-size:10px; font-weight:800; letter-spacing:.02em;
@@ -527,6 +530,8 @@
           <div class="gh" role="columnheader"><span class="gh__logo"><img src="assets/tiktok.svg" alt=""></span><span class="gh__name">TikTok Shop</span></div>
         </div>
       </div>
+      <!-- canal futuro fica visível sem virar coluna morta: uma nota, não 5 células inertes -->
+      <p class="hint mx-futuros" id="mx-futuros"></p>
     </section>
     </div>
 
@@ -696,11 +701,18 @@
    Ybera.com 4,8 · Shopee 4,6 · TikTok 4,3 · TikTok em "Últimas unidades"
    e "Lançamento" (tag manual) · Shopee "Campeão de vendas".
    =========================================================================== */
+/* A lista de canais tem UMA origem para as duas superfícies (decisão do designer,
+   16/08): "em breve" é um estado de canal no dado, não um enfeite de tela. O painel
+   da influenciadora anuncia o canal futuro; aqui, cada tela do admin decide como
+   mostrá-lo sem virar controle morto (nota na matriz, linha inerte em Tags/Timer). */
 var CANAIS = [
   {id:'ybera',  nome:'Ybera.com',   logo:'assets/ybera.svg'},
   {id:'shopee', nome:'Shopee',      logo:'assets/Shopee.svg'},
-  {id:'tiktok', nome:'TikTok Shop', logo:'assets/tiktok.svg'}
+  {id:'tiktok', nome:'TikTok Shop', logo:'assets/tiktok.svg'},
+  {id:'ml',     nome:'Mercado Livre', logo:'assets/mercadolivre.png', breve:true}
 ];
+/* só canais integrados entram na matriz, no resumo e nas referências de frete */
+var CANAIS_ATIVOS = CANAIS.filter(function(c){ return !c.breve; });
 
 /* rótulos idênticos aos do comparador público — critério de verificação 6 da spec */
 var TIER_ESTOQUE = ['Disponível','Últimas unidades','Indisponível'];
@@ -881,7 +893,7 @@ function render(){
   CAMPOS.forEach(function(campo){
     html += '<div class="gridrow" role="row">';
     html += '<div class="rowlabel" role="rowheader">' + campo.nome + (campo.sub ? '<small>' + campo.sub + '</small>' : '') + '</div>';
-    CANAIS.forEach(function(canal){ html += celula(campo, canal); });
+    CANAIS_ATIVOS.forEach(function(canal){ html += celula(campo, canal); });
     html += '</div>';
   });
   g.insertAdjacentHTML('beforeend', html);
@@ -900,7 +912,7 @@ function focarCelula(campoId, chId){
 function resumo(){
   var n = 0, vencendo = 0, semPrazo = 0;
   CAMPOS.forEach(function(campo){
-    CANAIS.forEach(function(canal){
+    CANAIS_ATIVOS.forEach(function(canal){
       var s = D[campo.id][canal.id];
       if(s.fonte !== 'over') return;
       n++;
@@ -917,6 +929,17 @@ function resumo(){
   el.innerHTML = t + (extras.length ? ' · ' + extras.join(' · ') : '');
 }
 render();
+
+/* nota de canais futuros na matriz — nasce do mesmo dado das outras telas */
+(function(){
+  var futuros = CANAIS.filter(function(c){ return c.breve; });
+  var el = document.getElementById('mx-futuros');
+  el.classList.toggle('is-hidden', !futuros.length);
+  el.textContent = futuros.length
+    ? futuros.map(function(c){ return c.nome; }).join(' e ') +
+      ' chega na próxima fase: quando a integração existir, entra aqui como mais uma coluna.'
+    : '';
+})();
 
 /* ------------------------------ interação -------------------------------- */
 var bd = document.getElementById('bd');
@@ -1007,7 +1030,7 @@ function abrir(campoId, chId, btn){
     /* referenciar outro canal é opção só de quem não tem API (TikTok, Q-F) */
     var podeRef = (s.api === null);
     mdFsrc.classList.toggle('is-hidden', !podeRef);
-    mdRefsel.innerHTML = CANAIS.filter(function(c){
+    mdRefsel.innerHTML = CANAIS_ATIVOS.filter(function(c){
       return c.id !== canal.id && !D.frete[c.id].exato && D.frete[c.id].valor !== null;
     }).map(function(c){
       return '<option value="' + c.id + '"' + (s.ref === c.id ? ' selected' : '') + '>' + c.nome + ' (' + D.frete[c.id].valor + ')</option>';
@@ -1212,6 +1235,14 @@ var TAG_SUGESTOES = ['desconto no Pix', 'mais brinde', 'desconto progressivo'];
 var TAGS = {ybera:['mais brinde'], shopee:['desconto no Pix'], tiktok:[]};
 function renderTags(){
   document.getElementById('taglist').innerHTML = CANAIS.map(function(c){
+    /* canal futuro: presente e honesto, sem controles que não fazem nada */
+    if(c.breve){
+      return '<div class="tagcanal">' +
+        '<div class="tagcanal__head"><img src="' + c.logo + '" alt="">' + c.nome +
+        ' <span class="pill-breve">em breve</span></div>' +
+        '<div class="tagchips"><span class="hint">A integração chega na próxima fase. Quando existir, as tags deste canal serão configuradas aqui.</span></div>' +
+      '</div>';
+    }
     var lista = TAGS[c.id];
     var chips = lista.length
       ? lista.map(function(t, i){
@@ -1246,6 +1277,13 @@ function addTagDoInput(ch){
 var TIMER = {ybera:null, shopee:{dias:2}, tiktok:null};
 function renderTimer(){
   document.getElementById('tmlist').innerHTML = CANAIS.map(function(c){
+    if(c.breve){
+      return '<div class="trow">' +
+        '<div class="trow__ch"><img src="' + c.logo + '" alt="">' + c.nome + '</div>' +
+        '<div class="trow__st"><span class="hint">A integração chega na próxima fase. Quando existir, o timer deste canal será configurado aqui.</span></div>' +
+        '<span class="pill-breve">em breve</span>' +
+      '</div>';
+    }
     var t = TIMER[c.id];
     var st = t
       ? 'No ar — o card avisa que a oferta <b>sai ' + (t.dias === 1 ? 'em 1 dia' : 'em ' + t.dias + ' dias') + '</b>.'
