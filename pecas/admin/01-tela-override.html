@@ -131,6 +131,8 @@
     padding:0 4px 12px; flex-wrap:wrap;
   }
   .matrix__title{font-size:16px; font-weight:800; color:var(--b2c-neutral-70)}
+  .matrix__count{font-size:12px; font-weight:700; color:var(--b2c-neutral-70); margin-top:4px}
+  .matrix__count b{color:var(--b2c-warning-40); font-weight:800}
   .legend{display:flex; align-items:center; gap:16px; font-size:12px; font-weight:600; color:var(--b2c-neutral-60); flex-wrap:wrap}
   .legend span{display:inline-flex; align-items:center; gap:6px}
   .dot{width:8px; height:8px; border-radius:9999px; flex:none}
@@ -182,6 +184,10 @@
   .was b{font-weight:800}
   .until{font-size:12px; line-height:16px; color:var(--b2c-neutral-70); font-weight:600}
   .until b{font-weight:800; color:var(--b2c-neutral-90)}
+  /* "há quanto tempo" — exigido duas vezes pelo brief (Tela 4 e mitigação do risco de
+     override esquecido). Sem trilha de auditoria, é a única idade que o campo tem. */
+  .since{font-size:12px; line-height:16px; color:var(--b2c-neutral-70)}
+  .since b{font-weight:700}
   .why{
     font-size:12px; line-height:16px; color:var(--b2c-neutral-70); font-style:italic;
     border-left:2px solid var(--b2c-warning-20); padding-left:8px;
@@ -246,6 +252,21 @@
   .days{display:flex; align-items:center; gap:8px}
   .days .inp{width:88px}
   .days span{font-size:13px; color:var(--b2c-neutral-60)}
+  /* seletor de imagem — o único campo cujo "novo valor" não é texto nem número */
+  .imgpick{display:flex; gap:12px; align-items:flex-start}
+  .imgpick__prev{
+    width:88px; height:88px; border-radius:10px; overflow:hidden; flex:none;
+    background:var(--b2c-neutral-20); border:1px solid var(--b2c-neutral-30);
+  }
+  .imgpick__prev img{width:100%; height:100%; object-fit:cover}
+  .imgpick__body{flex:1; min-width:0}
+  .imgpick__body .btn{height:36px}
+  .imgpick__body .hint{margin-top:8px}
+  .visually-hidden{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
+  }
+  .visually-hidden:focus-visible + .btn{outline:2px solid var(--b2c-primary); outline-offset:2px}
   .note{
     display:flex; gap:8px; background:var(--b2c-info-10); border-radius:10px; padding:10px 12px;
     font-size:12px; line-height:16px; color:var(--b2c-info-50); margin-top:8px;
@@ -355,7 +376,10 @@
     <!-- ===== matriz campo × canal ===== -->
     <section class="matrix" aria-labelledby="mx-title">
       <header class="matrix__head">
-        <h2 class="matrix__title" id="mx-title">Campos por canal</h2>
+        <div>
+          <h2 class="matrix__title" id="mx-title">Campos por canal</h2>
+          <p class="matrix__count" id="mx-count"></p>
+        </div>
         <div class="legend">
           <span><i class="dot dot--api"></i>Valor da API</span>
           <span><i class="dot dot--over"></i>Substituído por você</span>
@@ -387,9 +411,17 @@
       <label for="md-val" id="md-val-lbl">Novo valor</label>
       <select class="sel" id="md-val"></select>
       <input class="inp is-hidden" id="md-num" type="number" min="0" max="5" step="0.1" aria-labelledby="md-val-lbl">
+      <div class="imgpick is-hidden" id="md-imgwrap">
+        <div class="imgpick__prev"><img id="md-imgprev" src="" alt=""></div>
+        <div class="imgpick__body">
+          <input id="md-img" type="file" accept="image/*" class="visually-hidden">
+          <label class="btn btn--outline" for="md-img">Escolher imagem</label>
+          <p class="hint" id="md-imgname">Nenhuma imagem escolhida — o cliente segue vendo a da API.</p>
+        </div>
+      </div>
       <div class="note is-hidden" id="md-launch">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg>
-        <span><b>Lançamento é uma marcação sua.</b> Não existe cálculo por data de cadastro por trás dela — o canal continua enviando o volume real, e ele volta assim que esta marcação vencer.</span>
+        <span><b>Lançamento é uma marcação sua.</b> Não existe cálculo por data de cadastro por trás dela — o canal continua enviando o volume real, e ele volta assim que esta marcação vencer. Serve também para <b>relançar</b> um produto que já esteve no catálogo.</span>
       </div>
     </div>
 
@@ -455,7 +487,10 @@ var CAMPOS = [
 ];
 
 /* estado: por campo, por canal.
-   fonte: 'api' | 'over' | 'vazio'   ·   api: o que a API diz (nunca some da tela) */
+   fonte: 'api' | 'over' | 'vazio'   ·   api: o que a API diz (nunca some da tela)
+   desde/desdeDias: há quanto tempo o override está de pé — exigência do brief (Tela 4 e
+   mitigação do risco "override sem trilha de auditoria"). Fixos no dataset, e não
+   calculados de new Date(), para a peça não envelhecer sozinha entre uma revisão e outra. */
 var D = {
   estoque:{
     ybera:  {fonte:'api',  valor:'Disponível',       api:'Disponível'},
@@ -466,21 +501,23 @@ var D = {
     /* Wake não envia volume de vendas — é sempre preenchimento do admin (brief, taxonomia) */
     ybera:  {fonte:'vazio', valor:null, api:null, nota:'A Wake não envia volume de vendas.'},
     shopee: {fonte:'over',  valor:'Campeão de vendas', api:'Mais vendido', dias:1,
+             desde:'02/08', desdeDias:12,
              motivo:'Destaque do live do dia 12 — segurar até o fim da campanha de agosto.'},
-    tiktok: {fonte:'over',  valor:'Lançamento', api:'Sem selo', dias:null, motivo:null}
+    tiktok: {fonte:'over',  valor:'Lançamento', api:'Sem selo', dias:null,
+             desde:'21/07', desdeDias:24, motivo:null}
   },
   nota:{
     ybera:  {fonte:'api', valor:'4,8', api:'4,8'},
     shopee: {fonte:'api', valor:'4,6', api:'4,6'},
     /* TikTok não expõe avaliação até HT-04 — o admin preenche */
-    tiktok: {fonte:'over', valor:'4,3', api:null, dias:12,
+    tiktok: {fonte:'over', valor:'4,3', api:null, dias:12, desde:'02/08', desdeDias:12,
              motivo:'Média das avaliações do app, conferida manualmente em 02/08.'}
   },
   imagem:{
     ybera:  {fonte:'api', valor:'assets/produto.jpg', api:'assets/produto.jpg'},
     shopee: {fonte:'api', valor:'assets/produto.jpg', api:'assets/produto.jpg'},
     tiktok: {fonte:'over', valor:null, api:'assets/produto.jpg', dias:null, oculto:true,
-             motivo:null}
+             desde:'28/07', desdeDias:17, motivo:null}
   }
 };
 
@@ -490,6 +527,11 @@ function prazoTexto(d){
   if(d <= 0) return 'hoje';
   if(d === 1) return 'amanhã';
   return 'em ' + d + ' dias';
+}
+function idadeTexto(s){
+  if(s.desdeDias === 0 || s.desde === 'hoje') return 'Ativo <b>desde hoje</b>';
+  if(s.desdeDias === 1) return 'Ativo desde ontem · <b>há 1 dia</b>';
+  return 'Ativo desde ' + s.desde + ' · <b>há ' + s.desdeDias + ' dias</b>';
 }
 function estrelas(){
   return '<svg viewBox="0 0 24 24"><path d="m12 3 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.2l5.9-.9z"/></svg>';
@@ -542,6 +584,9 @@ function celula(campo, canal){
     } else {
       h += '<div class="until">Volta para <b>' + s.api + '</b> ' + p + '</div>';
     }
+    /* há quanto tempo — o brief pede isso junto com "quando expira", e é o que reduz
+       o risco de um override ficar esquecido de pé sem ninguém lembrar por quê */
+    h += '<div class="since">' + idadeTexto(s) + '</div>';
     if(s.motivo){ h += '<div class="why">' + s.motivo + '</div>'; }
   } else if(s.fonte === 'vazio' && s.nota){
     h += '<div class="hint">' + s.nota + '</div>';
@@ -569,6 +614,29 @@ function render(){
     CANAIS.forEach(function(canal){ html += celula(campo, canal); });
   });
   g.insertAdjacentHTML('beforeend', html);
+  resumo();
+}
+
+/* "quais campos estão sob override ativo" — o brief pede a indicação no painel.
+   A matriz já responde célula a célula; a contagem responde antes da varredura. */
+function resumo(){
+  var n = 0, vencendo = 0, semPrazo = 0;
+  CAMPOS.forEach(function(campo){
+    CANAIS.forEach(function(canal){
+      var s = D[campo.id][canal.id];
+      if(s.fonte !== 'over') return;
+      n++;
+      if(s.dias === null || s.dias === undefined) semPrazo++;
+      else if(s.dias <= 3) vencendo++;
+    });
+  });
+  var el = document.getElementById('mx-count');
+  if(n === 0){ el.innerHTML = 'Nenhum campo substituído — tudo vem da API.'; return; }
+  var t = n === 1 ? '1 campo substituído' : n + ' campos substituídos';
+  var extras = [];
+  if(vencendo) extras.push('<b>' + (vencendo === 1 ? '1 vence' : vencendo + ' vencem') + ' em até 3 dias</b>');
+  if(semPrazo) extras.push((semPrazo === 1 ? '1 sem prazo' : semPrazo + ' sem prazo') + ' para voltar');
+  el.innerHTML = t + (extras.length ? ' · ' + extras.join(' · ') : '');
 }
 render();
 
@@ -586,7 +654,19 @@ var mdWhyWrap = document.getElementById('md-why-wrap');
 var mdWhy = document.getElementById('md-why');
 var mdWhyReq = document.getElementById('md-why-req');
 var mdSave = document.getElementById('md-save');
-var alvo = null, ultimoFoco = null;
+var mdImgWrap = document.getElementById('md-imgwrap');
+var mdImg = document.getElementById('md-img');
+var mdImgPrev = document.getElementById('md-imgprev');
+var mdImgName = document.getElementById('md-imgname');
+var alvo = null, ultimoFoco = null, imgNova = null;
+
+mdImg.addEventListener('change', function(){
+  var f = mdImg.files && mdImg.files[0];
+  if(!f) return;
+  imgNova = URL.createObjectURL(f);
+  mdImgPrev.src = imgNova;
+  mdImgName.textContent = f.name;
+});
 
 function campoPorId(id){ return CAMPOS.filter(function(c){ return c.id === id; })[0]; }
 function canalPorId(id){ return CANAIS.filter(function(c){ return c.id === id; })[0]; }
@@ -608,16 +688,23 @@ function abrir(campoId, chId, btn){
   }
 
   /* controle de valor conforme o tipo do campo */
+  mdVal.classList.add('is-hidden');
+  mdNum.classList.add('is-hidden');
+  mdImgWrap.classList.add('is-hidden');
   if(campo.tipo === 'tier'){
-    mdVal.classList.remove('is-hidden'); mdNum.classList.add('is-hidden');
+    mdVal.classList.remove('is-hidden');
     mdVal.innerHTML = campo.opcoes.map(function(o){
       return '<option' + (o === s.valor ? ' selected' : '') + '>' + o + '</option>';
     }).join('');
   } else if(campo.tipo === 'nota'){
-    mdVal.classList.add('is-hidden'); mdNum.classList.remove('is-hidden');
+    mdNum.classList.remove('is-hidden');
     mdNum.value = (s.valor || '4,0').replace(',', '.');
-  } else {
-    mdVal.classList.add('is-hidden'); mdNum.classList.add('is-hidden');
+  } else if(campo.tipo === 'imagem'){
+    mdImgWrap.classList.remove('is-hidden');
+    mdImg.value = '';
+    imgNova = null;
+    mdImgPrev.src = s.valor || s.api || '';
+    mdImgName.textContent = 'Nenhuma imagem escolhida — o cliente segue vendo a da API.';
   }
 
   mdDays.value = s.dias || campo.ttl;
@@ -642,7 +729,9 @@ function sincronizarMotivo(){
   var lanc = ehLancamento();
   mdLaunch.classList.toggle('is-hidden', !lanc);
   var exige = alvo.campo.motivo && !lanc;
-  mdWhyWrap.classList.toggle('is-hidden', !alvo.campo.motivo && !lanc);
+  /* O brief só exige motivo em Avaliação e Volume de Vendas. O campo fica disponível em
+     TODOS, opcional — como não há trilha de auditoria, esta é a única linha onde o admin
+     pode deixar dito por que fez o que fez. Decisão de Design, não requisito do brief. */
   mdWhyReq.textContent = exige ? 'obrigatório' : 'opcional';
   mdWhyReq.style.color = exige ? '' : 'var(--b2c-neutral-60)';
   mdSave.disabled = exige && mdWhy.value.trim() === '';
@@ -668,8 +757,10 @@ mdSave.addEventListener('click', function(){
   s.oculto = (modo === 'ocultar');
   if(alvo.campo.tipo === 'nota'){ s.valor = String(mdNum.value).replace('.', ','); }
   else if(alvo.campo.tipo === 'tier'){ s.valor = mdVal.value === 'Sem selo' ? null : mdVal.value; }
+  else if(alvo.campo.tipo === 'imagem' && imgNova){ s.valor = imgNova; }
   s.dias = (modo === 'dias') ? parseInt(mdDays.value, 10) : null;
   s.motivo = mdWhy.value.trim() || null;
+  s.desde = 'hoje'; s.desdeDias = 0;
 
   fechar();
   render();
@@ -690,7 +781,7 @@ document.addEventListener('click', function(e){
     var s = D[campoId][chId];
     if(s.api === null){ s.fonte = 'vazio'; s.valor = null; }
     else { s.fonte = 'api'; s.valor = s.api; }
-    s.dias = null; s.motivo = null; s.oculto = false;
+    s.dias = null; s.motivo = null; s.oculto = false; s.desde = null; s.desdeDias = null;
     render();
     return;
   }

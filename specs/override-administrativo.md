@@ -248,6 +248,29 @@ O portão (fase 03) confere, olhando a peça renderizada:
   — ela está escondida do cliente". Não inventei o que o card público faz nesse caso, porque
   isso é decisão do Produto. Deixar o estado visível na peça é o que torna a pergunta
   discutível em vez de esquecida.
+- **[2026-08-14] [fase 02] Repasse da peça contra o brief, item por item — 3 faltas reais
+  corrigidas.** O designer pediu a conferência; o que estava faltando:
+  1. **"há quanto tempo"** — o brief pede a indicação de override "e há quanto tempo/quando
+     expira", e repete a exigência na mitigação do risco *Override sem trilha de auditoria*
+     ("deixar claro para o próprio admin quando um campo está sob override e há quanto tempo,
+     para reduzir o risco de esquecimento"). A peça só respondia *quando expira*. Toda célula
+     sob override ganhou **"Ativo desde 02/08 · há 12 dias"**. É a metade da exigência que
+     mais importa justamente nos overrides *sem* prazo, que são os que ficam esquecidos.
+  2. **Imagem abria o modal sem controle de valor** — defeito, não escolha: `md-val` e
+     `md-num` ficavam escondidos e nada tomava o lugar, então "Novo valor" aparecia vazio.
+     Agora tem miniatura do que está no ar + botão de escolher arquivo com preview.
+  3. **Relançamento** — a Tela 5 diz que "Lançamento" serve "inclusive para marcar um
+     relançamento de produto já existente", e isso não aparecia em lugar nenhum. Entrou na
+     nota que já explicava a marcação manual.
+- **[2026-08-14] [fase 02] Duas adições que NÃO são do brief, e ficam sujeitas a rejeição:**
+  (a) contagem no cabeçalho da matriz ("4 campos substituídos · 1 vence em até 3 dias ·
+  2 sem prazo para voltar") — o brief pede a indicação de *quais* campos, que a matriz já dá;
+  a contagem responde antes da varredura e nomeia o que vence; (b) campo de motivo disponível
+  em **todos** os campos, opcional onde o brief não exige. Sem trilha de auditoria, é a única
+  linha onde o admin registra por que fez o que fez. As duas mitigam o risco que o próprio
+  brief registrou, mas nenhuma foi pedida.
+- **[2026-08-14] [fase 02] Contrastes dos elementos novos medidos no renderizado:** `.since`
+  7,24:1 · contagem 7,73:1 · destaque da contagem 5,07:1. Nenhum valor novo de token.
 - **[2026-08-14] [fase 01] Portão de saída da fase 01:** critério de sucesso checável olhando ✔ ·
   nenhuma premissa crítica sem dono ✔ · fronteira explícita do que está fora ✔. Spec **ativa**.
   A fase 02 pode começar: a moldura vem herdada da peça 05 de `atualizacao-poc-referencia`.
