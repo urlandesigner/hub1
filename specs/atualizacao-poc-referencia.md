@@ -95,6 +95,7 @@ Decidida na entrada da fase 02 (2026-07-15), com captura dev-mode como guardrail
 | 2 | Conteúdo dos vídeos tutoriais (Modal A e B) não existe — POC usa placeholder | média | fato | Produto/Operação (roteiro e gravação) | antes do go-to-market |
 | 3 | ~~Captura dev-mode acessível~~ **RESOLVIDA (fase 02):** captura existe e é rica; nota: datada de 2026-06-26 — revalidar antes da POC oficial (pendência 8 da entrega) | — | fato | Design | ✔ |
 | 4 | ~~Rótulo do CTA~~ **RESOLVIDA (portão):** "HUB Ybera" validado pelo designer, sem emoji, com ícone de link | — | veredicto registrado | Design | ✔ |
+| 5 | **O contrato do endpoint de status (RF-10) precisa listar canais futuros.** Decisão do designer (2026-08-16): o card "Em breve" do Mercado Livre não é conteúdo fixo da tela — é dado, com a mesma origem dos outros canais. Isso exige que o endpoint devolva canais ainda não integrados com um estado próprio ("em breve"), o que nenhum RF prevê hoje | média (sem isso, o anúncio vira deploy manual do front) | lacuna verificada no DRP v2.7 (RF-10 só lista integrado/pendente/inativo/erro) | Produto + Engenharia | antes do refinamento da Feature |
 
 ## Quebra de tarefas
 1. Linha de canal do painel de vínculos — os 3 estados (peça atômica)
@@ -461,3 +462,28 @@ distintos; sem erros de console. Aplicado em `06-fluxo-completo.html` e seu espe
   ("3 de 3"), devbar alterna carregado/loading/erro. Aguardando o veredicto do designer.
 - **[2026-08-16] [fase 03 · ciclo 2] VEREDICTO DO DESIGNER: APROVADO** ("ta tudo aprovado").
   Ciclo 2 fechado.
+
+- **[2026-08-16] [fase 01 · ciclo 3] Decisão do designer: o painel de canais passa a ter
+  ORIGEM DE DADOS** ("não é pra ser conteúdo fixo na POC, é pra ser conteúdo com origem,
+  assim como os outros canais"). Contexto: ao perguntar por que o Mercado Livre aparece na
+  tela da influenciadora e não no admin, ficou exposto que o card "Em breve" era HTML escrito
+  à mão — um anúncio sem dono nem mecanismo. A decisão: o painel renderiza TODOS os canais a
+  partir de uma estrutura de dados que espelha a resposta do endpoint de status (RF-10), e
+  "em breve" vira um ESTADO de canal no contrato — não um enfeite da tela. Consequência para
+  fora de Design registrada como premissa 5: o RF-10 hoje só prevê integrado/pendente/inativo/
+  erro; listar canal futuro com estado próprio precisa entrar no contrato (Produto+Engenharia).
+- **[2026-08-16] [fase 02 · ciclo 3] Painel refeito sobre origem de dados.** Estrutura
+  `CANAIS_HUB` (id, nome, logo, estado, hint, ação/modal) espelhando a resposta do RF-10;
+  `renderPainel()` desenha os cards, o skeleton (um fantasma POR CANAL, sem número mágico) e
+  o contador (que só conta canais reais — `estado !== 'breve'` fica fora do "N de 3") a partir
+  dela. O HTML dos 4 cards escritos à mão saiu; a ação de vincular virou delegação por
+  `data-vincular`; `setLinked` agora muda o DADO e re-renderiza — e devolve o foco ao card
+  atualizado, porque o botão-gatilho deixa de existir no re-render. Modais A/B intocados.
+- **[2026-08-16] [fase 03 · ciclo 3] Verificado por medição, carga limpa:** 4 cards nascendo
+  do dado (ML "Em breve" com botão desabilitado e logo real), contador "1 de 3"; skeleton com
+  4 fantasmas gerados do mesmo dado; erro de leitura via devbar intacto; fluxo Shopee
+  (expirado→Modal B→Vinculado, "2 de 3", chip trocado, botão removido, foco no card) e TikTok
+  (nunca→Modal A→"3 de 3"); zero erros de console na bateria inteira. Paridade visual com o
+  estado aprovado conferida por screenshot. Aguardando o veredicto do designer.
+- **[2026-08-16] [fase 03 · ciclo 3] VEREDICTO DO DESIGNER: APROVADO** ("ok, e pode subir
+  tudo para producao"). Ciclo 3 fechado e publicado.

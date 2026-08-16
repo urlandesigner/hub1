@@ -465,41 +465,12 @@
         <h2 class="links-panel__title">Meus canais de venda</h2>
         <span class="links-panel__meta" id="panel-meta"><b>1 de 3</b> canais recebendo suas vendas pelo link do Hub</span>
       </header>
-      <div id="panel-rows">
-      <div class="link-row">
-        <span class="link-row__logo"><img src="assets/ybera.svg" alt=""></span>
-        <span class="link-row__name">Ybera.com</span>
-        <span class="link-row__hint">Suas vendas neste canal já contam para a sua comissão.</span>
-        <span class="chip chip--ok"><svg viewBox="0 0 448 512" fill="currentColor" aria-hidden="true"><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg>Vinculado</span>
-      </div>
-      <div class="link-row" id="row-shopee">
-        <span class="link-row__logo"><img src="assets/Shopee.svg" alt=""></span>
-        <span class="link-row__name">Shopee</span>
-        <span class="link-row__hint">Sua conexão com a Shopee expirou. Refaça a autorização para voltar a ganhar comissão.</span>
-        <span class="chip chip--warn"><svg viewBox="0 0 512 512" fill="currentColor" aria-hidden="true"><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>Conexão expirada</span>
-        <button class="link-row__action" type="button" id="act-shopee" aria-haspopup="dialog">Reconectar Shopee</button>
-      </div>
-      <div class="link-row" id="row-tiktok">
-        <span class="link-row__logo"><img src="assets/tiktok.svg" alt=""></span>
-        <span class="link-row__name">TikTok Shop</span>
-        <span class="link-row__hint">Vincule sua conta para ganhar comissão nas vendas do TikTok.</span>
-        <span class="chip chip--off">Não vinculado</span>
-        <button class="link-row__action" type="button" id="act-tiktok" aria-haspopup="dialog">Como vincular TikTok ao seu Hub</button>
-      </div>
-      <div class="link-row" id="row-ml">
-        <span class="link-row__logo"><img src="assets/mercadolivre.png" alt=""></span>
-        <span class="link-row__name">Mercado Livre</span>
-        <span class="link-row__hint">Essa integração ainda não está disponível. Em breve você vai poder vincular sua conta e vender por esse canal também.</span>
-        <span class="chip chip--soon">Em breve</span>
-        <button class="link-row__action" type="button" id="act-ml" disabled aria-disabled="true">Em breve</button>
-      </div>
-      </div>
-      <div id="panel-loading" hidden aria-busy="true">
-        <div class="sk-row" aria-hidden="true"><span class="sk sk-logo"></span><span class="sk sk-name"></span><span class="sk sk-hint"></span><span class="sk sk-chip"></span></div>
-        <div class="sk-row" aria-hidden="true"><span class="sk sk-logo"></span><span class="sk sk-name"></span><span class="sk sk-hint"></span><span class="sk sk-chip"></span></div>
-        <div class="sk-row" aria-hidden="true"><span class="sk sk-logo"></span><span class="sk sk-name"></span><span class="sk sk-hint"></span><span class="sk sk-chip"></span></div>
-        <div class="sk-row" aria-hidden="true"><span class="sk sk-logo"></span><span class="sk sk-name"></span><span class="sk sk-hint"></span><span class="sk sk-chip"></span></div>
-      </div>
+      <!-- Os cards de canal são RENDERIZADOS da estrutura CANAIS_HUB (script no fim da
+           página), que espelha a resposta do endpoint de status por canal (RF-10).
+           Nenhum canal é escrito à mão aqui — nem o Mercado Livre: "em breve" é um
+           estado de canal no dado, não um enfeite da tela (decisão do designer, 16/08). -->
+      <div id="panel-rows"></div>
+      <div id="panel-loading" hidden aria-busy="true"></div>
       <div id="panel-error" hidden>
         <div class="panel-notice" role="status">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
@@ -787,11 +758,64 @@
 </div>
 
 <script>
+  // ===== ORIGEM DOS DADOS DO PAINEL (ciclo 3) ==========================================
+  // Espelha a resposta do endpoint de status por canal (RF-10): a tela não tem canal
+  // escrito à mão — tudo que o painel mostra nasce desta estrutura, INCLUSIVE o Mercado
+  // Livre ("em breve" é um estado de canal no dado, não um enfeite da POC — decisão do
+  // designer, 16/08). Na produção isto é um fetch; o estado "breve" precisa entrar no
+  // contrato do endpoint (premissa 5 da spec — RF-10 hoje não lista canais futuros).
+  const HINT_VINCULADO = 'Suas vendas neste canal já contam para a sua comissão.';
+  const CANAIS_HUB = [
+    {id:'ybera',  nome:'Ybera.com',     logo:'assets/ybera.svg',        estado:'vinculado',
+     hint:HINT_VINCULADO},
+    {id:'shopee', nome:'Shopee',        logo:'assets/Shopee.svg',       estado:'expirado',
+     hint:'Sua conexão com a Shopee expirou. Refaça a autorização para voltar a ganhar comissão.',
+     acao:'Reconectar Shopee', modal:'modal-b'},
+    {id:'tiktok', nome:'TikTok Shop',   logo:'assets/tiktok.svg',       estado:'nunca',
+     hint:'Vincule sua conta para ganhar comissão nas vendas do TikTok.',
+     acao:'Como vincular TikTok ao seu Hub', modal:'modal-a'},
+    {id:'ml',     nome:'Mercado Livre', logo:'assets/mercadolivre.png', estado:'breve',
+     hint:'Essa integração ainda não está disponível. Em breve você vai poder vincular sua conta e vender por esse canal também.'}
+  ];
+
+  const CHECK = '<svg viewBox="0 0 448 512" fill="currentColor" aria-hidden="true"><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg>';
+  const WARN = '<svg viewBox="0 0 512 512" fill="currentColor" aria-hidden="true"><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>';
+
+  function chipDe(c){
+    if(c.estado === 'vinculado') return '<span class="chip chip--ok">' + CHECK + 'Vinculado</span>';
+    if(c.estado === 'expirado')  return '<span class="chip chip--warn">' + WARN + 'Conexão expirada</span>';
+    if(c.estado === 'breve')     return '<span class="chip chip--soon">Em breve</span>';
+    return '<span class="chip chip--off">Não vinculado</span>';
+  }
+  function acaoDe(c){
+    if(c.estado === 'breve')
+      return '<button class="link-row__action" type="button" disabled aria-disabled="true">Em breve</button>';
+    if(c.acao && c.estado !== 'vinculado')
+      return '<button class="link-row__action" type="button" data-vincular="' + c.id + '" aria-haspopup="dialog">' + c.acao + '</button>';
+    return '';
+  }
+  function renderPainel(){
+    document.getElementById('panel-rows').innerHTML = CANAIS_HUB.map(c =>
+      '<div class="link-row" id="row-' + c.id + '" tabindex="-1">' +
+        '<span class="link-row__logo"><img src="' + c.logo + '" alt=""></span>' +
+        '<span class="link-row__name">' + c.nome + '</span>' +
+        '<span class="link-row__hint">' + c.hint + '</span>' +
+        chipDe(c) + acaoDe(c) +
+      '</div>').join('');
+    // o skeleton também nasce do dado: um fantasma por canal, nunca um número mágico
+    document.getElementById('panel-loading').innerHTML = CANAIS_HUB.map(() =>
+      '<div class="sk-row" aria-hidden="true"><span class="sk sk-logo"></span><span class="sk sk-name"></span><span class="sk sk-hint"></span><span class="sk sk-chip"></span></div>').join('');
+    const reais = CANAIS_HUB.filter(c => c.estado !== 'breve');
+    const on = reais.filter(c => c.estado === 'vinculado').length;
+    document.getElementById('panel-meta').innerHTML =
+      '<b>' + on + ' de ' + reais.length + '</b> canais recebendo suas vendas pelo link do Hub';
+  }
+  renderPainel();
+
   // ===== Fluxo: link contextual -> modal -> autorizacao (simulada) -> estado atualizado =====
   const modalA = document.getElementById('modal-a');
   const modalB = document.getElementById('modal-b');
   let lastTrigger = null;
-  let linked = 1;
 
   function open(m, trigger){
     lastTrigger = trigger;
@@ -802,9 +826,12 @@
     m.classList.remove('on');
     if (lastTrigger && document.contains(lastTrigger)) lastTrigger.focus();
   }
-  document.getElementById('act-tiktok').addEventListener('click', e=>open(modalA, e.currentTarget));
-  document.getElementById('act-shopee').addEventListener('click', e=>open(modalB, e.currentTarget));
-  // act-ml fica de fora: card do Mercado Livre é "novidade" (CTA disabled), sem modal.
+  document.getElementById('panel-rows').addEventListener('click', e=>{
+    const btn = e.target.closest('[data-vincular]');
+    if(!btn) return;
+    const c = CANAIS_HUB.find(x => x.id === btn.dataset.vincular);
+    open(document.getElementById(c.modal), btn);
+  });
   document.querySelectorAll('[data-close]').forEach(b=>
     b.addEventListener('click', ()=>close(b.closest('.modal'))));
   [modalA, modalB].forEach(m=>{
@@ -814,26 +841,22 @@
     if(e.key==='Escape'){ [modalA,modalB].forEach(close); }
   });
 
-  const CHECK = '<svg viewBox="0 0 448 512" fill="currentColor" aria-hidden="true"><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg>';
-  function setLinked(rowId){
-    const row = document.getElementById(rowId);
-    row.querySelector('.link-row__hint').textContent = 'Suas vendas neste canal já contam para a sua comissão.';
-    const chip = row.querySelector('.chip');
-    chip.className = 'chip chip--ok';
-    chip.innerHTML = CHECK + 'Vinculado';
-    const act = row.querySelector('.link-row__action');
-    if (act) act.remove();
-    linked += 1;
-    document.getElementById('panel-meta').innerHTML =
-      '<b>' + linked + ' de 3</b> canais recebendo suas vendas pelo link do Hub';
+  function setLinked(id){
+    const c = CANAIS_HUB.find(x => x.id === id);
+    c.estado = 'vinculado';
+    c.hint = HINT_VINCULADO;
+    renderPainel();
+    // o botão-gatilho deixou de existir no re-render — o foco vai ao card atualizado
+    const row = document.getElementById('row-' + id);
+    if(row) row.focus();
   }
   // Na producao, os botoes abaixo abrem a URL de autorizacao OAuth do canal (RF-008);
   // aqui a concessao externa e simulada para demonstrar o retorno de estado.
   document.getElementById('auth-tiktok').addEventListener('click', ()=>{
-    close(modalA); setLinked('row-tiktok');
+    close(modalA); setLinked('tiktok');
   });
   document.getElementById('auth-shopee').addEventListener('click', ()=>{
-    close(modalB); setLinked('row-shopee');
+    close(modalB); setLinked('shopee');
   });
 
   // ===== Link único do Hub (ciclo 2) — capacidade 2 do DRP: um link por produto, =====
