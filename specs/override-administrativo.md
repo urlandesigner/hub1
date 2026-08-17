@@ -668,3 +668,11 @@ O portão (fase 03) confere, olhando a peça renderizada:
   conscientes desta demanda.
 - **[2026-08-16] [dado] Frete de Shopee e TikTok: R$ 22,90 → R$ 19,90** (pedido do designer).
   Alinhado nas duas peças no mesmo passo; o valor sugerido no campo do modal acompanhou.
+
+- **[2026-08-16] [ajuste] Miniatura do produto na lista da Tela 2** (pedido do designer):
+  44px, à esquerda do nome, borda e fundo dos tokens. O Óleo de Mirra mostra a foto real; os
+  demais usam o placeholder declarado — repetir o frasco do Mirra em "Máscara Reparação" seria
+  mostrar produto errado, a mesma decisão já tomada na peça da influenciadora. `alt` vazio de
+  propósito: o nome do produto está no mesmo item, ao lado, e repeti-lo seria ruído para leitor de
+  tela. Verificado: 6 miniaturas, zero imagem quebrada, alinhadas com o nome, sobrevivem ao
+  re-render do habilitar/desabilitar, console limpo.
