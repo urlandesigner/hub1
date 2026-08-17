@@ -1737,3 +1737,13 @@ não tem degrau utilizável entre 2,18:1 e 5,30:1.
   pelo CEP do cliente" sem ação, e a opção "usar o frete de outro canal" ficou alcançável nos
   dois marketplaces (antes só aparecia para canal sem valor, o que a mudança tornaria inalcançável
   — `podeRef` passou a depender de o frete ser estimado, não de estar vazio).
+
+- **[2026-08-16] [dado] Frete de Shopee e TikTok: R$ 22,90 → R$ 19,90** (pedido do designer).
+  Totais refeitos: Shopee 199,80 · TikTok 204,80. **Efeito colateral achado na verificação e
+  resolvido:** com a Shopee em 199,80, o frete genérico da Wake (R$ 9,90 → total 199,80) criava
+  **empate exato de total** entre dois canais, e a faixa "Melhor oferta" ficaria arbitrária aos
+  olhos do cliente. Ajustei o frete genérico da Wake para R$ 7,90 (total 197,80), o que **mantém
+  o mesmo vencedor de antes** e desfaz o empate. É dado de demonstração de um CEP não mapeado,
+  reversível — se o Produto quiser tratar empate como regra (ex.: em caso de igualdade, prefere
+  o canal de frete exato), aí é decisão de produto, não de dado.
+  Conferido: nenhum dos três estados de CEP tem dois totais iguais.

@@ -651,3 +651,20 @@ O portão (fase 03) confere, olhando a peça renderizada:
   pelo CEP do cliente" sem ação, e a opção "usar o frete de outro canal" ficou alcançável nos
   dois marketplaces (antes só aparecia para canal sem valor, o que a mudança tornaria inalcançável
   — `podeRef` passou a depender de o frete ser estimado, não de estar vazio).
+
+- **[2026-08-16] [Δspec · segunda divergência intencional do brief] Prazo de entrega virou campo
+  do painel.** Pergunta do designer ("prazo de entrega não vem do admin? lá não vejo as opções de
+  editar") e decisão dele em seguida. O brief **não autoriza**: a taxonomia do v1.10 marca Prazo
+  como API pura, coluna "Override disponível" = "—", igual ao Preço. Razão da divergência: a
+  **Shopee não informa prazo** e ninguém podia suprir, então o card dela ficava com "Não
+  informado" para sempre — ao lado de um Frete que a Ybera ajusta à mão. A assimetria não se
+  sustentava depois do v1.10 ter aberto o Frete. Mecânica idêntica à do Frete: prazo de volta,
+  sem motivo obrigatório, "ocultar campo" disponível. **Regra de honestidade nova:** prazo que
+  vem do canal aparece limpo; prazo que VOCÊ digitou sai com a marca **"Aproximado"** — a mesma
+  do frete estimado, para o cliente não tomar chute por precisão. Verificado: definir na Shopee
+  ("5–8 dias úteis") grava, marca "Aproximado", carimba autoria e prazo de volta; o prazo
+  automático da Ybera continua sem marca. Matriz agora 5 campos × 3 canais = 15 células.
+  **Para o Produto referendar** — junto com a remoção da Imagem, são as duas divergências
+  conscientes desta demanda.
+- **[2026-08-16] [dado] Frete de Shopee e TikTok: R$ 22,90 → R$ 19,90** (pedido do designer).
+  Alinhado nas duas peças no mesmo passo; o valor sugerido no campo do modal acompanhou.

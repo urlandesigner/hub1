@@ -675,22 +675,22 @@
 
   const STATE = {
     ref:{ isRef:true, order:['shopee','tiktok','ybera'], best:'shopee',
-      d:{ shopee:{total:'R$ 202,80', price:'R$ 179,90', freight:'+ frete R$ 22,90'},
-          tiktok:{total:'R$ 207,80', price:'R$ 184,90', freight:'+ frete R$ 22,90', prazo:'4–7 dias úteis'},
+      d:{ shopee:{total:'R$ 199,80', price:'R$ 179,90', freight:'+ frete R$ 19,90'},
+          tiktok:{total:'R$ 204,80', price:'R$ 184,90', freight:'+ frete R$ 19,90', prazo:'4–7 dias úteis'},
           ybera:{total:'R$ 209,80', price:'R$ 189,90', freight:'+ frete R$ 19,90', prazo:'3–5 dias úteis'} } },
     cepA:{ cep:'01310-100', city:'São Paulo, SP', order:['ybera','shopee','tiktok'], best:'ybera',
       d:{ ybera:{total:'R$ 189,90', price:'R$ 189,90', freight:'Frete grátis', free:true, prazo:'2–4 dias úteis'},
-          shopee:{total:'R$ 202,80', price:'R$ 179,90', freight:'+ frete R$ 22,90'},
-          tiktok:{total:'R$ 207,80', price:'R$ 184,90', freight:'+ frete R$ 22,90', prazo:'3–6 dias úteis'} } },
+          shopee:{total:'R$ 199,80', price:'R$ 179,90', freight:'+ frete R$ 19,90'},
+          tiktok:{total:'R$ 204,80', price:'R$ 184,90', freight:'+ frete R$ 19,90', prazo:'3–6 dias úteis'} } },
     cepB:{ cep:'69900-970', city:'Rio Branco, AC', order:['shopee','tiktok','ybera'], best:'shopee',
-      d:{ shopee:{total:'R$ 202,80', price:'R$ 179,90', freight:'+ frete R$ 22,90'},
+      d:{ shopee:{total:'R$ 199,80', price:'R$ 179,90', freight:'+ frete R$ 19,90'},
           ybera:{total:'R$ 224,80', price:'R$ 189,90', freight:'+ frete R$ 34,90', prazo:'6–9 dias úteis'},
-          tiktok:{total:'R$ 207,80', price:'R$ 184,90', freight:'+ frete R$ 22,90', prazo:'4–7 dias úteis'} } },
+          tiktok:{total:'R$ 204,80', price:'R$ 184,90', freight:'+ frete R$ 19,90', prazo:'4–7 dias úteis'} } },
     // fallback do demo: qualquer CEP válido não-mapeado usa frete recalculado genérico
     cepGen:{ order:['ybera','shopee','tiktok'], best:'ybera',
-      d:{ ybera:{total:'R$ 199,80', price:'R$ 189,90', freight:'+ frete R$ 9,90', prazo:'3–6 dias úteis'},
-          shopee:{total:'R$ 202,80', price:'R$ 179,90', freight:'+ frete R$ 22,90'},
-          tiktok:{total:'R$ 207,80', price:'R$ 184,90', freight:'+ frete R$ 22,90', prazo:'4–7 dias úteis'} } },
+      d:{ ybera:{total:'R$ 197,80', price:'R$ 189,90', freight:'+ frete R$ 7,90', prazo:'3–6 dias úteis'},
+          shopee:{total:'R$ 199,80', price:'R$ 179,90', freight:'+ frete R$ 19,90'},
+          tiktok:{total:'R$ 204,80', price:'R$ 184,90', freight:'+ frete R$ 19,90', prazo:'4–7 dias úteis'} } },
   };
   const CEP_MAP = {'01310100':'cepA','69900970':'cepB'};
 

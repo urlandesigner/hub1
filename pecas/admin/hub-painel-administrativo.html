@@ -599,6 +599,7 @@
       <input class="inp is-hidden" id="md-num" type="number" min="0" max="5" step="0.1" aria-labelledby="md-val-lbl">
       <!-- frete (Q-E/Q-F, brief v1.10): valor manual sempre sai com a marca "Aproximado";
            no TikTok há também a opção de referenciar o frete de outro canal -->
+      <input class="inp is-hidden" id="md-prazo" type="text" placeholder="ex.: 3–6 dias úteis" aria-labelledby="md-val-lbl">
       <div class="is-hidden" id="md-fretewrap">
         <div class="opts" id="md-fsrc">
           <label class="opt"><input type="radio" name="fsrc" value="valor" checked>
@@ -712,7 +713,12 @@ var CAMPOS = [
   /* Frete entrou como campo do painel no brief v1.10 (Q-E/Q-F): substituível só em
      Shopee/TikTok, sem motivo; valor manual sempre sai rotulado "Aproximado" no card.
      A mecânica de prazo é a mesma dos demais — premissa 12 da spec (o brief não a define). */
-  {id:'frete',   nome:'Frete',            tipo:'frete',  opcoes:null,         motivo:false, ttl:2}
+  {id:'frete',   nome:'Frete',            tipo:'frete',  opcoes:null,         motivo:false, ttl:2},
+  /* Prazo de entrega entrou por decisão do designer (16/08), NÃO pelo brief: a taxonomia do
+     v1.10 marca Prazo como API pura, sem override. Motivo da divergência: a Shopee não informa
+     prazo e ninguém podia suprir, então o card ficava com "Não informado" para sempre ao lado
+     de um frete que a Ybera ajusta à mão. Registrado na spec para o Produto referendar. */
+  {id:'prazo',   nome:'Prazo de entrega', tipo:'prazo',  opcoes:null,         motivo:false, ttl:2}
 ];
 
 /* estado: por campo, por canal.
@@ -751,15 +757,22 @@ var D_MIRRA = {
              por:'Ana Ribeiro',
              motivo:'Média das avaliações do app, conferida manualmente em 02/08.'}
   },
+  prazo:{
+    ybera:  {fonte:'api',   valor:'3–6 dias úteis', api:'3–6 dias úteis'},
+    /* a Shopee não informa prazo por API — sem valor seu, o card fica sem essa linha */
+    shopee: {fonte:'vazio', valor:null, api:null,
+             nota:'A Shopee não informa prazo de entrega. Sem um valor seu, o cliente vê "Não informado".'},
+    tiktok: {fonte:'api',   valor:'4–7 dias úteis', api:'4–7 dias úteis'}
+  },
   frete:{
     /* Q-E/Q-F (v1.10): Wake é exato pelo CEP real — sem substituição; Shopee vem da API
        sempre como estimativa ("Aproximado"); TikTok não tem API — manual, referência, ou nada */
     ybera:  {fonte:'api',   valor:null, api:null, exato:true},
-    shopee: {fonte:'api',   valor:'R$ 22,90', api:'R$ 22,90'},
+    shopee: {fonte:'api',   valor:'R$ 19,90', api:'R$ 19,90'},
     /* decisão de produto (designer, 16/08): Shopee e TikTok se comportam igual — o TikTok não
        tem frete próprio por API (Q-F), então herda a MESMA estimativa da Shopee, automática.
        Sai rotulado "Aproximado" como ela, e por isso entra no ranking preço + frete. */
-    tiktok: {fonte:'api', valor:'R$ 22,90', api:'R$ 22,90'}
+    tiktok: {fonte:'api', valor:'R$ 19,90', api:'R$ 19,90'}
   }
 };
 
@@ -784,6 +797,12 @@ function camposDaApi(){
       /* Q-H/HT-04: no TikTok a nota é sempre manual — sem override, o campo não tem valor */
       tiktok: {fonte:'vazio', valor:null, api:null,
                nota:'O TikTok Shop não informa avaliação. Sem um valor seu, o card não mostra estrelas.'}
+    },
+    prazo:{
+      ybera:  {fonte:'api',   valor:'3–6 dias úteis', api:'3–6 dias úteis'},
+      shopee: {fonte:'vazio', valor:null, api:null,
+               nota:'A Shopee não informa prazo de entrega. Sem um valor seu, o cliente vê "Não informado".'},
+      tiktok: {fonte:'api',   valor:'4–7 dias úteis', api:'4–7 dias úteis'}
     },
     frete:{
       ybera:  {fonte:'api', valor:null, api:null, exato:true},
@@ -847,8 +866,12 @@ function celula(campo, canal){
     h += '<div class="val">Frete da ' + canalPorId(s.ref).nome + '<span class="tag-aprox">Aproximado</span></div>';
   } else if(campo.tipo === 'frete' && s.valor !== null){
     h += '<div class="val">' + s.valor + '<span class="tag-aprox">Aproximado</span></div>';
+  } else if(campo.tipo === 'prazo' && s.valor !== null){
+    /* prazo do próprio canal é preciso; prazo que você digitou é estimativa, e o cliente
+       precisa saber a diferença (mesma regra do frete) */
+    h += '<div class="val">' + s.valor + (s.fonte === 'over' ? '<span class="tag-aprox">Aproximado</span>' : '') + '</div>';
   } else if(s.valor === null){
-    h += '<div class="val val--muted">' + (campo.tipo === 'frete' ? 'Sem informação' : 'Nenhum selo') + '</div>';
+    h += '<div class="val val--muted">' + (campo.tipo === 'frete' || campo.tipo === 'prazo' ? 'Sem informação' : 'Nenhum selo') + '</div>';
   } else {
     h += '<div class="val">' + s.valor + '</div>';
   }
@@ -964,6 +987,7 @@ var mdWhyWrap = document.getElementById('md-why-wrap');
 var mdWhy = document.getElementById('md-why');
 var mdWhyReq = document.getElementById('md-why-req');
 var mdSave = document.getElementById('md-save');
+var mdPrazo = document.getElementById('md-prazo');
 var mdFreteWrap = document.getElementById('md-fretewrap');
 var mdFsrc = document.getElementById('md-fsrc');
 var mdMoedaWrap = document.getElementById('md-moeda-wrap');
@@ -995,6 +1019,8 @@ function abrir(campoId, chId, btn){
   if(s.api === null){
     /* definitivo, não transitório — Q-H/HT-04 fechadas no v1.10 */
     mdNow.innerHTML = 'O ' + canal.nome + ' <b>não informa este campo</b>. O que você definir aqui é o único valor que o cliente vê.';
+  } else if(campo.tipo === 'prazo'){
+    mdNow.innerHTML = 'O ' + canal.nome + ' informa <b>' + s.api + '</b>. O que você puser aqui aparece marcado como estimativa.';
   } else if(campo.tipo === 'frete'){
     mdNow.innerHTML = 'O ' + canal.nome + ' informa <b>' + s.api + '</b> — estimativa, sem o CEP do comprador. Qualquer valor aqui sai com a marca <b>"Aproximado"</b>.';
   } else {
@@ -1005,6 +1031,7 @@ function abrir(campoId, chId, btn){
   mdVal.classList.add('is-hidden');
   mdNum.classList.add('is-hidden');
   mdFreteWrap.classList.add('is-hidden');
+  mdPrazo.classList.add('is-hidden');
   if(campo.tipo === 'tier'){
     mdVal.classList.remove('is-hidden');
     mdVal.innerHTML = campo.opcoes.map(function(o){
@@ -1013,6 +1040,9 @@ function abrir(campoId, chId, btn){
   } else if(campo.tipo === 'nota'){
     mdNum.classList.remove('is-hidden');
     mdNum.value = (s.valor || '4,0').replace(',', '.');
+  } else if(campo.tipo === 'prazo'){
+    mdPrazo.classList.remove('is-hidden');
+    mdPrazo.value = s.valor || '';
   } else if(campo.tipo === 'frete'){
     mdFreteWrap.classList.remove('is-hidden');
     /* referenciar outro canal (Q-F) vale para qualquer canal de frete estimado — só a Wake
@@ -1025,7 +1055,7 @@ function abrir(campoId, chId, btn){
       return '<option value="' + c.id + '"' + (s.ref === c.id ? ' selected' : '') + '>' + c.nome + ' (' + D.frete[c.id].valor + ')</option>';
     }).join('');
     mdFsrc.querySelector('input[value="' + (s.ref ? 'ref' : 'valor') + '"]').checked = true;
-    mdMoeda.value = s.valor ? s.valor.replace('R$', '').trim().replace(',', '.') : '24.90';
+    mdMoeda.value = s.valor ? s.valor.replace('R$', '').trim().replace(',', '.') : '19.90';
     sincronizarFrete();
   }
 
@@ -1040,6 +1070,7 @@ function abrir(campoId, chId, btn){
   bd.classList.add('is-open');
   /* primeiro controle visível de cada tipo */
   if(campo.tipo === 'nota') mdNum.focus();
+  else if(campo.tipo === 'prazo') mdPrazo.focus();
   else if(campo.tipo === 'frete') (mdFsrc.classList.contains('is-hidden') ? mdMoeda : mdFsrc.querySelector('input:checked')).focus();
   else mdVal.focus();
 }
@@ -1105,6 +1136,7 @@ mdSave.addEventListener('click', function(){
   };
   if(alvo.campo.tipo === 'nota'){ novo.valor = String(mdNum.value).replace('.', ','); }
   else if(alvo.campo.tipo === 'tier'){ novo.valor = mdVal.value === 'Sem selo' ? null : mdVal.value; }
+  else if(alvo.campo.tipo === 'prazo'){ novo.valor = mdPrazo.value.trim() || null; }
   else if(alvo.campo.tipo === 'frete'){
     var usarRef = !mdFsrc.classList.contains('is-hidden')
       && mdFsrc.querySelector('input[value="ref"]').checked;
