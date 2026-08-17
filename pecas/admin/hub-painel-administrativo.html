@@ -755,9 +755,11 @@ var D_MIRRA = {
     /* Q-E/Q-F (v1.10): Wake é exato pelo CEP real — sem substituição; Shopee vem da API
        sempre como estimativa ("Aproximado"); TikTok não tem API — manual, referência, ou nada */
     ybera:  {fonte:'api',   valor:null, api:null, exato:true},
-    shopee: {fonte:'api',   valor:'R$ 19,90', api:'R$ 19,90'},
-    tiktok: {fonte:'vazio', valor:null, api:null,
-             nota:'O TikTok não envia frete. Sem um valor seu (ou o de outro canal como referência), este canal fica fora do ranking "menor preço + frete".'}
+    shopee: {fonte:'api',   valor:'R$ 22,90', api:'R$ 22,90'},
+    /* decisão de produto (designer, 16/08): Shopee e TikTok se comportam igual — o TikTok não
+       tem frete próprio por API (Q-F), então herda a MESMA estimativa da Shopee, automática.
+       Sai rotulado "Aproximado" como ela, e por isso entra no ranking preço + frete. */
+    tiktok: {fonte:'api', valor:'R$ 22,90', api:'R$ 22,90'}
   }
 };
 
@@ -785,9 +787,8 @@ function camposDaApi(){
     },
     frete:{
       ybera:  {fonte:'api', valor:null, api:null, exato:true},
-      shopee: {fonte:'api', valor:'R$ 22,90', api:'R$ 22,90'},
-      tiktok: {fonte:'vazio', valor:null, api:null,
-               nota:'O TikTok não envia frete. Sem um valor seu (ou o de outro canal como referência), este canal fica fora do ranking "menor preço + frete".'}
+      shopee: {fonte:'api', valor:'R$ 19,90', api:'R$ 19,90'},
+      tiktok: {fonte:'api', valor:'R$ 19,90', api:'R$ 19,90'}
     }
   };
 }
@@ -1014,8 +1015,9 @@ function abrir(campoId, chId, btn){
     mdNum.value = (s.valor || '4,0').replace(',', '.');
   } else if(campo.tipo === 'frete'){
     mdFreteWrap.classList.remove('is-hidden');
-    /* referenciar outro canal é opção só de quem não tem API (TikTok, Q-F) */
-    var podeRef = (s.api === null);
+    /* referenciar outro canal (Q-F) vale para qualquer canal de frete estimado — só a Wake
+       fica fora, porque cota exato pelo CEP e não tem override */
+    var podeRef = !s.exato;
     mdFsrc.classList.toggle('is-hidden', !podeRef);
     mdRefsel.innerHTML = CANAIS_ATIVOS.filter(function(c){
       return c.id !== canal.id && !D.frete[c.id].exato && D.frete[c.id].valor !== null;

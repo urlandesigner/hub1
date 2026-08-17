@@ -316,6 +316,15 @@
     font-weight:700; font-size:12px; line-height:1; letter-spacing:.12em; text-transform:uppercase}
   .channel__ribbon svg{width:14px; height:14px; flex:none; fill:var(--amber-600)}
   /* não entrega neste CEP */
+  /* tag "Aproximado" (Q-E/Q-F do v1.10 + resposta ao H-UX-16): pílula neutra pequena ao lado
+     do valor — cumpre a transparência sem competir com o preço */
+  .aprox{display:inline-block; margin-left:6px; font-size:10px; font-weight:700; letter-spacing:.02em;
+    text-transform:uppercase; color:var(--neutral-700); border:1px solid var(--neutral-400);
+    border-radius:var(--r-full); padding:1px 7px; vertical-align:1px; white-space:nowrap}
+  /* canal sem frete: visível e comprável, mas fora da comparação por preço + frete */
+  .channel__outrank{display:flex; gap:8px; align-items:flex-start; margin-top:var(--sp-300);
+    font-size:13px; line-height:18px; color:var(--neutral-700)}
+  .channel__outrank svg{width:14px; height:14px; flex:none; margin-top:2px}
   .channel--noship{background:var(--neutral-100); border-color:var(--neutral-400); border-style:dashed}
   .channel--noship .channel__head{margin-bottom:var(--sp-400)}
   .channel--noship .channel__name{color:var(--neutral-700)}
@@ -652,29 +661,36 @@
   };
 
   const CH = {
-    shopee:{name:'Shopee', logo:'assets/Shopee.svg', cta:'Comprar na Shopee', artigo:'a', href:'https://shopee.com.br/', sub:'Marketplace parceiro', rating:4.6, noPrazo:true, stock:'ok', volume:'champ'},
-    tiktok:{name:'TikTok Shop', logo:'assets/tiktok.svg', cta:'Comprar no TikTok Shop', artigo:'o', href:'https://www.tiktok.com/shop', sub:'Loja no TikTok Shop', rating:4.3, noFrete:true, stock:'low', volume:'launch'},
+    /* aprox: o frete da Shopee vem de `estimated_shipping_fee`, que NÃO usa o CEP do
+       comprador (Q-E do v1.10) — por isso é constante entre CEPs e sai sempre rotulado. */
+    shopee:{name:'Shopee', logo:'assets/Shopee.svg', cta:'Comprar na Shopee', artigo:'a', href:'https://shopee.com.br/', sub:'Marketplace parceiro', rating:4.6, noPrazo:true, aprox:true, stock:'ok', volume:'champ'},
+    /* aprox: o TikTok não tem frete próprio por API (Q-F), e a regra de produto é usar a mesma
+       estimativa da Shopee — os dois marketplaces se comportam igual. Sai rotulado como
+       estimativa, igual à Shopee, e por isso ENTRA na comparação preço + frete.
+       O caminho "canal sem frete" (noFrete) continua implementado: é a resposta ao H-UX-16 e
+       volta a valer se o admin remover o valor. */
+    tiktok:{name:'TikTok Shop', logo:'assets/tiktok.svg', cta:'Comprar no TikTok Shop', artigo:'o', href:'https://www.tiktok.com/shop', sub:'Loja no TikTok Shop', rating:4.3, aprox:true, stock:'low', volume:'launch'},
     ybera:{name:'Ybera.com', logo:'assets/ybera.svg', cta:'Comprar na Ybera.com', artigo:'a', href:'https://www.ybera.com/produto/escova-progressiva-500g-fashion-gold-150264?parceiro=52154', sub:'Canal oficial Ybera', rating:4.8, stock:'ok', volume:null},
   };
 
   const STATE = {
     ref:{ isRef:true, order:['shopee','tiktok','ybera'], best:'shopee',
-      d:{ shopee:{total:'R$ 204,80', price:'R$ 179,90', freight:'+ frete R$ 24,90'},
-          tiktok:{total:'R$ 206,90', price:'R$ 184,90', prazo:'4–7 dias úteis'},
+      d:{ shopee:{total:'R$ 202,80', price:'R$ 179,90', freight:'+ frete R$ 22,90'},
+          tiktok:{total:'R$ 207,80', price:'R$ 184,90', freight:'+ frete R$ 22,90', prazo:'4–7 dias úteis'},
           ybera:{total:'R$ 209,80', price:'R$ 189,90', freight:'+ frete R$ 19,90', prazo:'3–5 dias úteis'} } },
     cepA:{ cep:'01310-100', city:'São Paulo, SP', order:['ybera','shopee','tiktok'], best:'ybera',
       d:{ ybera:{total:'R$ 189,90', price:'R$ 189,90', freight:'Frete grátis', free:true, prazo:'2–4 dias úteis'},
-          shopee:{total:'R$ 196,80', price:'R$ 179,90', freight:'+ frete R$ 16,90'},
-          tiktok:{total:'R$ 202,90', price:'R$ 184,90', prazo:'3–6 dias úteis'} } },
-    cepB:{ cep:'69900-970', city:'Rio Branco, AC', order:['shopee','ybera','tiktok'], best:'shopee',
-      d:{ shopee:{total:'R$ 222,80', price:'R$ 179,90', freight:'+ frete R$ 42,90'},
+          shopee:{total:'R$ 202,80', price:'R$ 179,90', freight:'+ frete R$ 22,90'},
+          tiktok:{total:'R$ 207,80', price:'R$ 184,90', freight:'+ frete R$ 22,90', prazo:'3–6 dias úteis'} } },
+    cepB:{ cep:'69900-970', city:'Rio Branco, AC', order:['shopee','tiktok','ybera'], best:'shopee',
+      d:{ shopee:{total:'R$ 202,80', price:'R$ 179,90', freight:'+ frete R$ 22,90'},
           ybera:{total:'R$ 224,80', price:'R$ 189,90', freight:'+ frete R$ 34,90', prazo:'6–9 dias úteis'},
-          tiktok:{noship:true} } },
+          tiktok:{total:'R$ 207,80', price:'R$ 184,90', freight:'+ frete R$ 22,90', prazo:'4–7 dias úteis'} } },
     // fallback do demo: qualquer CEP válido não-mapeado usa frete recalculado genérico
     cepGen:{ order:['ybera','shopee','tiktok'], best:'ybera',
       d:{ ybera:{total:'R$ 199,80', price:'R$ 189,90', freight:'+ frete R$ 9,90', prazo:'3–6 dias úteis'},
           shopee:{total:'R$ 202,80', price:'R$ 179,90', freight:'+ frete R$ 22,90'},
-          tiktok:{total:'R$ 203,90', price:'R$ 184,90', prazo:'4–7 dias úteis'} } },
+          tiktok:{total:'R$ 207,80', price:'R$ 184,90', freight:'+ frete R$ 22,90', prazo:'4–7 dias úteis'} } },
   };
   const CEP_MAP = {'01310100':'cepA','69900970':'cepB'};
 
@@ -715,7 +731,8 @@
   function fillCard(el, id, st){
     const info = st.d[id]; const ch = CH[id];
     const hasCep = !st.isRef;
-    const isBest = hasCep && !info.noship && st.best === id;
+    /* canal sem frete nunca é "melhor oferta": ele não disputa preço + frete (H-UX-16) */
+    const isBest = hasCep && !info.noship && !ch.noFrete && st.best === id;
     const subText = isBest ? 'Canal verificado' : ch.sub;
     /* faixa full-width no topo do card, dentro da moldura preta — não é mais um chip na
        linha do nome (reversão registrada no Rastro em 2026-08-13) */
@@ -734,7 +751,8 @@
     }
     el.className = 'channel' + (isBest ? ' channel--best' : '');
     const cta = '<a class="channel__cta" href="#" data-ch="'+id+'"><span class="spinner" aria-hidden="true"></span><span class="label">'+ch.cta+'</span>'+ARROW+'</a>';
-    const total = hasCep
+    /* sem frete conhecido não existe "total da compra" — mostra o preço como piso */
+    const total = (hasCep && !ch.noFrete)
       ? ('<div class="channel__total">'+
           '<div class="channel__total-label"><b>'+(isBest ? 'Total da compra' : 'Total')+'</b></div>'+
           '<span class="channel__total-val">'+info.total+'</span>'+
@@ -743,9 +761,18 @@
           '<div class="channel__total-label"><b>A partir de</b></div>'+
           '<span class="channel__total-val">'+info.price+'</span>'+
         '</div>');
+    /* Não informado = o canal não expõe o dado (a causa manda a copy, regra do ciclo 3).
+       Aproximado = valor real, mas estimado sem o CEP do comprador (Shopee, Q-E). */
+    const tagAprox = ch.aprox ? '<span class="aprox">Aproximado</span>' : '';
     const freteVal = ch.noFrete
-      ? '<dd class="pending">Calculado no checkout</dd>'
-      : !hasCep ? '<dd class="pending">Informe o CEP</dd>' : (info.free ? '<dd class="free">Grátis</dd>' : '<dd>'+info.freight.replace('+ frete ','')+'</dd>');
+      ? '<dd class="pending">Não informado</dd>'
+      : !hasCep ? '<dd class="pending">Informe o CEP</dd>'
+      : (info.free ? '<dd class="free">Grátis</dd>' : '<dd>'+info.freight.replace('+ frete ','')+tagAprox+'</dd>');
+    /* por que este canal não aparece no ranking — só depois do CEP, quando o ranking passa a
+       ser preço + frete (antes dele a ordenação é por preço, e aí o canal participa normal) */
+    const outrank = (hasCep && ch.noFrete)
+      ? '<div class="channel__outrank">'+WARN+'<span>'+ch.name+' não informa o frete, então não entra na comparação por preço + frete.</span></div>'
+      : '';
     const prazoVal = ch.noPrazo
       ? '<dd class="pending">Não informado</dd>'
       : !hasCep ? '<dd class="pending">Informe o CEP</dd>' : '<dd>'+info.prazo+'</dd>';
@@ -760,6 +787,7 @@
           '<div class="channel__row"><dt>Prazo de entrega</dt>'+prazoVal+'</div>'+
           '<div class="channel__row"><dt>Frete</dt>'+freteVal+'</div>'+
         '</dl>'+
+        outrank+
         '<div class="channel__divider"></div>'+
         '<div class="channel__foot">'+total+cta+'</div>'+
       '</div>';

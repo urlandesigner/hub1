@@ -1652,3 +1652,88 @@ não tem degrau utilizável entre 2,18:1 e 5,30:1.
   em produção ainda se chama "Peça 10 · elevada (craft dentro dos tokens)" na aba do navegador.
   É nome interno de trabalho exposto ao cliente final em `hub1-drab.vercel.app`. Corrigir é
   mudar copy de página viva — fica para decisão do designer, não para um ajuste de arrumação.
+
+- **[2026-08-16] [fase 01 · ciclo 4] Ciclo aberto por divergência achada pelo designer entre as
+  peças:** o comparador mostrava frete da Shopee de R$ 22,90 (CEP genérico) e o painel admin
+  dizia R$ 19,90 — as três peças precisam contar a mesma verdade, e não contavam. Ao investigar,
+  o número era só o sintoma: **o comparador está no modelo anterior ao Brief v1.10**, em que o
+  frete de todo canal recalcula por CEP. O v1.10 (Q-E/Q-F, a partir da avaliação de Engenharia)
+  fechou outra taxonomia: **só a Wake cota pelo CEP real**; a **Shopee** vem de
+  `estimated_shipping_fee`, que **não usa o CEP do comprador** — daí a tag "Aproximado"
+  obrigatória; o **TikTok** não tem frete por API nenhuma.
+- **[2026-08-16] [fase 01 · ciclo 4] Segundo defeito, achado no mesmo caminho: frete fantasma do
+  TikTok.** O card do TikTok não exibia frete ("Calculado no checkout") mas o **total somava um
+  frete invisível**: sem CEP, preço 184,90 e total 206,90 (R$ 22 ocultos); no CEP genérico, R$ 19.
+  Além de mentir no total, isso fazia o canal competir no ranking com número que ninguém vê —
+  exatamente o que a coordenada de ordenação do v1.10 proíbe. Terceiro achado: no CEP de Rio
+  Branco o TikTok aparecia como "A loja não entrega neste CEP" — conhecimento que **não existe**,
+  porque o canal não expõe frete nem cobertura; era dado inventado.
+- **[2026-08-16] [fase 01 · ciclo 4] Resposta de Design ao H-UX-16** (a pergunta que o brief
+  deixou para Design e que estava em aberto): **canal sem frete continua visível e comprável, mas
+  fora do ranking** — fica por último depois dos canais completos, nunca recebe a faixa "Melhor
+  oferta", mostra "Não informado" no frete e ganha uma linha explicando por que não entra na
+  comparação por preço + frete. O total dele deixa de ser "Total da compra" e passa a "A partir
+  de" + preço do produto, porque somar um frete que não existe seria inventar. Razão da escolha:
+  esconder o canal puniria o cliente que talvez preferisse comprar lá (e o brief só manda ocultar
+  canal sem estoque/preço/vínculo, não sem frete); deixá-lo no ranking distorceria a comparação a
+  favor de quem não mostra o custo todo. Sobre a tag: **"Aproximado" em pílula neutra e pequena,
+  ao lado do valor** — visível para cumprir a transparência (RNF-Transparência), discreta para não
+  competir com o preço, que é a informação principal do card.
+- **[2026-08-16] [fase 01 · ciclo 4] Escopo deste ciclo:** (1) frete da Shopee constante em todos
+  os estados de CEP, com tag "Aproximado"; (2) TikTok sem frete — total honesto, fora do ranking,
+  com a linha explicativa; (3) remoção do estado "não entrega neste CEP" do TikTok; (4) Wake
+  intocada (cotação real por CEP é o comportamento correto). **Fora deste ciclo:** imagem por
+  canal e o disclaimer de variação de preço (Tela 7) — seguem pendentes, cada um com o próprio
+  peso, e nenhum deles é causa da divergência que abriu este ciclo.
+
+- **[2026-08-16] [fase 02 · ciclo 4] Implementado.** (1) `CH.shopee` ganhou `aprox:true` e o frete
+  dela virou **R$ 22,90 fixo nos quatro estados** (sem CEP, São Paulo, Rio Branco, CEP genérico),
+  com total 202,80 em todos — deixou de fingir cotação por CEP; a pílula **"Aproximado"** sai ao
+  lado do valor. (2) TikTok: frete passou de "Calculado no checkout" (que prometia cálculo
+  adiante) para **"Não informado"**, o total deixou de somar o frete invisível (era 206,90 sobre
+  preço de 184,90) e agora mostra **"A partir de R$ 184,90"**; ganhou a linha *"TikTok Shop não
+  informa o frete, então não entra na comparação por preço + frete"* e nunca recebe a faixa
+  "Melhor oferta" (`isBest` passou a exigir `!ch.noFrete`). (3) Saiu o estado inventado "A loja
+  não entrega neste CEP" do TikTok em Rio Branco. (4) Wake intocada. As ordens já existentes
+  seguiram corretas com os números novos — conferido estado por estado.
+- **[2026-08-16] [fase 03 · ciclo 4] Verificado por medição nos quatro estados:**
+  sem CEP → ordem por preço (Shopee 179,90 · TikTok 184,90 · Ybera 189,90), TikTok participa
+  normalmente porque antes do CEP o ranking é só preço, e a linha de exclusão **não** aparece;
+  São Paulo → Ybera grátis é a melhor (189,90), Shopee 22,90 "Aproximado" (202,80), TikTok fora;
+  Rio Branco → Shopee vira a melhor (202,80 contra 224,80 da Ybera), TikTok fora, sem card de
+  "não entrega"; CEP genérico → Ybera 199,80 melhor, Shopee 202,80. Contraste da pílula
+  "Aproximado" e da linha de exclusão: **8,04** sobre o fundo real (a primeira medição deu 2,07
+  porque pegou a moldura escura do card "melhor" em vez do painel branco que fica atrás).
+  Mobile 375px: sem rolagem lateral, pílula na mesma linha do valor, linha de exclusão visível.
+  Console limpo. **Artefato de ambiente registrado para não virar caça a fantasma:** no painel de
+  automação a página fica `visibilityState: 'hidden'`, então o `requestAnimationFrame` do FLIP não
+  dispara e os cards mantêm o `translateY` invertido — a ordem visual sai trocada enquanto a
+  ordem do DOM está certa. Para usuário real resolve sozinho quando a aba volta a ficar visível;
+  não é defeito da peça.
+- **[2026-08-16] [ciclo 4] Espelho `pecas/comparador-publico/hub-comparador-publico.html`
+  ressincronizado** pelo comando do LEIA-ME e conferido idêntico ao `index.html`.
+
+- **[2026-08-16] [Δspec · decisão de produto do designer] Shopee e TikTok passam a se comportar
+  igual no frete: o TikTok herda a MESMA estimativa da Shopee, automática.** Pedido do designer
+  ("tanto Shopee quanto TikTok o frete vai ser da mesma forma, pode colocar frete automático no
+  TikTok também, no mesmo valor da Shopee"). Encaixa no brief sem forçar: a Q-F já previa
+  "referenciar o frete de outro canal disponível para aquele produto" — a diferença é que aqui
+  isso vira **regra automática**, não ação manual do admin. Para o cliente é indistinguível: os
+  dois saem rotulados "Aproximado", como a Q-E exige de quem não cota pelo CEP real. Consequência
+  de ordenação: o TikTok **volta a entrar** na comparação preço + frete (207,80 = 184,90 + 22,90).
+  Em Rio Branco isso reordena a lista — TikTok (207,80) passa a Ybera (224,80).
+  **O caminho "canal sem frete" continua implementado** (frete "Não informado", total como "A
+  partir de", linha explicando a exclusão do ranking, nunca "Melhor oferta"): é a resposta ao
+  H-UX-16 e volta a valer se o admin remover o valor de um canal. Nenhum estado da demonstração
+  o exercita agora — está registrado aqui para não parecer código morto.
+  **Para o Produto:** o DRP v2.7 descreve o TikTok como "sem frete, admin insere ou referencia";
+  esta regra automática é decisão de Design/Produto do designer e precisa ser referendada.
+- **[2026-08-16] [fase 03] Verificado nos quatro estados após a mudança:** sem CEP → ordem por
+  preço, todos com "Informe o CEP" e "A partir de"; São Paulo → Ybera grátis melhor (189,90),
+  Shopee 202,80, TikTok 207,80, ambos "Aproximado"; Rio Branco → Shopee melhor (202,80), TikTok
+  (207,80), Ybera (224,80) — reordenado corretamente; CEP genérico → Ybera melhor (199,80).
+  Nenhum card "não entrega neste CEP", nenhuma linha de exclusão de ranking, console limpo.
+  No admin: Shopee e TikTok mostram "Automático · R$ 22,90 · Aproximado", a Wake segue "Exato,
+  pelo CEP do cliente" sem ação, e a opção "usar o frete de outro canal" ficou alcançável nos
+  dois marketplaces (antes só aparecia para canal sem valor, o que a mudança tornaria inalcançável
+  — `podeRef` passou a depender de o frete ser estimado, não de estar vazio).
