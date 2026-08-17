@@ -1747,3 +1747,18 @@ não tem degrau utilizável entre 2,18:1 e 5,30:1.
   reversível — se o Produto quiser tratar empate como regra (ex.: em caso de igualdade, prefere
   o canal de frete exato), aí é decisão de produto, não de dado.
   Conferido: nenhum dos três estados de CEP tem dois totais iguais.
+
+- **[2026-08-16] [ajuste visual] "Aproximado" deixou de ser pílula: virou texto simples ao lado do
+  valor, sem caixa alta.** Pedido do designer olhando o card do TikTok em produção. Ficou 12px,
+  peso 600, `neutral-700`, na mesma linha do valor, contraste 8,04. Aplicado também no admin
+  (`.tag-aprox`), para as duas telas que falam do mesmo dado não divergirem no tratamento.
+- **[2026-08-16] [craft] Sombra na foto do produto, copiada de referência real.** O designer
+  apontou `hublinks-ybera.vercel.app` como referência; medi a sombra lá em vez de estimar:
+  `0 0 8px rgba(5,5,5,.10)` aplicada na própria imagem. **Coincidência que virou guardrail:** esse
+  é exatamente o valor do nosso token `--shadow-sm` — então a aplicação foi `box-shadow:
+  var(--shadow-sm)`, sem valor novo no CSS. Conferido por medição que o valor computado nas duas
+  páginas é idêntico. Decisão de onde aplicar: no contêiner `.hero__media`, **não** no `<img>` —
+  o contêiner tem `overflow:hidden` para o zoom do hover, e a sombra da imagem interna sairia
+  recortada. Escopo: só a foto grande do comparador (o elemento equivalente ao da referência); as
+  miniaturas de 72px do admin e os cards do catálogo da influenciadora ficaram de fora, onde um
+  halo de 8px não aparece e só sujaria a densidade.

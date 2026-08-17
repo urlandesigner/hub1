@@ -127,7 +127,11 @@
      wrapper e o tilt na foto, senão o `forwards` do reveal venceria o transform do tilt. */
   .hero__figure{width:100%; position:relative; perspective:1200px}
   .hero__title{font-family:var(--font-display); font-weight:600; font-size:24px; line-height:32px; letter-spacing:-.01em; padding:0 var(--sp-200)}
+  /* halo suave na foto do produto: mesma sombra da referência hublinks-ybera.vercel.app
+     (medida em 2026-08-16: 0 0 8px rgba(5,5,5,.10)), que por sorte JÁ era o nosso
+     --shadow-sm — token, não valor novo. */
   .hero__media{width:100%; border-radius:var(--r-500); overflow:hidden; background:var(--neutral-100); border:1px solid var(--neutral-300); aspect-ratio:1/1; position:relative;
+    box-shadow:var(--shadow-sm);
     transform:rotateX(var(--tiltx,0deg)) rotateY(var(--tilty,0deg)); transition:transform .15s ease-out}
   .hero__media img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .8s var(--ease-out)}
   .hero__media:hover img{transform:scale(1.04)}
@@ -318,9 +322,8 @@
   /* não entrega neste CEP */
   /* tag "Aproximado" (Q-E/Q-F do v1.10 + resposta ao H-UX-16): pílula neutra pequena ao lado
      do valor — cumpre a transparência sem competir com o preço */
-  .aprox{display:inline-block; margin-left:6px; font-size:10px; font-weight:700; letter-spacing:.02em;
-    text-transform:uppercase; color:var(--neutral-700); border:1px solid var(--neutral-400);
-    border-radius:var(--r-full); padding:1px 7px; vertical-align:1px; white-space:nowrap}
+  .aprox{display:inline-block; margin-left:6px; font-size:12px; font-weight:600;
+    color:var(--neutral-700); white-space:nowrap}
   /* canal sem frete: visível e comprável, mas fora da comparação por preço + frete */
   .channel__outrank{display:flex; gap:8px; align-items:flex-start; margin-top:var(--sp-300);
     font-size:13px; line-height:18px; color:var(--neutral-700)}
