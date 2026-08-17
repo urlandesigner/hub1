@@ -565,7 +565,7 @@
         </header>
         <p class="note nota-gate">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
-          O comparador público só mostra o que você habilitar aqui. Produto desabilitado não existe para o cliente — nem com todos os dados preenchidos.
+          O Hub só mostra o que você habilitar aqui. Produto desabilitado não existe para o cliente — nem com todos os dados preenchidos.
         </p>
         <div id="plist"></div>
       </section>
@@ -576,7 +576,7 @@
       <section class="panel">
         <header class="panel__head">
           <h2 class="panel__title" id="tg-title" tabindex="-1">Tags por oferta</h2>
-          <p class="panel__sub">A etiqueta aparece no card do canal, no comparador público.</p>
+          <p class="panel__sub">A etiqueta aparece no card do canal, no Hub.</p>
         </header>
         <div id="taglist"></div>
       </section>
@@ -652,7 +652,7 @@
         </label>
         <label class="opt">
           <input type="radio" name="ttl" value="ocultar">
-          <span><b>Ocultar este campo</b><small>O campo deixa de aparecer no comparador para este canal.</small></span>
+          <span><b>Ocultar este campo</b><small>O campo deixa de aparecer no Hub para este canal.</small></span>
         </label>
       </div>
     </div>
@@ -665,7 +665,7 @@
 
     <div class="modal__error is-hidden" id="md-err" role="alert">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
-      <span>Não foi possível salvar. Nada mudou no comparador — tente de novo.</span>
+      <span>Não foi possível salvar. Nada mudou no Hub — tente de novo.</span>
     </div>
 
     <div class="modal__acts">
@@ -868,7 +868,7 @@ function celula(campo, canal){
 
   /* valor exibido ao cliente */
   if(s.oculto){
-    h += '<div class="thumb thumb--hidden">Oculto no comparador</div>';
+    h += '<div class="thumb thumb--hidden">Oculto no Hub</div>';
   } else if(campo.tipo === 'nota' && s.valor === null){
     /* canal sem nota e sem override — não existe "★ nada" */
     h += '<div class="val val--muted">Sem nota</div>';
@@ -904,7 +904,7 @@ function celula(campo, canal){
     if(p === null){
       h += '<div class="until">Sem expiração — fica até você remover</div>';
     } else if(s.api === null){
-      h += '<div class="until">Este campo <b>some do comparador ' + p + '</b></div>';
+      h += '<div class="until">Este campo <b>sai do Hub ' + p + '</b></div>';
     } else if(s.oculto){
       h += '<div class="until">Volta a aparecer ' + p + '</div>';
     } else {
@@ -1077,7 +1077,7 @@ function abrir(campoId, chId, btn){
 
   mdDays.value = s.dias || campo.ttl;
   mdTtlHint.textContent = s.api === null
-    ? 'Depois disso o campo some do comparador, porque o canal não informa esse valor.'
+    ? 'Depois disso o campo sai do Hub, porque o canal não informa esse valor.'
     : 'Depois disso o campo volta sozinho para o valor do canal.';
   bd.querySelector('input[name="ttl"][value="dias"]').checked = true;
   mdWhy.value = s.motivo || '';
@@ -1273,8 +1273,8 @@ function renderProdutos(){
       '<div class="prow__thumb"><img src="' + p.foto + '" alt=""></div>' +
       '<div class="prow__name"><b>' + p.nome + '</b><small>SKU ' + p.sku + '</small></div>' +
       (p.on
-        ? '<span class="chip chip--ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>No comparador</span>'
-        : '<span class="chip chip--off">Fora do comparador</span>') +
+        ? '<span class="chip chip--ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>No Hub</span>'
+        : '<span class="chip chip--off">Fora do Hub</span>') +
       /* habilitado é o que tem informações a gerenciar: abrir = escolher o produto */
       (p.on ? '<button class="linkbtn" data-abrir="' + p.id + '">Abrir informações</button>' : '') +
       '<button class="btn btn--outline btn--sm" data-hab="' + i + '">' + (p.on ? 'Desabilitar' : 'Habilitar') + '</button>' +
@@ -1282,7 +1282,7 @@ function renderProdutos(){
   }).join('');
   var n = PRODUTOS.filter(function(p){ return p.on; }).length;
   document.getElementById('pd-count').innerHTML =
-    '<b>' + n + ' de ' + PRODUTOS.length + '</b> produtos habilitados no comparador';
+    '<b>' + n + ' de ' + PRODUTOS.length + '</b> produtos habilitados no Hub';
 }
 
 /* ---------------- produto aberto: contexto das três telas por produto ---------------- */
@@ -1291,7 +1291,7 @@ function produtoAtual(){
   return PRODUTOS.filter(function(p){ return p.id === atual; })[0];
 }
 var CHIP_OK = '<span class="chip chip--ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Habilitado no Hub</span>';
-var CHIP_OFF = '<span class="chip chip--off">Fora do comparador</span>';
+var CHIP_OFF = '<span class="chip chip--off">Fora do Hub</span>';
 function renderContexto(){
   var p = produtoAtual();
   document.getElementById('ctx-crumb').textContent = p.nome;
@@ -1462,11 +1462,11 @@ document.getElementById('prodctx').classList.remove('is-hidden');
    inclusive dos itens "em breve", para o tour não prometer o que o menu não abre. */
 var TOUR_PASSOS = [
   { titulo: 'O catálogo ganhou a seção Hub',
-    corpo: '<p>Os produtos que você habilita passam a aparecer no <b>comparador público</b>, onde o cliente compara preço, frete e prazo entre Ybera.com, Shopee e TikTok Shop.</p><p>Pela seção você controla o que entra no comparador (<b>Produtos no Hub</b>), as etiquetas de cada oferta (<b>Tags</b>), o que cada canal mostra do produto (<b>Informações do produto</b>) e o prazo de urgência do card (<b>Timer da oferta</b>).</p>' },
+    corpo: '<p>Os produtos que você habilita passam a aparecer no <b>Hub</b>, onde o cliente compara preço, frete e prazo entre Ybera.com, Shopee e TikTok Shop.</p><p>Pela seção você controla o que entra no Hub (<b>Produtos no Hub</b>), as etiquetas de cada oferta (<b>Tags</b>), o que cada canal mostra do produto (<b>Informações do produto</b>) e o prazo de urgência do card (<b>Timer da oferta</b>).</p>' },
   { titulo: 'Cada campo mostra de onde o valor veio',
     corpo: '<p>Em Informações do produto, a tabela cruza os campos que você pode substituir — Estoque, Volume de Vendas, Avaliação e, onde o canal permite, o Frete — com os três canais. Cada célula diz de onde o valor veio.</p><p>Onde você substituiu, a célula fica marcada em âmbar e guarda <b>o valor automático logo abaixo</b> — ele nunca some.</p>' },
   { titulo: 'Toda substituição tem prazo para voltar',
-    corpo: '<p>Ao substituir, você escolhe o novo valor e por quantos dias ele vale — depois disso o campo <b>volta sozinho</b> para o que o canal informa. Em Avaliação e Volume de Vendas, dizer o motivo é obrigatório.</p><p>Substituir muda só o que o cliente vê no card — <b>não muda a ordem</b> dos canais no comparador.</p>' }
+    corpo: '<p>Ao substituir, você escolhe o novo valor e por quantos dias ele vale — depois disso o campo <b>volta sozinho</b> para o que o canal informa. Em Avaliação e Volume de Vendas, dizer o motivo é obrigatório.</p><p>Substituir muda só o que o cliente vê no card — <b>não muda a ordem</b> dos canais no Hub.</p>' }
 ];
 
 var tourBd = document.getElementById('tour');

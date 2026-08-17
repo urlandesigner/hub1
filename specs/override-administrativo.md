@@ -694,3 +694,19 @@ O portão (fase 03) confere, olhando a peça renderizada:
   `.sidebar__section--hub`: agora a barra rola dentro de si. Verificado a 375px (sidebar contida,
   tags em 1 coluna, zero rolagem lateral) e a 2000px (regressão das 4 vistas verde).
 - **[2026-08-16] [dado] Miniatura na lista de produtos** — ver entrada anterior; mantida.
+
+- **[2026-08-16] [Δspec · vocabulário unificado] "comparador" saiu da interface interna: agora é
+  **Hub**.** Observação do designer: o painel dizia "Hub" no menu e "comparador" nos chips — dois
+  nomes para a mesma coisa. Unificado em **Hub** nas superfícies internas (admin e Escritório da
+  influenciadora): chips "No Hub"/"Fora do Hub", contagem "3 de 6 produtos habilitados no Hub",
+  gate ("O Hub só mostra o que você habilitar aqui"), "Oculto no Hub", "sai do Hub em N dias",
+  erro de salvamento ("Nada mudou no Hub"), opção de ocultar, os três passos do tour, e o aviso da
+  peça da influenciadora. Zero ocorrência de "comparador" no texto renderizado das duas peças
+  (medido em todas as vistas, no modal, no tour e no estado de erro).
+  **A página do cliente NÃO entrou na troca, de propósito:** ela nunca disse "comparador" nem
+  "Hub" na copy visível — só em caminhos de asset e comentários —, e isso responde ao H-UX-05 do
+  brief ("o cliente não precisa saber que está acessando um HUB; a experiência pode ser
+  transparente"). Introduzir a marca lá seria reabrir uma decisão fechada. A palavra segue nos
+  comentários de código, nos nomes de arquivo/pasta e nas specs, onde é linguagem de projeto.
+  Quarto jargão a sair da tela, depois de "override", "API" e "escassez" — o padrão já é
+  registrável para a fase 04: **palavra de documento ≠ palavra de tela.**
