@@ -487,3 +487,14 @@ distintos; sem erros de console. Aplicado em `06-fluxo-completo.html` e seu espe
   estado aprovado conferida por screenshot. Aguardando o veredicto do designer.
 - **[2026-08-16] [fase 03 · ciclo 3] VEREDICTO DO DESIGNER: APROVADO** ("ok, e pode subir
   tudo para producao"). Ciclo 3 fechado e publicado.
+
+- **[2026-08-16] [correção de fidelidade] Moldura destravada: `.main` tinha `max-width:1160px`;
+  o app real é fluido.** Mesmo defeito e mesma correção da peça do admin (ver Rastro de
+  `override-administrativo.md` para o achado completo e a lição de rubric): o teto vinha da
+  captura de julho e só aparece em viewport maior que ele — em monitor largo sobrava quase
+  metade da tela. Agora `width:100%; min-width:0`. Efeito colateral desejado e conferido: a
+  2400px o painel espalha os 4 cards de canal em 511px cada (o mesmo comportamento dos cards
+  de "Saldos" do app real) e o catálogo abre 7 colunas de 288px; a 1440px volta a 4 canais de
+  271px e 3 colunas de produto (idêntico ao que foi aprovado); em 375px o painel fica em 1
+  coluna. Sem rolagem lateral nova — a da página inteira em mobile segue pré-existente
+  (sidebar fixa, já registrado neste Rastro).

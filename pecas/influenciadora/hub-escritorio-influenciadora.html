@@ -77,7 +77,10 @@
   .sidebar__user small{font-size:11px; color:var(--b2c-neutral-60)}
 
   /* ================= COLUNA PRINCIPAL ================= */
-  .main{padding:16px; max-width:1160px; width:100%}
+  /* fluido, como o app real (achado do designer comparando com produção, 16/08):
+     o max-width:1160px vinha da captura de julho e deixava metade da tela vazia em
+     monitor largo. min-width:0 impede que os grids estourem a coluna. */
+  .main{padding:16px; width:100%; min-width:0}
 
   .topbar{
     background:var(--b2c-neutral); border-radius:16px;

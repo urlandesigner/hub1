@@ -483,6 +483,32 @@ O portão (fase 03) confere, olhando a peça renderizada:
   contraste 7,03; zero erros de console. Aguardando o veredicto do designer.
 - **[2026-08-16] [fase 03 · ciclo 4] VEREDICTO DO DESIGNER: APROVADO** ("ok"). Publicado em
   produção (commit 2195d20).
+
+- **[2026-08-16] [correção de fidelidade] Moldura destravada: o conteúdo era limitado a
+  1160px; o app real é fluido.** Achado pelo designer comparando print de produção (conta
+  admin real) com o nosso protótipo, os dois no mesmo monitor largo (~2530px de viewport):
+  em produção o conteúdo ocupa 100% da largura ao lado da sidebar; aqui parava em 1400px e
+  deixava ~45% da tela vazia. O `max-width:1160px` do `.main` veio da captura de julho e
+  passou por três ciclos sem ser questionado, porque toda verificação anterior rodou em
+  viewport de 800–1280px, onde o teto não aparece. Corrigido nas DUAS peças (admin e
+  influenciadora) para `width:100%; min-width:0` — o `min-width:0` impede que os grids
+  estourem a coluna do layout. **Lição para o rubric (Δrubric candidato, fase 04): verificar
+  também em viewport maior que o teto de largura da peça — um `max-width` só se revela acima
+  dele.** Verificado a 2400px (matriz 3 colunas de 636px, células alinhadas, zero sobra à
+  direita), 1440px (colunas de 316px, as 4 vistas e o modal de frete intactos) e 680/375px
+  (matriz em 1 coluna com o canal rotulado, barra Hub horizontal) — sem rolagem lateral em
+  nenhum, console limpo.
+- **[2026-08-16] [premissa 3 — evidência nova, decisão pendente] O menu real do admin foi
+  capturado.** O print de produção enviado pelo designer é de uma conta ADMIN ("Admin Nivello
+  PRO"), o que resolve a evidência que faltava: o menu real do admin é **Lojas** (Ybera.com,
+  Loja Interna — com submenu) · **Financeiro** (Desbloqueio, Sacar, Meus saques, Transferir,
+  Extrato) · **Performance** (Minhas metas, Relatórios) · **Suporte** (Atualizações com selo
+  "Novo", Material de Apoio, Ybera Academy, Central de Ajuda). Não existe a seção "Rede" (que
+  aparece na conta da influenciadora — o menu varia por papel), nem as seções "Catálogo" e
+  "Operação" que esta peça propôs. **Consequência: a sidebar do admin está em drift declarado.**
+  O que a evidência NÃO resolve: onde a seção "Hub" se encaixa na IA real, e onde o admin
+  gerencia produtos hoje (provavelmente dentro do submenu de "Ybera.com", que o print mostra
+  fechado). Realinhar exige essa decisão — registrado para o designer, não executado.
 - **[2026-08-16] [fase 02] Tela 9 gerada dentro da peça existente** (um modal não merece
   arquivo próprio — é a mesma superfície). Coordenadas do brief cumpridas literalmente:
   gatilho "capacidade nova no catálogo" (a seção Hub), tour rápido de 3 passos explicando o
