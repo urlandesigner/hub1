@@ -1762,3 +1762,60 @@ não tem degrau utilizável entre 2,18:1 e 5,30:1.
   recortada. Escopo: só a foto grande do comparador (o elemento equivalente ao da referência); as
   miniaturas de 72px do admin e os cards do catálogo da influenciadora ficaram de fora, onde um
   halo de 8px não aparece e só sujaria a densidade.
+
+- **[2026-08-16] [fase 02 · ciclo 5] Timer da oferta no card (Tela 6 do brief).** O designer pediu
+  para ver como o card ficaria com o timer ligado; construído em vez de descrito. Faixa discreta
+  dentro do card, entre o frete e o total: 🕐 *"Oferta no ar por mais **2 dias**"*. Só aparece no
+  canal que tem timer ligado no painel admin — na demonstração, a Shopee; Ybera e TikTok não
+  mostram nada, o que fecha a coerência painel → vitrine. Decisões: (a) **sem cor de alarme** —
+  âmbar já é o selo "Últimas unidades", e dois âmbares no mesmo card fazem o cliente parar de
+  distinguir estoque de prazo; a urgência vem da palavra e do negrito, o que também atende a
+  mitigação de "visual menos alarmista" que o brief pede para tier mal calibrado; (b) a copy diz
+  **"no ar"**, não "preço garantido" — é o que impede o timer de virar compromisso financeiro que
+  a Ybera não assumiu (a "garantia de oferta por X minutos" foi trocada por timer sem cobertura
+  financeira na apresentação de 05/08). Contrastes: 7,67 no texto, 15,88 no negrito.
+- **[2026-08-16] [Δspec · terceira divergência intencional] O aviso de variação de preço foi
+  ADICIONADO e depois REMOVIDO a pedido do designer, no mesmo dia.** Eu havia posto uma linha
+  abaixo da lista ("Preço, frete e condições são de cada loja e podem mudar sem aviso...") como
+  metade da resposta à Q-22 — a ideia era timer DENTRO do card e aviso FORA, uma vez para a
+  comparação toda, para os dois nunca aparecerem colados se contradizendo. O designer pediu para
+  remover; removido, junto do CSS, e o comentário do timer no código foi corrigido para não
+  afirmar um par que não existe mais. **Consequência a registrar sem rodeio:** a página voltou a
+  não ter nenhum texto sobre variação de preço (verificado: zero ocorrência de "podem mudar",
+  "sem aviso" ou "sujeito" no texto renderizado), e isso contraria o **RNF-Transparência**, que é
+  requisito e não enfeite: "o comparador deve informar de forma visível que preços e condições
+  exibidos estão sujeitos a alterações nas plataformas de origem sem aviso prévio". Pior: agora o
+  card tem urgência (timer) **sem o contrapeso** que a Q-22 pressupõe — a pergunta do brief sobre
+  a convivência dos dois fica sem resposta possível, porque só um dos dois existe. **Q-22 volta a
+  ABERTA.** Alternativas oferecidas ao designer, para quando quiser retomar: no rodapé da página,
+  junto do "Preços atualizados há 6 min" do topo, ou dentro do card do canal com timer.
+
+- **[2026-08-16] [fase 02 · ciclo 4] Timer da oferta no card do cliente (Tela 6 fecha o circuito
+  com o painel).** O admin já configurava o timer por produto × canal e o card não mostrava nada —
+  controle sem destino, mesmo padrão da imagem por canal. Agora o card traz uma faixa discreta
+  entre o frete e o total: **"Oferta no ar por mais 2 dias"**, relógio + valor em negrito.
+  Decisões: (a) **sem cor de alarme** — âmbar já é o selo "Últimas unidades", e dois âmbares no
+  mesmo card fariam o cliente parar de distinguir estoque de prazo; a urgência vem da palavra e
+  do peso, coerente com a mitigação que o próprio brief pede para o tier; (b) **a copy nega
+  promessa de preço** — "no ar por mais 2 dias", nunca "preço garantido", que é o que separa o
+  timer de um compromisso financeiro que a Ybera não assumiu (a "garantia de oferta por X minutos"
+  foi trocada por timer sem cobertura na reunião de 05/08); (c) coerência ponta a ponta conferida:
+  só a Shopee mostra timer, porque é o único canal com timer ligado no painel.
+  Contrastes: 7,67 no texto, 15,88 no negrito.
+- **[2026-08-16] [Δspec · terceira divergência intencional] O aviso de variação de preço foi
+  REMOVIDO a pedido do designer.** Eu o havia adicionado no mesmo passo do timer (uma linha
+  embaixo da lista: "Preço, frete e condições são de cada loja e podem mudar sem aviso…"), como
+  resposta à Q-22 — timer dentro do card, aviso fora, para os dois nunca aparecerem colados se
+  contradizendo. O designer pediu para tirar; removido, e **isto precisa chegar ao Produto**: a
+  **RNF-Transparência** exige que o comparador informe de forma visível que preços e condições
+  podem mudar nas plataformas de origem, e a Tela 7 do brief é exatamente esse aviso. Hoje a
+  página **não tem nenhum texto nesse sentido** (verificado por busca no texto renderizado) — e o
+  timer entrou justamente agora, ou seja, a urgência está no ar sem o contrapeso que a Q-22
+  pressupõe. Se o Produto mantiver a exigência, os lugares que sobram sem poluir o card são o
+  rodapé (junto de "Pagamento seguro na plataforma do canal") ou a linha de frescor do topo
+  ("Preços atualizados há 6 min"). Nota deixada também no comentário do CSS do timer, para quem
+  ler o código não achar que a Q-22 está respondida.
+- **[2026-08-16] [ajuste] Respiro vertical do "Como funciona": 64px → 80px** em cima e embaixo
+  (pedido do designer), usando `--sp-2000`, o próximo degrau da escala — sem valor novo. Lateral
+  intocada. Nota para o próximo pedido de respiro: a escala termina em 80px, então ir além exige
+  criar token (`--sp-2400`), não hardcodar.

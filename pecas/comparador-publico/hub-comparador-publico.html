@@ -324,6 +324,17 @@
      do valor — cumpre a transparência sem competir com o preço */
   .aprox{display:inline-block; margin-left:6px; font-size:12px; font-weight:600;
     color:var(--neutral-700); white-space:nowrap}
+  /* TIMER DA OFERTA (Tela 6 do brief, configurado no painel admin por produto × canal).
+     Sem cor de alarme de propósito: âmbar já é o selo "Últimas unidades", e dois âmbares no
+     mesmo card viram ruído. A urgência vem da palavra e do negrito, não da cor.
+     NOTA: o aviso de variação de preço (Tela 7) foi removido a pedido do designer em 16/08 —
+     então hoje o timer aparece SEM o contrapeso que a Q-22 pressupõe. Ver Rastro da spec. */
+  .channel__timer{display:flex; align-items:center; gap:8px; margin-top:var(--sp-300);
+    background:var(--neutral-100); border-radius:var(--r-200); padding:8px var(--sp-300);
+    font-size:13px; line-height:18px; color:var(--neutral-700); font-weight:600}
+  .channel__timer b{color:var(--neutral-900); font-weight:800}
+  .channel__timer svg{width:15px; height:15px; flex:none; color:var(--neutral-900)}
+  .channel--best .channel__timer{background:var(--neutral-100)}
   /* canal sem frete: visível e comprável, mas fora da comparação por preço + frete */
   .channel__outrank{display:flex; gap:8px; align-items:flex-start; margin-top:var(--sp-300);
     font-size:13px; line-height:18px; color:var(--neutral-700)}
@@ -542,6 +553,7 @@
       <span class="freshness">Preços atualizados há 6 min</span>
     </header>
     <div class="pilha" id="pilha"></div>
+
     <p class="stack-note reveal d-5">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 7.6 8 9 4.5-1.4 8-4 8-9V6l-8-3Z"/></svg>
       Você será levado ao site do canal oficial para finalizar.
@@ -637,6 +649,7 @@
   const PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
   const PIN_LEAD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
   const LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>';
+  const CLOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>';
   const WARN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>';
   const ALERT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>';
 
@@ -666,7 +679,7 @@
   const CH = {
     /* aprox: o frete da Shopee vem de `estimated_shipping_fee`, que NÃO usa o CEP do
        comprador (Q-E do v1.10) — por isso é constante entre CEPs e sai sempre rotulado. */
-    shopee:{name:'Shopee', logo:'assets/Shopee.svg', cta:'Comprar na Shopee', artigo:'a', href:'https://shopee.com.br/', sub:'Marketplace parceiro', rating:4.6, noPrazo:true, aprox:true, stock:'ok', volume:'champ'},
+    shopee:{name:'Shopee', logo:'assets/Shopee.svg', cta:'Comprar na Shopee', artigo:'a', href:'https://shopee.com.br/', sub:'Marketplace parceiro', rating:4.6, noPrazo:true, aprox:true, stock:'ok', volume:'champ', timer:2},
     /* aprox: o TikTok não tem frete próprio por API (Q-F), e a regra de produto é usar a mesma
        estimativa da Shopee — os dois marketplaces se comportam igual. Sai rotulado como
        estimativa, igual à Shopee, e por isso ENTRA na comparação preço + frete.
@@ -781,6 +794,11 @@
       : !hasCep ? '<dd class="pending">Informe o CEP</dd>' : '<dd>'+info.prazo+'</dd>';
     /* .channel__panel: no card comum é um wrapper sem estilo; no card melhor é o painel branco
        de raio nos 4 cantos, recuado dentro da moldura preta. */
+    /* timer da oferta: prazo em que a oferta fica no ar — NUNCA promessa de preço travado */
+    const timerLine = ch.timer
+      ? '<div class="channel__timer">'+CLOCK+'<span>Oferta no ar por mais <b>'+
+        (ch.timer === 1 ? '1 dia' : ch.timer+' dias')+'</b></span></div>'
+      : '';
     el.innerHTML =
       ribbon+
       '<div class="channel__panel">'+
@@ -791,6 +809,7 @@
           '<div class="channel__row"><dt>Frete</dt>'+freteVal+'</div>'+
         '</dl>'+
         outrank+
+        timerLine+
         '<div class="channel__divider"></div>'+
         '<div class="channel__foot">'+total+cta+'</div>'+
       '</div>';

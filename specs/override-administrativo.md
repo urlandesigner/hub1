@@ -676,3 +676,21 @@ O portão (fase 03) confere, olhando a peça renderizada:
   propósito: o nome do produto está no mesmo item, ao lado, e repeti-lo seria ruído para leitor de
   tela. Verificado: 6 miniaturas, zero imagem quebrada, alinhadas com o nome, sobrevivem ao
   re-render do habilitar/desabilitar, console limpo.
+
+- **[2026-08-16] [ajuste] Tags por oferta em colunas** (sugestão do designer: "organizar a grid na
+  mesma linha e quebrar só quando não couber"). Os 4 canais eram blocos empilhados usando um terço
+  da tela em monitor largo; viraram grade `auto-fit` com mínimo de 300px — 4 numa linha a 2000px,
+  3+1 a 1280px, 1 a 375px. Cada canal virou card com borda (separador horizontal não faz sentido
+  em grade) e o campo "nova tag" passou a acompanhar a largura da coluna. A tela **Timer da oferta
+  ficou em linhas de propósito**: ali cada canal é compacto e a linha já usa a largura toda —
+  virar coluna deixaria quatro cards quase vazios. Se o designer quiser as duas iguais, é troca de
+  um bloco.
+- **[2026-08-16] [defeito próprio, corrigido] A barra horizontal do menu Hub empurrava a página em
+  tela estreita.** Introduzida no ajuste de largura de 16/08, ela cresce até o conteúdo porque item
+  de grid adota `min-width:auto` — então o `overflow-x:auto` que eu havia posto nunca entrava em
+  ação, e a página inteira ganhava rolagem lateral (sidebar em 688px num viewport de 375). Estava
+  no ar desde então, invisível porque nenhuma outra tela tinha conteúdo largo o bastante para
+  expor. Corrigido com `min-width:0` em `.app`, `.sidebar`, `.sidebar__menu` e
+  `.sidebar__section--hub`: agora a barra rola dentro de si. Verificado a 375px (sidebar contida,
+  tags em 1 coluna, zero rolagem lateral) e a 2000px (regressão das 4 vistas verde).
+- **[2026-08-16] [dado] Miniatura na lista de produtos** — ver entrada anterior; mantida.

@@ -335,7 +335,14 @@
   .btn--sm{height:32px; padding:0 12px; font-size:13px}
 
   /* ---- Tela 3 — Tags por oferta ---- */
-  .tagcanal{padding:12px 4px; border-top:1px solid var(--b2c-neutral-30)}
+  /* canais lado a lado, quebrando só quando não couberem: em monitor largo os 4 blocos
+     ficavam empilhados usando um terço da tela (achado do designer, 16/08). O minmax de
+     300px é o ponto em que o campo de nova tag e o botão ainda cabem na mesma linha. */
+  #taglist{display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:12px}
+  .tagcanal{
+    padding:12px; border:1px solid var(--b2c-neutral-30); border-radius:12px;
+    display:flex; flex-direction:column;
+  }
   .tagcanal__head{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; color:var(--b2c-neutral-70)}
   .tagcanal__head img{width:16px; height:16px; object-fit:contain}
   .tagchips{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
@@ -351,8 +358,8 @@
   }
   .tagchip button:hover{background:var(--club-100)}
   .tagchip button:focus-visible{outline:2px solid var(--b2c-primary)}
-  .tagadd{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap}
-  .tagadd .inp{max-width:280px}
+  .tagadd{display:flex; gap:8px; margin-top:auto; padding-top:10px; flex-wrap:wrap}
+  .tagadd .inp{flex:1; min-width:150px}
   .tagsug{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px}
   .tagsug button{
     background:none; border:1px dashed var(--b2c-neutral-40); border-radius:9999px;
@@ -417,6 +424,11 @@
     .app{grid-template-columns:1fr}
     /* no estreito a sidebar vira barra horizontal só com a seção Hub — as quatro
        telas continuam alcançáveis; a moldura réplica (Catálogo, Operação) sai */
+    /* min-width:0 é o que faz o overflow-x da barra funcionar: sem isso, item de grid
+       adota min-width:auto, a barra cresce até o conteúdo e empurra a página inteira
+       (defeito introduzido junto com a barra, achado ao pôr as tags em colunas). */
+    .app{min-width:0}
+    .sidebar, .sidebar__menu, .sidebar__section--hub{min-width:0}
     .sidebar{border-bottom:1px solid var(--b2c-neutral-30)}
     .sidebar__logo, .sidebar__user, .sidebar__section:not(.sidebar__section--hub){display:none}
     .sidebar__menu{padding:8px 12px; overflow:visible}
