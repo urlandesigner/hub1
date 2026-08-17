@@ -9,12 +9,17 @@ navegáveis pelo menu lateral (seção Hub):
   comparador público.
 - **Tela 3 — Tags por oferta**: etiquetas por canal (sugestões do próprio DRP: "desconto no
   Pix", "mais brinde", "desconto progressivo").
-- **Telas 4 e 5 — Campos e overrides**: a matriz campo × canal, com substituição, prazo de
-  volta, motivo, "Lançamento" manual — e, desde o v1.10, **Frete** (sempre "Aproximado" em
-  Shopee/TikTok; no TikTok dá para referenciar o frete de outro canal) e **quem inseriu**
-  cada substituição.
-- **Tela 6 — Timer de escassez**: o prazo de urgência do card, por canal — com o aviso de que
+- **Telas 4 e 5 — Informações do produto**: a matriz campo × canal (Estoque, Volume de Vendas,
+  Avaliação e Frete), com substituição, prazo de volta, motivo, "Lançamento" manual e **quem
+  inseriu** cada substituição. O **Frete** entrou no v1.10 (sempre "Aproximado" em
+  Shopee/TikTok; no TikTok dá para referenciar o frete de outro canal). O campo **Imagem foi
+  removido por decisão de Design** — divergência consciente do brief, registrada na spec.
+- **Tela 6 — Timer da oferta**: o prazo de urgência do card, por canal — com o aviso de que
   timer não segura preço.
+
+Os rótulos da interface não usam as palavras do brief ("override", "API", "escassez"): a tela
+fala como quem opera o catálogo. A rastreabilidade até o brief está nos comentários do código
+e nas specs.
 - **Tela 9 — Tour de onboarding**: o modal da primeira visita.
 
 O chassi (sidebar, topbar, tokens `b2c-*`) é herdado de

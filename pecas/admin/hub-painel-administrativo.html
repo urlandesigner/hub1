@@ -141,6 +141,14 @@
   }
   .chip svg{width:12px; height:12px; flex:none}
   .chip--ok{background:var(--b2c-positive-10); color:var(--b2c-positive-40); border-color:var(--b2c-positive-20)}
+  /* trocar de produto sem voltar à lista */
+  .prod__switch{flex:none; align-self:flex-start; min-width:0}
+  .prod__switch label{
+    display:block; font-size:11px; font-weight:800; letter-spacing:.02em; text-transform:uppercase;
+    color:var(--b2c-neutral-60); margin-bottom:4px;
+  }
+  .prod__switch .sel{max-width:280px}
+  @media (max-width:720px){ .prod__switch .sel{max-width:none} }
 
   /* ================= MATRIZ CAMPO × CANAL ================= */
   .matrix{background:var(--b2c-neutral); border-radius:16px; padding:16px}
@@ -168,10 +176,9 @@
   .gh__logo img{width:14px; height:14px; object-fit:contain}
   .gh__name{font-size:13px; font-weight:800; color:var(--b2c-neutral-70)}
   .rowlabel{
-    display:flex; flex-direction:column; align-items:flex-start; padding:16px 4px 0;
+    padding:16px 4px 0;
     font-size:13px; font-weight:700; color:var(--b2c-neutral-70);
   }
-  .rowlabel small{display:block; font-weight:600; font-size:11px; color:var(--b2c-neutral-60); margin-top:2px}
 
   /* --- célula --- */
   .cell{
@@ -189,14 +196,12 @@
   .val--muted{color:var(--b2c-neutral-60); font-weight:700}
   .stars{display:inline-flex; align-items:center; gap:4px}
   .stars svg{width:14px; height:14px; fill:var(--b2c-warning-40); flex:none}
-  .thumb{
-    width:100%; height:64px; border-radius:8px; overflow:hidden;
-    background:var(--b2c-neutral-20); display:flex; align-items:center; justify-content:center;
-  }
-  .thumb img{width:100%; height:100%; object-fit:cover}
+  /* estado "campo oculto no comparador" — vale para qualquer campo (opção do brief) */
   .thumb--hidden{
+    width:100%; height:64px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
     border:1px dashed var(--b2c-neutral-40); color:var(--b2c-neutral-60);
-    font-size:12px; font-weight:700; background:none;
+    font-size:12px; font-weight:700;
   }
   /* o valor da API nunca some: quando há override, ele fica na linha de baixo */
   .was{font-size:12px; line-height:16px; color:var(--b2c-warning-40)}
@@ -271,16 +276,6 @@
   .days{display:flex; align-items:center; gap:8px}
   .days .inp{width:88px}
   .days span{font-size:13px; color:var(--b2c-neutral-60)}
-  /* seletor de imagem — o único campo cujo "novo valor" não é texto nem número */
-  .imgpick{display:flex; gap:12px; align-items:flex-start}
-  .imgpick__prev{
-    width:88px; height:88px; border-radius:10px; overflow:hidden; flex:none;
-    background:var(--b2c-neutral-20); border:1px solid var(--b2c-neutral-30);
-  }
-  .imgpick__prev img{width:100%; height:100%; object-fit:cover}
-  .imgpick__body{flex:1; min-width:0}
-  .imgpick__body .btn{height:36px}
-  .imgpick__body .hint{margin-top:8px}
   .visually-hidden{
     position:absolute; width:1px; height:1px; padding:0; margin:-1px;
     overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
@@ -457,9 +452,9 @@
         <a class="sidebar__item" href="#" data-view="tags">
           <span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 12 22l-8.6-8.6a2 2 0 0 1-.6-1.4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 1.4.6l6.4 6.4a2 2 0 0 1 0 2.8z" transform="scale(.9) translate(1.3 1.3)"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor" stroke="none"/></svg>Tags por oferta</span>
         </a>
-        <a class="sidebar__item is-active" href="#" data-view="campos" aria-current="page"><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Campos e overrides</span></a>
+        <a class="sidebar__item is-active" href="#" data-view="campos" aria-current="page"><span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Informações do produto</span></a>
         <a class="sidebar__item" href="#" data-view="timer">
-          <span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Timer de escassez</span>
+          <span class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Timer da oferta</span>
         </a>
       </div>
       <div class="sidebar__section">
@@ -483,33 +478,38 @@
     </div>
 
     <!-- ============ TELA 4/5 — CAMPOS E OVERRIDES ============ -->
-    <div class="view is-on" id="view-campos">
-    <nav class="crumb" aria-label="Você está em">
-      <!-- a tela-mãe (Tela 2) existe desde o ciclo 3 — o breadcrumb navega de verdade -->
-      <a href="#" data-goto="produtos">Produtos no Hub</a>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
-      <b>Óleo de Mirra Reparador 90ml</b>
-    </nav>
+    <!-- ============ CONTEXTO DO PRODUTO ============
+         Informações, Tags e Timer são telas DE UM PRODUTO — não destinos soltos. Este bloco
+         é comum às três: diz qual produto está aberto e permite trocar sem voltar à lista
+         (achado do designer, 16/08: "entro em Tags e já vejo o Mirra sem ter escolhido"). -->
+    <div id="prodctx" class="is-hidden">
+      <nav class="crumb" aria-label="Você está em">
+        <a href="#" data-goto="produtos">Produtos no Hub</a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+        <b id="ctx-crumb"></b>
+      </nav>
 
-    <!-- ===== cabeçalho do produto ===== -->
-    <section class="prod">
-      <div class="prod__photo"><img src="assets/produto.jpg" alt=""></div>
-      <div class="prod__body">
-        <h1 class="prod__name">Óleo de Mirra Reparador 90ml</h1>
-        <div class="prod__meta">
-          <span class="prod__sku">SKU 150264</span>
-          <span class="chip chip--ok">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-            Habilitado no Hub
-          </span>
-          <a class="prod__link" href="../../index.html" target="_blank" rel="noopener">
-            Ver como o cliente vê
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
-          </a>
+      <section class="prod">
+        <div class="prod__photo"><img id="ctx-foto" src="assets/produto.jpg" alt=""></div>
+        <div class="prod__body">
+          <h1 class="prod__name" id="ctx-nome" tabindex="-1"></h1>
+          <div class="prod__meta">
+            <span class="prod__sku" id="ctx-sku"></span>
+            <span id="ctx-chip"></span>
+            <a class="prod__link" href="../../index.html" target="_blank" rel="noopener">
+              Ver como o cliente vê
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
+            </a>
+          </div>
         </div>
-      </div>
-    </section>
+        <div class="prod__switch">
+          <label for="prod-sel">Produto aberto</label>
+          <select class="sel" id="prod-sel"></select>
+        </div>
+      </section>
+    </div>
 
+    <div class="view is-on" id="view-campos">
     <!-- ===== matriz campo × canal ===== -->
     <section class="matrix" aria-labelledby="mx-title">
       <header class="matrix__head">
@@ -519,7 +519,7 @@
           <p class="matrix__count" id="mx-count" aria-live="polite"></p>
         </div>
         <div class="legend">
-          <span><i class="dot dot--api"></i>Valor da API</span>
+          <span><i class="dot dot--api"></i>Automático, do canal</span>
           <span><i class="dot dot--over"></i>Substituído por você</span>
         </div>
       </header>
@@ -549,7 +549,7 @@
         </header>
         <p class="note nota-gate">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
-          O comparador público só mostra o que você habilitar aqui. Produto desabilitado não existe para o cliente — nem com dados completos na API.
+          O comparador público só mostra o que você habilitar aqui. Produto desabilitado não existe para o cliente — nem com todos os dados preenchidos.
         </p>
         <div id="plist"></div>
       </section>
@@ -557,15 +557,10 @@
 
     <!-- ============ TELA 3 — TAGS POR OFERTA (DRP v2.7 §7/RF-13) ============ -->
     <div class="view" id="view-tags">
-      <nav class="crumb" aria-label="Você está em">
-        <a href="#" data-goto="produtos">Produtos no Hub</a>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
-        <b>Tags por oferta</b>
-      </nav>
       <section class="panel">
         <header class="panel__head">
           <h2 class="panel__title" id="tg-title" tabindex="-1">Tags por oferta</h2>
-          <p class="panel__sub"><b>Óleo de Mirra Reparador 90ml</b> · SKU 150264 — a etiqueta aparece no card do canal, no comparador público.</p>
+          <p class="panel__sub">A etiqueta aparece no card do canal, no comparador público.</p>
         </header>
         <div id="taglist"></div>
       </section>
@@ -573,15 +568,10 @@
 
     <!-- ============ TELA 6 — TIMER DE ESCASSEZ (DRP v2.7 §7/RF-13) ============ -->
     <div class="view" id="view-timer">
-      <nav class="crumb" aria-label="Você está em">
-        <a href="#" data-goto="produtos">Produtos no Hub</a>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
-        <b>Timer de escassez</b>
-      </nav>
       <section class="panel">
         <header class="panel__head">
-          <h2 class="panel__title" id="tm-title" tabindex="-1">Timer de escassez</h2>
-          <p class="panel__sub"><b>Óleo de Mirra Reparador 90ml</b> · SKU 150264 — o card do canal mostra por quanto tempo a oferta fica no ar.</p>
+          <h2 class="panel__title" id="tm-title" tabindex="-1">Timer da oferta</h2>
+          <p class="panel__sub">O card do canal mostra por quanto tempo a oferta fica no ar.</p>
         </header>
         <p class="aviso">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 21h20zM12 10v5M12 18.5h.01"/></svg>
@@ -607,16 +597,6 @@
       <label for="md-val" id="md-val-lbl">Novo valor</label>
       <select class="sel" id="md-val"></select>
       <input class="inp is-hidden" id="md-num" type="number" min="0" max="5" step="0.1" aria-labelledby="md-val-lbl">
-      <div class="imgpick is-hidden" id="md-imgwrap">
-        <!-- sem src no HTML: `src=""` faz o navegador requisitar a própria página como imagem.
-             Quem preenche é o abrir(), com a imagem que está no ar naquele canal. -->
-        <div class="imgpick__prev"><img id="md-imgprev" alt=""></div>
-        <div class="imgpick__body">
-          <input id="md-img" type="file" accept="image/*" class="visually-hidden">
-          <label class="btn btn--outline" for="md-img">Escolher imagem</label>
-          <p class="hint" id="md-imgname">Nenhuma imagem escolhida — o cliente segue vendo a da API.</p>
-        </div>
-      </div>
       <!-- frete (Q-E/Q-F, brief v1.10): valor manual sempre sai com a marca "Aproximado";
            no TikTok há também a opção de referenciar o frete de outro canal -->
       <div class="is-hidden" id="md-fretewrap">
@@ -642,7 +622,7 @@
           <input type="radio" name="ttl" value="dias" checked>
           <span>
             <b>Por um período</b>
-            <small id="md-ttl-hint">Depois disso o campo volta sozinho para o valor da API.</small>
+            <small id="md-ttl-hint">Depois disso o campo volta sozinho para o valor do canal.</small>
             <span class="days" style="margin-top:8px">
               <input class="inp" id="md-days" type="number" min="1" max="365" value="2" aria-label="Dias até expirar">
               <span>dias</span>
@@ -722,15 +702,17 @@ var CANAIS_ATIVOS = CANAIS.filter(function(c){ return !c.breve; });
 var TIER_ESTOQUE = ['Disponível','Últimas unidades','Indisponível'];
 var TIER_VOLUME  = ['Campeão de vendas','Mais vendido','Lançamento','Sem selo'];
 
+/* Os campos não têm mais subtítulo de formato ("tier", "nota real", "depende do CEP"):
+   era vocabulário de documento repetindo o que a própria célula mostra — "Disponível" já
+   se lê como categoria, "★ 4,8" como nota (decisão do designer, 16/08). */
 var CAMPOS = [
-  {id:'estoque', nome:'Estoque',           sub:'tier',          tipo:'tier',   opcoes:TIER_ESTOQUE, motivo:false, ttl:2},
-  {id:'volume',  nome:'Volume de Vendas',  sub:'tier',          tipo:'tier',   opcoes:TIER_VOLUME,  motivo:true,  ttl:15},
-  {id:'nota',    nome:'Avaliação',         sub:'nota real',     tipo:'nota',   opcoes:null,         motivo:true,  ttl:15},
-  {id:'imagem',  nome:'Imagem',            sub:'',              tipo:'imagem', opcoes:null,         motivo:false, ttl:15},
+  {id:'estoque', nome:'Estoque',          tipo:'tier',   opcoes:TIER_ESTOQUE, motivo:false, ttl:2},
+  {id:'volume',  nome:'Volume de Vendas', tipo:'tier',   opcoes:TIER_VOLUME,  motivo:true,  ttl:15},
+  {id:'nota',    nome:'Avaliação',        tipo:'nota',   opcoes:null,         motivo:true,  ttl:15},
   /* Frete entrou como campo do painel no brief v1.10 (Q-E/Q-F): substituível só em
      Shopee/TikTok, sem motivo; valor manual sempre sai rotulado "Aproximado" no card.
      A mecânica de prazo é a mesma dos demais — premissa 12 da spec (o brief não a define). */
-  {id:'frete',   nome:'Frete',             sub:'depende do CEP', tipo:'frete', opcoes:null,         motivo:false, ttl:2}
+  {id:'frete',   nome:'Frete',            tipo:'frete',  opcoes:null,         motivo:false, ttl:2}
 ];
 
 /* estado: por campo, por canal.
@@ -740,7 +722,7 @@ var CAMPOS = [
    calculados de new Date(), para a peça não envelhecer sozinha entre uma revisão e outra. */
 /* `por`: quem inseriu o override — o brief v1.10 pede junto do badge (HT-08: autoria e
    timestamp ficam estampados no próprio registro; é o que existe de rastro, sem trilha). */
-var D = {
+var D_MIRRA = {
   estoque:{
     ybera:  {fonte:'api',  valor:'Disponível', api:'Disponível'},
     shopee: {fonte:'api',  valor:'Disponível', api:'Disponível'},
@@ -748,7 +730,7 @@ var D = {
        "Últimas unidades" nesse canal só existe por override do admin, como aqui */
     tiktok: {fonte:'over', valor:'Últimas unidades', api:'Disponível', dias:2,
              desde:'15/08', desdeDias:1, por:'Ana Ribeiro',
-             motivo:'A API do TikTok só diz se tem ou não tem estoque — fim do lote de agosto marcado à mão.'}
+             motivo:'O TikTok só diz se tem ou não tem estoque — fim do lote de agosto marcado à mão.'}
   },
   volume:{
     /* Wake não envia volume de vendas — gap real, sempre manual (DRP v2.7, Q-19) */
@@ -769,12 +751,6 @@ var D = {
              por:'Ana Ribeiro',
              motivo:'Média das avaliações do app, conferida manualmente em 02/08.'}
   },
-  imagem:{
-    ybera:  {fonte:'api', valor:'assets/produto.jpg', api:'assets/produto.jpg'},
-    shopee: {fonte:'api', valor:'assets/produto.jpg', api:'assets/produto.jpg'},
-    tiktok: {fonte:'over', valor:null, api:'assets/produto.jpg', dias:null, oculto:true,
-             desde:'28/07', desdeDias:17, por:'Ana Ribeiro', motivo:null}
-  },
   frete:{
     /* Q-E/Q-F (v1.10): Wake é exato pelo CEP real — sem substituição; Shopee vem da API
        sempre como estimativa ("Aproximado"); TikTok não tem API — manual, referência, ou nada */
@@ -784,6 +760,40 @@ var D = {
              nota:'O TikTok não envia frete. Sem um valor seu (ou o de outro canal como referência), este canal fica fora do ranking "menor preço + frete".'}
   }
 };
+
+/* Estado de um produto que ninguém tocou: tudo como a API entrega. É o estado mais comum
+   em produção (o admin trabalha por exceção) e o que os outros produtos habilitados usam. */
+function camposDaApi(){
+  return {
+    estoque:{
+      ybera:  {fonte:'api', valor:'Disponível', api:'Disponível'},
+      shopee: {fonte:'api', valor:'Disponível', api:'Disponível'},
+      tiktok: {fonte:'api', valor:'Disponível', api:'Disponível'}
+    },
+    volume:{
+      ybera:  {fonte:'vazio', valor:null, api:null, nota:'A Wake não envia volume de vendas.'},
+      shopee: {fonte:'api', valor:'Mais vendido', api:'Mais vendido'},
+      /* a API respondeu, e o cálculo não deu selo nenhum — diferente de "não envia" */
+      tiktok: {fonte:'api', valor:null, api:null}
+    },
+    nota:{
+      ybera:  {fonte:'api', valor:'4,6', api:'4,6'},
+      shopee: {fonte:'api', valor:'4,5', api:'4,5'},
+      /* Q-H/HT-04: no TikTok a nota é sempre manual — sem override, o campo não tem valor */
+      tiktok: {fonte:'vazio', valor:null, api:null,
+               nota:'O TikTok Shop não informa avaliação. Sem um valor seu, o card não mostra estrelas.'}
+    },
+    frete:{
+      ybera:  {fonte:'api', valor:null, api:null, exato:true},
+      shopee: {fonte:'api', valor:'R$ 22,90', api:'R$ 22,90'},
+      tiktok: {fonte:'vazio', valor:null, api:null,
+               nota:'O TikTok não envia frete. Sem um valor seu (ou o de outro canal como referência), este canal fica fora do ranking "menor preço + frete".'}
+    }
+  };
+}
+
+/* o dataset em uso é sempre o do produto aberto — trocado em abrirProduto() */
+var D = D_MIRRA;
 
 /* --------------------------- helpers de texto --------------------------- */
 function prazoTexto(d){
@@ -817,14 +827,15 @@ function celula(campo, canal){
   } else if(s.fonte === 'vazio'){
     h += '<span class="src">Sem valor</span>';
   } else {
-    h += '<span class="src"><i class="dot dot--api"></i>Da API</span>';
+    h += '<span class="src"><i class="dot dot--api"></i>Automático</span>';
   }
 
   /* valor exibido ao cliente */
   if(s.oculto){
     h += '<div class="thumb thumb--hidden">Oculto no comparador</div>';
-  } else if(campo.tipo === 'imagem'){
-    h += '<div class="thumb"><img src="' + s.valor + '" alt=""></div>';
+  } else if(campo.tipo === 'nota' && s.valor === null){
+    /* canal sem nota e sem override — não existe "★ nada" */
+    h += '<div class="val val--muted">Sem nota</div>';
   } else if(campo.tipo === 'nota'){
     h += '<div class="val"><span class="stars">' + estrelas() + s.valor + '</span></div>';
   } else if(campo.tipo === 'frete' && s.exato){
@@ -845,13 +856,9 @@ function celula(campo, canal){
   if(s.fonte === 'over'){
     if(s.api === null){
       /* sem "ainda": para Avaliação no TikTok e Volume na Wake isso é definitivo (v1.10) */
-      h += '<div class="was">O ' + canal.nome + ' não envia este campo por API — o valor é sempre seu.</div>';
-    } else if(campo.tipo === 'imagem'){
-      h += '<div class="was">' + (s.oculto
-        ? 'A API envia uma imagem — ela está escondida do cliente.'
-        : 'A imagem da API fica guardada por baixo.') + '</div>';
+      h += '<div class="was">O ' + canal.nome + ' não informa este campo — o valor é sempre seu.</div>';
     } else {
-      h += '<div class="was">A API diz <b>' + s.api + '</b></div>';
+      h += '<div class="was">O ' + canal.nome + ' informa <b>' + s.api + '</b></div>';
     }
     var p = prazoTexto(s.dias);
     if(p === null){
@@ -860,9 +867,6 @@ function celula(campo, canal){
       h += '<div class="until">Este campo <b>some do comparador ' + p + '</b></div>';
     } else if(s.oculto){
       h += '<div class="until">Volta a aparecer ' + p + '</div>';
-    } else if(campo.tipo === 'imagem'){
-      /* o valor de API de imagem é um caminho de arquivo — nunca imprimir na tela */
-      h += '<div class="until">Volta para a imagem da API ' + p + '</div>';
     } else {
       h += '<div class="until">Volta para <b>' + s.api + '</b> ' + p + '</div>';
     }
@@ -896,7 +900,7 @@ function render(){
   var html = '';
   CAMPOS.forEach(function(campo){
     html += '<div class="gridrow" role="row">';
-    html += '<div class="rowlabel" role="rowheader">' + campo.nome + (campo.sub ? '<small>' + campo.sub + '</small>' : '') + '</div>';
+    html += '<div class="rowlabel" role="rowheader">' + campo.nome + '</div>';
     CANAIS_ATIVOS.forEach(function(canal){ html += celula(campo, canal); });
     html += '</div>';
   });
@@ -925,7 +929,7 @@ function resumo(){
     });
   });
   var el = document.getElementById('mx-count');
-  if(n === 0){ el.innerHTML = 'Nenhum campo substituído — tudo vem da API.'; return; }
+  if(n === 0){ el.innerHTML = 'Nenhum campo substituído — tudo vem automático dos canais.'; return; }
   var t = n === 1 ? '1 campo substituído' : n + ' campos substituídos';
   var extras = [];
   if(vencendo) extras.push('<b>' + (vencendo === 1 ? '1 vence' : vencendo + ' vencem') + ' em até 3 dias</b>');
@@ -959,16 +963,12 @@ var mdWhyWrap = document.getElementById('md-why-wrap');
 var mdWhy = document.getElementById('md-why');
 var mdWhyReq = document.getElementById('md-why-req');
 var mdSave = document.getElementById('md-save');
-var mdImgWrap = document.getElementById('md-imgwrap');
-var mdImg = document.getElementById('md-img');
-var mdImgPrev = document.getElementById('md-imgprev');
-var mdImgName = document.getElementById('md-imgname');
 var mdFreteWrap = document.getElementById('md-fretewrap');
 var mdFsrc = document.getElementById('md-fsrc');
 var mdMoedaWrap = document.getElementById('md-moeda-wrap');
 var mdMoeda = document.getElementById('md-moeda');
 var mdRefsel = document.getElementById('md-refsel');
-var alvo = null, ultimoFoco = null, imgNova = null;
+var alvo = null, ultimoFoco = null;
 
 /* frete no TikTok: valor manual OU referência a outro canal — os dois "Aproximado" */
 function sincronizarFrete(){
@@ -977,14 +977,6 @@ function sincronizarFrete(){
   mdRefsel.classList.toggle('is-hidden', !ref);
 }
 mdFsrc.addEventListener('change', sincronizarFrete);
-
-mdImg.addEventListener('change', function(){
-  var f = mdImg.files && mdImg.files[0];
-  if(!f) return;
-  imgNova = URL.createObjectURL(f);
-  mdImgPrev.src = imgNova;
-  mdImgName.textContent = f.name;
-});
 
 function campoPorId(id){ return CAMPOS.filter(function(c){ return c.id === id; })[0]; }
 function canalPorId(id){ return CANAIS.filter(function(c){ return c.id === id; })[0]; }
@@ -1001,19 +993,16 @@ function abrir(campoId, chId, btn){
 
   if(s.api === null){
     /* definitivo, não transitório — Q-H/HT-04 fechadas no v1.10 */
-    mdNow.innerHTML = 'O ' + canal.nome + ' <b>não envia este campo por API</b>. O que você definir aqui é o único valor que o cliente vê.';
-  } else if(campo.tipo === 'imagem'){
-    mdNow.innerHTML = 'A API envia uma imagem para este canal.';
+    mdNow.innerHTML = 'O ' + canal.nome + ' <b>não informa este campo</b>. O que você definir aqui é o único valor que o cliente vê.';
   } else if(campo.tipo === 'frete'){
-    mdNow.innerHTML = 'A API diz <b>' + s.api + '</b> — estimativa do canal, sem o CEP do comprador. Qualquer valor aqui sai com a marca <b>"Aproximado"</b>.';
+    mdNow.innerHTML = 'O ' + canal.nome + ' informa <b>' + s.api + '</b> — estimativa, sem o CEP do comprador. Qualquer valor aqui sai com a marca <b>"Aproximado"</b>.';
   } else {
-    mdNow.innerHTML = 'A API diz <b>' + s.api + '</b>' + (s.fonte === 'over' ? ' — hoje o cliente vê <b>' + (s.valor || 'nada') + '</b>' : '') + '.';
+    mdNow.innerHTML = 'O ' + canal.nome + ' informa <b>' + s.api + '</b>' + (s.fonte === 'over' ? ' — hoje o cliente vê <b>' + (s.valor || 'nada') + '</b>' : '') + '.';
   }
 
   /* controle de valor conforme o tipo do campo */
   mdVal.classList.add('is-hidden');
   mdNum.classList.add('is-hidden');
-  mdImgWrap.classList.add('is-hidden');
   mdFreteWrap.classList.add('is-hidden');
   if(campo.tipo === 'tier'){
     mdVal.classList.remove('is-hidden');
@@ -1023,12 +1012,6 @@ function abrir(campoId, chId, btn){
   } else if(campo.tipo === 'nota'){
     mdNum.classList.remove('is-hidden');
     mdNum.value = (s.valor || '4,0').replace(',', '.');
-  } else if(campo.tipo === 'imagem'){
-    mdImgWrap.classList.remove('is-hidden');
-    mdImg.value = '';
-    imgNova = null;
-    mdImgPrev.src = s.valor || s.api || '';
-    mdImgName.textContent = 'Nenhuma imagem escolhida — o cliente segue vendo a da API.';
   } else if(campo.tipo === 'frete'){
     mdFreteWrap.classList.remove('is-hidden');
     /* referenciar outro canal é opção só de quem não tem API (TikTok, Q-F) */
@@ -1046,8 +1029,8 @@ function abrir(campoId, chId, btn){
 
   mdDays.value = s.dias || campo.ttl;
   mdTtlHint.textContent = s.api === null
-    ? 'Depois disso o campo some do comparador, porque não há valor de API para voltar.'
-    : 'Depois disso o campo volta sozinho para o valor da API.';
+    ? 'Depois disso o campo some do comparador, porque o canal não informa esse valor.'
+    : 'Depois disso o campo volta sozinho para o valor do canal.';
   bd.querySelector('input[name="ttl"][value="dias"]').checked = true;
   mdWhy.value = s.motivo || '';
 
@@ -1056,7 +1039,6 @@ function abrir(campoId, chId, btn){
   /* primeiro controle visível de cada tipo */
   if(campo.tipo === 'nota') mdNum.focus();
   else if(campo.tipo === 'frete') (mdFsrc.classList.contains('is-hidden') ? mdMoeda : mdFsrc.querySelector('input:checked')).focus();
-  else if(campo.tipo === 'imagem') mdImg.focus();
   else mdVal.focus();
 }
 
@@ -1121,9 +1103,6 @@ mdSave.addEventListener('click', function(){
   };
   if(alvo.campo.tipo === 'nota'){ novo.valor = String(mdNum.value).replace('.', ','); }
   else if(alvo.campo.tipo === 'tier'){ novo.valor = mdVal.value === 'Sem selo' ? null : mdVal.value; }
-  /* sem imagem nova escolhida, vale a que já está no ar; se o campo estava oculto
-     (valor null) e foi destravado, volta a imagem da API — nunca um src vazio */
-  else if(alvo.campo.tipo === 'imagem'){ novo.valor = imgNova || s.valor || s.api; }
   else if(alvo.campo.tipo === 'frete'){
     var usarRef = !mdFsrc.classList.contains('is-hidden')
       && mdFsrc.querySelector('input[value="ref"]').checked;
@@ -1191,10 +1170,13 @@ document.addEventListener('click', function(e){
 /* --- troca de vista: as 4 telas do menu Hub são vistas da mesma peça --- */
 var VISTAS = ['produtos', 'tags', 'campos', 'timer'];
 var FOCO_VISTA = {produtos:'pd-title', tags:'tg-title', campos:'mx-title', timer:'tm-title'};
+/* as três telas por produto compartilham o contexto (qual produto está aberto) */
+var VISTAS_DE_PRODUTO = ['campos', 'tags', 'timer'];
 function trocarView(v){
   VISTAS.forEach(function(id){
     document.getElementById('view-' + id).classList.toggle('is-on', id === v);
   });
+  document.getElementById('prodctx').classList.toggle('is-hidden', VISTAS_DE_PRODUTO.indexOf(v) < 0);
   [].slice.call(document.querySelectorAll('.sidebar__item[data-view]')).forEach(function(a){
     var on = a.dataset.view === v;
     a.classList.toggle('is-active', on);
@@ -1207,14 +1189,32 @@ function trocarView(v){
   a.addEventListener('click', function(e){ e.preventDefault(); trocarView(a.dataset.view); });
 });
 
-/* --- Tela 2 — Produtos no Hub: o gate opt-in (nada aparece sem habilitação) --- */
+/* --- Tela 2 — Produtos no Hub: o gate opt-in (nada aparece sem habilitação) ---
+   Cada produto carrega o próprio estado das três telas por produto (campos, tags, timer).
+   Só o Óleo de Mirra tem o cenário rico de demonstração; os outros habilitados começam
+   como a maioria começa em produção: tudo vindo da API, nada substituído, sem tag nem
+   timer. Foto: só o Mirra tem asset real — os demais usam placeholder declarado, para a
+   tela não mostrar o frasco errado. */
+var FOTO_PLACEHOLDER = 'assets/produto-placeholder.svg';
 var PRODUTOS = [
-  {nome:'Óleo de Mirra Reparador 90ml',        sku:'150264', on:true, atual:true},
-  {nome:'Máscara Reparação Profunda 500g',     sku:'150318', on:true},
-  {nome:'Kit Fashion Gloss Progressiva',       sku:'149902', on:true},
-  {nome:'Sérum Reconstrutor de Pontas 60ml',   sku:'150411', on:false},
-  {nome:'Shampoo Antirresíduos 300ml',         sku:'150122', on:false},
-  {nome:'Condicionador Nutrição Diária 300ml', sku:'150123', on:false}
+  {id:'mirra',   nome:'Óleo de Mirra Reparador 90ml',    sku:'150264', on:true,
+   foto:'assets/produto.jpg', campos:D_MIRRA,
+   tags:{ybera:['mais brinde'], shopee:['desconto no Pix'], tiktok:[]},
+   timer:{ybera:null, shopee:{dias:2}, tiktok:null}},
+  {id:'mascara', nome:'Máscara Reparação Profunda 500g', sku:'150318', on:true,
+   foto:FOTO_PLACEHOLDER, campos:camposDaApi(),
+   tags:{ybera:[], shopee:[], tiktok:[]},
+   timer:{ybera:null, shopee:null, tiktok:null}},
+  {id:'gloss',   nome:'Kit Fashion Gloss Progressiva',   sku:'149902', on:true,
+   foto:FOTO_PLACEHOLDER, campos:camposDaApi(),
+   tags:{ybera:[], shopee:[], tiktok:[]},
+   timer:{ybera:null, shopee:null, tiktok:null}},
+  {id:'serum',   nome:'Sérum Reconstrutor de Pontas 60ml',   sku:'150411', on:false, foto:FOTO_PLACEHOLDER,
+   campos:camposDaApi(), tags:{ybera:[],shopee:[],tiktok:[]}, timer:{ybera:null,shopee:null,tiktok:null}},
+  {id:'shampoo', nome:'Shampoo Antirresíduos 300ml',         sku:'150122', on:false, foto:FOTO_PLACEHOLDER,
+   campos:camposDaApi(), tags:{ybera:[],shopee:[],tiktok:[]}, timer:{ybera:null,shopee:null,tiktok:null}},
+  {id:'cond',    nome:'Condicionador Nutrição Diária 300ml', sku:'150123', on:false, foto:FOTO_PLACEHOLDER,
+   campos:camposDaApi(), tags:{ybera:[],shopee:[],tiktok:[]}, timer:{ybera:null,shopee:null,tiktok:null}}
 ];
 function renderProdutos(){
   var el = document.getElementById('plist');
@@ -1224,8 +1224,8 @@ function renderProdutos(){
       (p.on
         ? '<span class="chip chip--ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>No comparador</span>'
         : '<span class="chip chip--off">Fora do comparador</span>') +
-      /* só o produto com dados nesta POC leva à tela de campos — link honesto */
-      (p.atual ? '<button class="linkbtn" data-goto="campos">Campos e overrides</button>' : '') +
+      /* habilitado é o que tem informações a gerenciar: abrir = escolher o produto */
+      (p.on ? '<button class="linkbtn" data-abrir="' + p.id + '">Abrir informações</button>' : '') +
       '<button class="btn btn--outline btn--sm" data-hab="' + i + '">' + (p.on ? 'Desabilitar' : 'Habilitar') + '</button>' +
     '</div>';
   }).join('');
@@ -1234,9 +1234,51 @@ function renderProdutos(){
     '<b>' + n + ' de ' + PRODUTOS.length + '</b> produtos habilitados no comparador';
 }
 
+/* ---------------- produto aberto: contexto das três telas por produto ---------------- */
+var atual = 'mirra';
+function produtoAtual(){
+  return PRODUTOS.filter(function(p){ return p.id === atual; })[0];
+}
+var CHIP_OK = '<span class="chip chip--ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Habilitado no Hub</span>';
+var CHIP_OFF = '<span class="chip chip--off">Fora do comparador</span>';
+function renderContexto(){
+  var p = produtoAtual();
+  document.getElementById('ctx-crumb').textContent = p.nome;
+  document.getElementById('ctx-nome').textContent = p.nome;
+  document.getElementById('ctx-sku').textContent = 'SKU ' + p.sku;
+  document.getElementById('ctx-foto').src = p.foto;
+  document.getElementById('ctx-chip').innerHTML = p.on ? CHIP_OK : CHIP_OFF;
+  /* o seletor lista só produtos habilitados: quem está fora do comparador não tem
+     informação a gerenciar (o gate da Tela 2 vem antes) */
+  document.getElementById('prod-sel').innerHTML = PRODUTOS.filter(function(x){ return x.on; })
+    .map(function(x){
+      return '<option value="' + x.id + '"' + (x.id === atual ? ' selected' : '') + '>' + x.nome + '</option>';
+    }).join('');
+}
+/* troca o produto aberto: os três conjuntos de dados passam a ser os dele */
+function abrirProduto(id, vista){
+  var p = PRODUTOS.filter(function(x){ return x.id === id; })[0];
+  if(!p) return;
+  atual = id;
+  D = p.campos; TAGS = p.tags; TIMER = p.timer;
+  renderContexto();
+  render();        /* matriz + resumo do produto aberto */
+  renderTags();
+  renderTimer();
+  trocarView(vista || 'campos');
+}
+document.getElementById('prod-sel').addEventListener('change', function(e){
+  /* trocar de produto mantém a tela em que a pessoa está */
+  var vista = VISTAS.filter(function(v){
+    return document.getElementById('view-' + v).classList.contains('is-on');
+  })[0] || 'campos';
+  abrirProduto(e.target.value, vista);
+  document.getElementById('prod-sel').focus();
+});
+
 /* --- Tela 3 — Tags por oferta: exemplos literais do DRP §7 como sugestões --- */
 var TAG_SUGESTOES = ['desconto no Pix', 'mais brinde', 'desconto progressivo'];
-var TAGS = {ybera:['mais brinde'], shopee:['desconto no Pix'], tiktok:[]};
+var TAGS = PRODUTOS[0].tags; /* do produto aberto — trocado em abrirProduto() */
 function renderTags(){
   document.getElementById('taglist').innerHTML = CANAIS.map(function(c){
     /* canal futuro: presente e honesto, sem controles que não fazem nada */
@@ -1278,7 +1320,7 @@ function addTagDoInput(ch){
 }
 
 /* --- Tela 6 — Timer de escassez: urgência com prazo, nunca garantia de preço --- */
-var TIMER = {ybera:null, shopee:{dias:2}, tiktok:null};
+var TIMER = PRODUTOS[0].timer; /* do produto aberto — trocado em abrirProduto() */
 function renderTimer(){
   document.getElementById('tmlist').innerHTML = CANAIS.map(function(c){
     if(c.breve){
@@ -1309,10 +1351,19 @@ function renderTimer(){
 document.addEventListener('click', function(e){
   var el;
   if((el = e.target.closest('[data-goto]'))){ e.preventDefault(); trocarView(el.dataset.goto); return; }
+  if((el = e.target.closest('[data-abrir]'))){ abrirProduto(el.dataset.abrir, 'campos'); return; }
   if((el = e.target.closest('[data-hab]'))){
     var p = PRODUTOS[+el.dataset.hab];
     p.on = !p.on;
+    /* desabilitar o produto aberto tira ele do seletor: abre o primeiro habilitado que
+       sobrar, para o contexto nunca apontar para um produto fora do comparador */
+    if(!p.on && p.id === atual){
+      var sobrou = PRODUTOS.filter(function(x){ return x.on; })[0];
+      if(sobrou){ atual = sobrou.id; D = sobrou.campos; TAGS = sobrou.tags; TIMER = sobrou.timer; }
+    }
     renderProdutos();
+    renderContexto();
+    render(); renderTags(); renderTimer();
     var nb = document.querySelector('[data-hab="' + el.dataset.hab + '"]');
     if(nb) nb.focus();
     return;
@@ -1348,8 +1399,11 @@ document.addEventListener('keydown', function(e){
 });
 
 renderProdutos();
+renderContexto();
 renderTags();
 renderTimer();
+/* a peça abre em Informações do produto, com o Mirra no contexto */
+document.getElementById('prodctx').classList.remove('is-hidden');
 
 /* ===== Tela 9 — tour de onboarding (brief v1.9, item 9) =====
    Aparece uma vez, na primeira visita depois de a capacidade chegar (guardado no navegador);
@@ -1357,11 +1411,11 @@ renderTimer();
    inclusive dos itens "em breve", para o tour não prometer o que o menu não abre. */
 var TOUR_PASSOS = [
   { titulo: 'O catálogo ganhou a seção Hub',
-    corpo: '<p>Os produtos que você habilita passam a aparecer no <b>comparador público</b>, onde o cliente compara preço, frete e prazo entre Ybera.com, Shopee e TikTok Shop.</p><p>Pela seção você controla o que entra no comparador (<b>Produtos no Hub</b>), as etiquetas de cada oferta (<b>Tags</b>), os valores que a API calcula (<b>Campos e overrides</b>) e o prazo de urgência do card (<b>Timer de escassez</b>).</p>' },
-  { titulo: 'Cada campo mostra o que a API calculou',
-    corpo: '<p>Em Campos e overrides, a tabela cruza os campos substituíveis — Estoque, Volume de Vendas, Avaliação, Imagem e, onde o canal permite, o Frete — com os três canais. Cada célula diz de onde o valor veio.</p><p>Onde você substituiu, a célula fica marcada em âmbar e guarda <b>o valor da API logo abaixo</b> — ele nunca some.</p>' },
+    corpo: '<p>Os produtos que você habilita passam a aparecer no <b>comparador público</b>, onde o cliente compara preço, frete e prazo entre Ybera.com, Shopee e TikTok Shop.</p><p>Pela seção você controla o que entra no comparador (<b>Produtos no Hub</b>), as etiquetas de cada oferta (<b>Tags</b>), o que cada canal mostra do produto (<b>Informações do produto</b>) e o prazo de urgência do card (<b>Timer da oferta</b>).</p>' },
+  { titulo: 'Cada campo mostra de onde o valor veio',
+    corpo: '<p>Em Informações do produto, a tabela cruza os campos que você pode substituir — Estoque, Volume de Vendas, Avaliação e, onde o canal permite, o Frete — com os três canais. Cada célula diz de onde o valor veio.</p><p>Onde você substituiu, a célula fica marcada em âmbar e guarda <b>o valor automático logo abaixo</b> — ele nunca some.</p>' },
   { titulo: 'Toda substituição tem prazo para voltar',
-    corpo: '<p>Ao substituir, você escolhe o novo valor e por quantos dias ele vale — depois disso o campo <b>volta sozinho</b> para o que a API diz. Em Avaliação e Volume de Vendas, dizer o motivo é obrigatório.</p><p>Substituir muda só o que o cliente vê no card — <b>não muda a ordem</b> dos canais no comparador.</p>' }
+    corpo: '<p>Ao substituir, você escolhe o novo valor e por quantos dias ele vale — depois disso o campo <b>volta sozinho</b> para o que o canal informa. Em Avaliação e Volume de Vendas, dizer o motivo é obrigatório.</p><p>Substituir muda só o que o cliente vê no card — <b>não muda a ordem</b> dos canais no comparador.</p>' }
 ];
 
 var tourBd = document.getElementById('tour');

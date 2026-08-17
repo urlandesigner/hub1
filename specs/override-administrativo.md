@@ -509,6 +509,67 @@ O portão (fase 03) confere, olhando a peça renderizada:
   O que a evidência NÃO resolve: onde a seção "Hub" se encaixa na IA real, e onde o admin
   gerencia produtos hoje (provavelmente dentro do submenu de "Ybera.com", que o print mostra
   fechado). Realinhar exige essa decisão — registrado para o designer, não executado.
+
+- **[2026-08-16] [fase 02 · ciclo 5] Três correções pedidas pelo designer ao revisar a peça
+  contra produção.**
+  **(a) Jargão no menu.** "Campos e overrides" → **"Informações do produto"** (escolha do
+  designer entre três opções apresentadas). O achado nasceu de uma pergunta dele — "o que quer
+  dizer overrides?" —, que é o próprio defeito: a interface dizia "Substituir/Substituído por
+  você" em todo lugar, e a palavra em inglês do brief só tinha sobrado nos rótulos de
+  navegação. Trocada nos 3 pontos (menu, link da lista de produtos, copy do tour). A palavra
+  segue nos comentários, no nome da demanda e nas specs — ali é linguagem de projeto.
+  **(b) Subtítulos de formato removidos** ("tier", "nota real", "depende do CEP" sob o nome de
+  cada campo): repetiam em vocabulário de documento o que a célula já mostra — "Disponível" se
+  lê como categoria, "★ 4,8" como nota. Tirei os três (não só os dois citados): manter apenas
+  o do Frete deixaria um resto órfão, e a informação já está na célula da Wake.
+  **(c) O produto virou contexto explícito — defeito de arquitetura.** O designer notou que
+  entrar em "Tags por oferta" pelo menu já mostrava o Óleo de Mirra sem ele ter escolhido nada,
+  e sem caminho para trocar. Causa: **três das quatro telas do Hub são de UM produto**
+  (Informações, Tags, Timer), mas o menu as tratava como destino de topo. Correção: bloco de
+  contexto (breadcrumb + cabeçalho do produto + **seletor "Produto aberto"**) comum às três
+  telas, escondido na lista; cada produto passou a ter **estado próprio** de campos, tags e
+  timer; "Abrir informações" na lista escolhe o produto; trocar pelo seletor **mantém a tela**
+  em que a pessoa está. O seletor lista só produtos habilitados (o gate da Tela 2 vem antes), e
+  desabilitar o produto aberto move o contexto para outro habilitado, em vez de deixar a tela
+  apontando para fora do comparador.
+  Consequências de dado: só o Mirra tem o cenário rico; os outros habilitados começam como a
+  maioria começa em produção — **tudo vindo da API, nada substituído** (estado que a peça nunca
+  havia mostrado e que o `resumo()` já sabia escrever: "Nenhum campo substituído — tudo vem da
+  API"). Foto: placeholder declarado (`assets/produto-placeholder.svg`) para os produtos sem
+  asset real, em vez de repetir o frasco do Mirra — mesma decisão já tomada na peça irmã.
+  **Defeito latente que isso expôs e corrigi:** `celula()` imprimia "★ null" para campo de nota
+  sem valor — estado real em produção (TikTok, onde a nota é sempre manual: Q-H). Agora mostra
+  "Sem nota".
+- **[2026-08-16] [fase 03 · ciclo 5] Verificado por medição:** contexto visível nas três telas
+  por produto e ausente na lista; seletor com os 3 habilitados; abrir pela lista troca nome,
+  SKU, foto e os três conjuntos de dados; trocar pelo seletor preserva a tela (testado em
+  Timer); isolamento conferido nos dois sentidos (tag e timer criados no Kit Gloss não vazam
+  para a Máscara; override salvo na Máscara não altera o Mirra); desabilitar o produto aberto
+  reduz o seletor a 2 e move o contexto; breadcrumb volta para a lista; "Sem nota" no TikTok do
+  produto limpo; subtítulos ausentes; rótulo novo no menu; zero imagem quebrada visível (a
+  única `img` sem `src` é a miniatura oculta do modal, de propósito); zero erros de console.
+  Aguardando o veredicto do designer.
+
+- **[2026-08-16] [fase 02 · ciclo 6] "API" saiu da interface** — segundo jargão vazado do brief
+  (o primeiro foi "override"), apontado pelo designer: *"quem entrar no painel não vai saber do
+  que se trata 'da API', é muito técnico"*. A palavra descrevia procedência em 20 pontos
+  visíveis. Trocas: legenda "Valor da API" → **"Automático, do canal"**; carimbo da célula
+  "Da API" → **"Automático"**; "A API diz X" → **"O TikTok Shop informa X"** (nome do canal, em
+  vez de abstração); "não envia este campo por API" → **"não informa este campo"**; "volta para
+  o valor da API" → **"do canal"**; "tudo vem da API" → **"tudo vem automático dos canais"**;
+  título do tour "Cada campo mostra o que a API calculou" → **"Cada campo mostra de onde o
+  valor veio"**. Zero ocorrência de "API" no texto renderizado (medido por `innerText`); a
+  palavra segue nos comentários e na chave interna do dado (`fonte:'api'`), que é código.
+- **[2026-08-16] [fase 02 · ciclo 6] Imagem por canal: a tela não dizia que é uma só.**
+  Pergunta do designer ("se subir mais de uma, qual aparece?") — o dado sempre guardou UM valor
+  por campo × canal e o `input` nunca aceitou múltiplos arquivos, mas nada na tela dizia isso.
+  Adicionada a linha **"Cada canal mostra uma imagem só: escolher outra substitui esta."** no
+  seletor de imagem. Verificado: `input.multiple === false`, aviso presente, modais de tier,
+  frete e sem-valor com a copy nova, produto limpo com o resumo novo, zero erros de console.
+  **Nota de contrato (premissa 5, segue com o Produto/comparador):** mesmo com uma imagem por
+  canal, o card público hoje tem UMA imagem no hero — então a substituição de imagem por canal
+  ainda não tem onde aparecer para o cliente. O DRP v2.7 já diz que deve ser por canal com
+  fallback para a imagem do produto de referência; falta o ciclo do comparador implementar.
 - **[2026-08-16] [fase 02] Tela 9 gerada dentro da peça existente** (um modal não merece
   arquivo próprio — é a mesma superfície). Coordenadas do brief cumpridas literalmente:
   gatilho "capacidade nova no catálogo" (a seção Hub), tour rápido de 3 passos explicando o
@@ -527,3 +588,34 @@ O portão (fase 03) confere, olhando a peça renderizada:
   contraste kicker 6,45 · corpo 7,73 · negrito 14,89 (AA folgado); 375px sem rolagem lateral
   (modal 327px, botões 40px ≥ alvo 24px); regressão do modal de substituição verde (abre,
   fecha, não coexiste com o tour); console limpo. Screenshot desktop conferido visualmente.
+
+- **[2026-08-16] [Δspec · divergência intencional do brief] O campo Imagem saiu do painel.**
+  Decisão do designer, escolhida entre três saídas apresentadas (só ocultar · só leitura ·
+  tirar a linha): **tirar a linha inteira**. A matriz passa a ter 4 campos — Estoque, Volume de
+  Vendas, Avaliação e Frete. **A divergência é consciente e precisa chegar ao Produto:** o DRP
+  v2.7 §7 e o RF-13 listam Imagem como overridável nos 3 canais ("Admin pode sobrescrever se a
+  imagem do canal estiver errada ou ausente"). O que sustenta a decisão: (a) premissa 5 — o card
+  público tem UMA imagem no hero, então override de imagem por canal não tem onde aparecer;
+  (b) upload traz armazenamento e proxy de CDN, que o próprio DRP registra como escopo real do
+  v1 (R-13, proxy da CDN do TikTok); (c) sem destino, era controle que promete e não entrega.
+  Se o Produto insistir no campo, ele volta — o custo é baixo e o histórico está aqui.
+  Removidos junto: seletor de arquivo e pré-visualização, CSS `.imgpick*`, os três ramos de
+  imagem em `celula()`, os ramos de `abrir()` e de salvar, o estado `oculto` de demonstração do
+  TikTok, e a menção a Imagem na copy do tour. **Preservado de propósito:** a opção "ocultar
+  campo" do prazo, que é do brief e vale para QUALQUER campo — testada depois da remoção
+  (ocultar Volume de Vendas na Shopee renderiza "Oculto no comparador" com a linha do canal
+  intacta). `FOTO_PLACEHOLDER` segue em uso, agora só na foto do cabeçalho do produto.
+- **[2026-08-16] [fase 02] "Timer de escassez" → "Timer da oferta"** (proposta do designer).
+  Terceiro jargão de documento saindo da interface, depois de "override" e "API": "escassez" é
+  como o Produto descreve o mecanismo (gerador de senso de escassez, DRP §7), não como a
+  operadora chama a coisa. O rótulo novo diz o que o controle faz — marca por quanto tempo a
+  oferta fica no ar. Trocado no menu, no título da tela e na copy do tour; os comentários do
+  código mantêm "Tela 6 — Timer de escassez" para rastrear até o brief. O aviso de que o timer
+  **não segura o preço** (Q-22) continua igual, e fica ainda mais necessário: "oferta" pode
+  sugerir preço garantido, e a tela precisa negar isso explicitamente.
+- **[2026-08-16] [fase 03] Verificado após remoção da Imagem e renome do timer:** 4 campos × 3
+  canais = 12 células; resumo recontou para "4 campos substituídos"; zero menção a "Imagem" no
+  texto renderizado e nenhum `input[type=file]` na página; modais de tier, nota e frete abrem
+  com o controle certo; salvar frete aplica ("R$ 24,90 · Aproximado"); "ocultar campo" funciona
+  em campo de tier; rótulos "Timer da oferta" no menu e no título; zero erros de console.
+  Aguardando o veredicto do designer sobre este lote (ciclos 5 e 6).
