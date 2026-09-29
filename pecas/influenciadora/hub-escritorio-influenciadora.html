@@ -381,14 +381,83 @@
   }
   .devbar button[aria-pressed="true"]{background:#fff; color:var(--b2c-neutral-90); border-color:#fff}
   [hidden]{display:none !important}
+
+  /* ================= RESPONSIVO (2026-09-29) =================
+     Tudo abaixo vive em media query de tela estreita: o desktop (≥1024px) não muda.
+     Os elementos novos (hambúrguer, fechar, fundo) nascem com display:none e só existem
+     abaixo de 1024px — o mesmo corte do app real (a sidebar da captura é
+     `hidden lg:block` e o hambúrguer da topbar é `lg:hidden`). */
+  .topbar__menu, .sidebar__close, .scrim{display:none}
+  @media (max-width:1023px){
+    .app{grid-template-columns:minmax(0,1fr)}
+    /* sidebar vira gaveta: mesma largura e o mesmo branco, fora da tela até abrir */
+    .sidebar{
+      position:fixed; top:0; bottom:0; left:0; z-index:250;
+      width:240px; max-width:85vw;
+      transform:translateX(-100%); visibility:hidden;
+      transition:transform .25s ease, visibility 0s linear .25s;
+    }
+    .sidebar.is-open{
+      transform:none; visibility:visible; box-shadow:0 0 8px rgba(5,5,5,.10);
+      transition:transform .25s ease;
+    }
+    .sidebar__logo{display:flex; align-items:center; justify-content:space-between}
+    .sidebar__close{
+      display:flex; background:none; border:0; cursor:pointer; color:var(--b2c-neutral-60);
+      padding:8px; margin:-8px -8px -8px 0; border-radius:var(--radius);
+    }
+    .sidebar__close:hover{color:var(--b2c-neutral-70); background:var(--b2c-neutral-20)}
+    .sidebar__close:focus-visible{outline:2px solid var(--b2c-primary); outline-offset:2px}
+    .sidebar__close svg{width:16px; height:16px; display:block}
+    .scrim{
+      display:block; position:fixed; inset:0; z-index:240;
+      background:hsl(240 4% 16% / .5);
+      opacity:0; pointer-events:none; transition:opacity .25s ease;
+    }
+    .scrim.on{opacity:1; pointer-events:auto}
+    body.is-locked{overflow:hidden}
+    .topbar{padding:8px 12px}
+    .topbar__menu{display:block; margin-right:auto}
+    .topbar__icon:focus-visible{outline:2px solid var(--b2c-primary); outline-offset:2px; border-radius:4px}
+    /* a barra de estados (dev) é fixa no rodapé: sem este respiro ela cobre o último card */
+    .main{padding-bottom:72px}
+    /* rótulo longo ("Como vincular TikTok ao seu Hub") quebrava e vazava do botão de 40px */
+    .link-row__action{height:auto; min-height:40px; padding:8px 12px; text-align:center}
+  }
+  /* tablet: 4 canais em 2×2 — o auto-fit dava 3+1, com o Mercado Livre sozinho na linha */
+  @media (min-width:721px) and (max-width:1023px){
+    #panel-rows:not([hidden]), #panel-loading:not([hidden]){grid-template-columns:repeat(2, minmax(0,1fr))}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .sidebar, .sidebar.is-open, .scrim{transition:none}
+  }
+  @media (max-width:720px){
+    .page-title{font-size:20px; margin:4px 4px 12px}
+    /* marcas numa faixa que rola de lado, como no app real no celular */
+    .filters__brands{flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; margin-bottom:-4px}
+    .brand-thumb{flex:none}
+    /* 280px de mínimo estoura abaixo de ~330px de coluna (celular de 320) */
+    .grid{grid-template-columns:repeat(auto-fill, minmax(min(280px, 100%), 1fr))}
+    /* em celular baixo (667px) a janela passava da tela sem ter como rolar */
+    .dialog{padding:20px; max-height:calc(100dvh - 32px); overflow-y:auto}
+    .dialog__actions .btn{flex:1 1 auto}
+    .devbar{justify-content:flex-start; overflow-x:auto}
+    .devbar button{flex:none}
+  }
 </style>
 </head>
 <body>
 
 <div class="app">
   <!-- ============ SIDEBAR ============ -->
-  <aside class="sidebar">
-    <div class="sidebar__logo"><img src="assets/logo-ybera-club.png" alt="Ybera Club"></div>
+  <aside class="sidebar" id="sidebar" aria-label="Menu principal">
+    <div class="sidebar__logo">
+      <img src="assets/logo-ybera-club.png" alt="Ybera Club">
+      <!-- só abaixo de 1024px, quando a sidebar vira gaveta -->
+      <button class="sidebar__close" type="button" aria-label="Fechar menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
     <nav class="sidebar__menu">
       <div class="sidebar__section">
         <p>Lojas</p>
@@ -440,6 +509,10 @@
   <!-- ============ MAIN ============ -->
   <main class="main">
     <div class="topbar">
+      <!-- hambúrguer do app real (fa-bars, lg:hidden) — só existe abaixo de 1024px -->
+      <button class="topbar__icon topbar__menu" type="button" aria-label="Abrir menu" aria-controls="sidebar" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
       <button class="topbar__icon" aria-label="Meu link de afiliada">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
       </button>
@@ -904,6 +977,38 @@
   });
 </script>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ===== GAVETA DO MENU (só abaixo de 1024px) ===== -->
+<div class="scrim" id="scrim"></div>
+<script>
+  (function(){
+    const sb = document.getElementById('sidebar');
+    const scrim = document.getElementById('scrim');
+    const btn = document.querySelector('.topbar__menu');
+    const estreito = matchMedia('(max-width:1023px)');
+    function abrir(){
+      sb.classList.add('is-open'); scrim.classList.add('on');
+      document.body.classList.add('is-locked');
+      btn.setAttribute('aria-expanded','true');
+      sb.querySelector('.sidebar__close').focus();
+    }
+    function fechar(devolverFoco){
+      if(!sb.classList.contains('is-open')) return;
+      sb.classList.remove('is-open'); scrim.classList.remove('on');
+      document.body.classList.remove('is-locked');
+      btn.setAttribute('aria-expanded','false');
+      if(devolverFoco) btn.focus();
+    }
+    btn.addEventListener('click', abrir);
+    scrim.addEventListener('click', ()=>fechar(true));
+    sb.querySelector('.sidebar__close').addEventListener('click', ()=>fechar(true));
+    // escolher um destino fecha a gaveta (os itens da réplica são inertes, mas o gesto é o real)
+    sb.querySelectorAll('.sidebar__item').forEach(a=>a.addEventListener('click', ()=>fechar(false)));
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') fechar(true); });
+    // girar o tablet para a largura de desktop com a gaveta aberta não deixa a página travada
+    estreito.addEventListener('change', e=>{ if(!e.matches) fechar(false); });
+  })();
+</script>
 
 
 <!-- Barra de estados — DEV ONLY, removida na entrega -->

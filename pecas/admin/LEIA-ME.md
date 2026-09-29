@@ -35,8 +35,8 @@ capturou a navegação real do admin (premissa 3 da spec).
 - **Tour de onboarding (Tela 9)**: aparece sozinho na primeira visita e não volta (fica
   guardado no navegador). Para vê-lo de novo, adicione `#tour` ao fim da URL — funciona
   inclusive com a página já aberta.
-- No mobile, o menu Hub vira uma barra horizontal no topo — as quatro telas continuam
-  alcançáveis.
+- Até 1080px (tablet e celular), a sidebar vira gaveta: abre pelo botão de menu no canto
+  esquerdo da topbar, como no app real. No tablet a matriz mantém os 3 canais lado a lado.
 
 Só o Óleo de Mirra tem a tela de campos nesta POC — os outros produtos da Tela 2 são
 habilitáveis, mas não têm matriz própria (um produto basta para demonstrar o fluxo).

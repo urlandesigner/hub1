@@ -514,3 +514,25 @@ distintos; sem erros de console. Aplicado em `06-fluxo-completo.html` e seu espe
   comentários de código, nos nomes de arquivo/pasta e nas specs, onde é linguagem de projeto.
   Quarto jargão a sair da tela, depois de "override", "API" e "escassez" — o padrão já é
   registrável para a fase 04: **palavra de documento ≠ palavra de tela.**
+
+- **[2026-09-29] [Δspec · responsivo] Tablet e celular revisados, desktop intocado.** Pedido do
+  designer: "revisados para que sejam responsivos. Não deixe afetar a versão desktop". A
+  restrição "o painel não pode quebrar em viewport estreito" se cumpria só no painel: a sidebar
+  fixa de 240px ocupava 2/3 da tela a 375px e espremia o catálogo numa coluna de ~80px
+  (rolagem lateral pré-existente, já anotada neste Rastro). Abaixo de 1024px, o corte `lg` do app
+  real, a sidebar vira **gaveta com hambúrguer na topbar** (captura dev-mode: sidebar
+  `hidden lg:block` + `fa-bars lg:hidden`). Fecha no Esc, no fundo escurecido ou no X, e devolve o
+  foco ao hambúrguer. Painel de canais **2×2 no tablet** (o auto-fit dava 3+1, com o Mercado Livre
+  sozinho na linha) e 1 coluna no celular, como antes; o botão de ação cresce em altura quando o
+  rótulo quebra ("Como vincular TikTok ao seu Hub" vazava dos 40px). No celular (≤720): marcas
+  numa faixa com rolagem lateral, como no app real no celular (`lybera-shop.mobile.png`); catálogo
+  com `min(280px,100%)`, que não estoura a 320px; modal com altura limitada e rolagem interna
+  (celular de 667px); barra de dev rolável e respiro no fim da página para ela não cobrir o
+  último card.
+  **Verificado por medição:** retrato de todos os elementos visíveis a 1440 e 1280px, antes e
+  depois: **0 diferença**. Rolagem lateral zero a 320, 375 e 768px; gaveta e Modal B testados a
+  375px; console limpo. Nenhum valor novo: a gaveta reaproveita a largura da sidebar, a sombra do
+  dialog e o véu do modal. Aguardando o portão.
+- **[2026-09-29] [fase 03] VEREDICTO DO DESIGNER: APROVADO** ("sobe tudo"), olhando os
+  renderizados a 375, 768 e 320px e a prova de desktop inalterado. Revisão responsiva fechada e
+  publicada.

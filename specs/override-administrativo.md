@@ -710,3 +710,29 @@ O portão (fase 03) confere, olhando a peça renderizada:
   comentários de código, nos nomes de arquivo/pasta e nas specs, onde é linguagem de projeto.
   Quarto jargão a sair da tela, depois de "override", "API" e "escassez" — o padrão já é
   registrável para a fase 04: **palavra de documento ≠ palavra de tela.**
+
+- **[2026-09-29] [Δspec · responsivo] Tablet e celular revisados, desktop intocado.** Pedido do
+  designer: "revisados para que sejam responsivos. Não deixe afetar a versão desktop". A
+  restrição "desktop-first, mas não pode quebrar em viewport estreito" não se cumpria: a 375px o
+  seletor "Produto aberto" espremia o nome do produto em uma palavra por linha e se sobrepunha a
+  ele, e a topbar ficava vazia. **Mudança intencional sobre uma decisão aprovada:** até 1080px a
+  barra horizontal só com a seção Hub (16/08) deu lugar à **gaveta com hambúrguer do app real**
+  (captura dev-mode: sidebar `hidden lg:block` + `fa-bars lg:hidden`). A moldura volta inteira
+  (logo, Catálogo, Operação e usuária), igual à peça da influenciadora. Fecha no Esc, no fundo
+  escurecido, no X ou ao escolher uma tela; o foco vai para o título da tela escolhida. Se o
+  designer preferir a barra de abas de volta, é troca de um bloco CSS.
+  Outros ajustes, todos dentro de media query: **matriz no tablet (640–1080px) com os 3 canais
+  lado a lado** e o rótulo do campo numa linha própria, porque a comparação entre canais é a
+  varredura que a matriz existe para permitir (Direção estética); abaixo de 640 segue empilhada
+  como antes. No celular (≤720): o cabeçalho do produto quebra linha com o seletor em largura
+  total; tags com `min(300px,100%)`; timer com linhas empilhadas; modal com altura limitada e
+  botões dividindo a largura.
+  **Verificado por medição:** retrato de todos os elementos visíveis (posição, tamanho, fonte,
+  cor, fundo, padding, raio) das 4 telas a 1440 e 1280px, gravado antes da mudança e comparado
+  depois: **0 diferença**. Rolagem lateral zero nas 4 telas a 320, 375 e 768px; gaveta testada
+  (abrir, navegar, Esc, trava de scroll, foco); modal de substituição cabe em 375×812; console
+  limpo. Nenhum valor novo: largura, sombra e véu reaproveitam os da própria peça (sidebar 240px,
+  sombra do dialog, véu do backdrop). Aguardando o portão.
+- **[2026-09-29] [fase 03] VEREDICTO DO DESIGNER: APROVADO** ("sobe tudo"), olhando os
+  renderizados a 375, 768 e 320px e a prova de desktop inalterado. Revisão responsiva fechada e
+  publicada.

@@ -420,21 +420,44 @@
     .btn:active{transform:none}
   }
 
+  /* ================= RESPONSIVO =================
+     Tudo abaixo vive em media query de tela estreita: acima de 1080px nada muda.
+     Revisão de 2026-09-29: a barra horizontal só com a seção Hub (16/08) deu lugar à
+     gaveta com hambúrguer do app real (sidebar `hidden lg:block` + fa-bars `lg:hidden`
+     na captura) — mesma moldura da peça da influenciadora, com logo, menu inteiro e
+     usuária de volta. Os elementos novos nascem com display:none e só existem aqui. */
+  .topbar__menu, .sidebar__close, .scrim{display:none}
   @media (max-width:1080px){
-    .app{grid-template-columns:1fr}
-    /* no estreito a sidebar vira barra horizontal só com a seção Hub — as quatro
-       telas continuam alcançáveis; a moldura réplica (Catálogo, Operação) sai */
-    /* min-width:0 é o que faz o overflow-x da barra funcionar: sem isso, item de grid
-       adota min-width:auto, a barra cresce até o conteúdo e empurra a página inteira
-       (defeito introduzido junto com a barra, achado ao pôr as tags em colunas). */
-    .app{min-width:0}
-    .sidebar, .sidebar__menu, .sidebar__section--hub{min-width:0}
-    .sidebar{border-bottom:1px solid var(--b2c-neutral-30)}
-    .sidebar__logo, .sidebar__user, .sidebar__section:not(.sidebar__section--hub){display:none}
-    .sidebar__menu{padding:8px 12px; overflow:visible}
-    .sidebar__section--hub{margin:0; display:flex; gap:4px; overflow-x:auto}
-    .sidebar__section--hub > p{display:none}
-    .sidebar__item{white-space:nowrap; padding:8px 10px; flex:none}
+    /* min-width:0: item de grid adota min-width:auto e a matriz empurraria a página */
+    .app{grid-template-columns:minmax(0,1fr); min-width:0}
+    .sidebar{
+      position:fixed; top:0; bottom:0; left:0; z-index:40;
+      width:240px; max-width:85vw;
+      transform:translateX(-100%); visibility:hidden;
+      transition:transform .25s ease, visibility 0s linear .25s;
+    }
+    .sidebar.is-open{
+      transform:none; visibility:visible; box-shadow:0 0 8px rgba(5,5,5,.10);
+      transition:transform .25s ease;
+    }
+    .sidebar__logo{display:flex; align-items:center; justify-content:space-between}
+    .sidebar__close{
+      display:flex; background:none; border:0; cursor:pointer; color:var(--b2c-neutral-60);
+      padding:8px; margin:-8px -8px -8px 0; border-radius:var(--radius);
+    }
+    .sidebar__close:hover{color:var(--b2c-neutral-70); background:var(--b2c-neutral-20)}
+    .sidebar__close:focus-visible{outline:2px solid var(--b2c-primary); outline-offset:2px}
+    .sidebar__close svg{width:16px; height:16px; display:block}
+    /* fica abaixo do modal de substituição e do tour (z-index 50) */
+    .scrim{
+      display:block; position:fixed; inset:0; z-index:35;
+      background:hsl(240 4% 16% / .45);
+      opacity:0; pointer-events:none; transition:opacity .25s ease;
+    }
+    .scrim.on{opacity:1; pointer-events:auto}
+    body.is-locked{overflow:hidden}
+    .topbar{padding:8px 12px}
+    .topbar__menu{display:block; margin-right:auto}
     .grid{grid-template-columns:1fr}
     .rowlabel{padding:16px 4px 4px; border-top:1px solid var(--b2c-neutral-30); margin-top:8px}
     .gh{display:none}
@@ -443,14 +466,51 @@
       color:var(--b2c-neutral-60); text-transform:uppercase;
     }
   }
+  @media (prefers-reduced-motion: reduce){
+    .sidebar, .sidebar.is-open, .scrim{transition:none}
+  }
+  /* tablet: os 3 canais de cada campo seguem lado a lado — a comparação entre canais é
+     a varredura que a matriz existe para permitir (direção estética da spec); só o
+     rótulo do campo sobe para uma linha própria, no lugar da coluna de 148px */
+  @media (min-width:640px) and (max-width:1080px){
+    .grid{grid-template-columns:repeat(3, minmax(0,1fr))}
+    .rowlabel{grid-column:1 / -1}
+    /* o cabeçalho vazio da coluna "Campo" ocuparia uma célula e desalinharia as linhas */
+    #mx > .gridrow:first-child > [role="columnheader"]:not(.gh){display:none}
+  }
+  @media (max-width:720px){
+    .main{padding:12px}
+    /* cabeçalho do produto: foto e nome numa linha, o seletor desce inteiro para baixo
+       (antes o seletor espremia o nome em uma palavra por linha e sobrepunha o texto) */
+    .prod{flex-wrap:wrap; align-items:flex-start; gap:12px}
+    .prod__photo{width:56px; height:56px}
+    .prod__name{font-size:18px; line-height:24px}
+    .prod__switch{flex:1 1 100%; align-self:stretch}
+    .prod__switch .sel{width:100%}
+    .crumb{flex-wrap:wrap; row-gap:4px}
+    /* tags: 300px de mínimo estoura a coluna em celular de 320 */
+    #taglist{grid-template-columns:repeat(auto-fit, minmax(min(300px, 100%), 1fr))}
+    .trow__ch{width:auto; flex:1 1 100%}
+    .trow__st{min-width:0; flex:1 1 100%}
+    .backdrop{padding:12px}
+    .modal{padding:20px; max-height:calc(100dvh - 24px)}
+    .modal__acts .btn{flex:1 1 auto}
+    .tour__foot{flex-wrap:wrap}
+  }
 </style>
 </head>
 <body>
 
 <div class="app">
   <!-- ============ SIDEBAR — chassi real, itens propostos (premissa 3) ============ -->
-  <aside class="sidebar">
-    <div class="sidebar__logo"><img src="assets/logo-ybera-club.png" alt="Ybera Club"></div>
+  <aside class="sidebar" id="sidebar" aria-label="Menu principal">
+    <div class="sidebar__logo">
+      <img src="assets/logo-ybera-club.png" alt="Ybera Club">
+      <!-- só até 1080px, quando a sidebar vira gaveta -->
+      <button class="sidebar__close" type="button" aria-label="Fechar menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
     <nav class="sidebar__menu">
       <div class="sidebar__section">
         <p>Catálogo</p>
@@ -488,6 +548,10 @@
   <!-- ============ MAIN ============ -->
   <main class="main">
     <div class="topbar">
+      <!-- hambúrguer do app real (fa-bars, lg:hidden) — só existe até 1080px -->
+      <button class="topbar__icon topbar__menu" type="button" aria-label="Abrir menu" aria-controls="sidebar" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
       <button class="topbar__icon" aria-label="Notificações">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>
       </button>
@@ -1523,6 +1587,42 @@ if(location.hash === '#tour' || !tourJaVisto()) tourAbrir();
 /* digitar #tour numa página já aberta não recarrega nada — reagir ao hash na hora,
    como o #falha já faz (lá a checagem é no salvar; aqui precisa ser no evento) */
 window.addEventListener('hashchange', function(){ if(location.hash === '#tour') tourAbrir(); });
+</script>
+
+<!-- ===== GAVETA DO MENU (só até 1080px) ===== -->
+<div class="scrim" id="scrim"></div>
+<script>
+(function(){
+  var sb = document.getElementById('sidebar');
+  var scrim = document.getElementById('scrim');
+  var btn = document.querySelector('.topbar__menu');
+  var fecharBtn = sb.querySelector('.sidebar__close');
+  function abrir(){
+    sb.classList.add('is-open'); scrim.classList.add('on');
+    document.body.classList.add('is-locked');
+    btn.setAttribute('aria-expanded', 'true');
+    fecharBtn.focus();
+  }
+  function fechar(devolverFoco){
+    if(!sb.classList.contains('is-open')) return;
+    sb.classList.remove('is-open'); scrim.classList.remove('on');
+    document.body.classList.remove('is-locked');
+    btn.setAttribute('aria-expanded', 'false');
+    if(devolverFoco) btn.focus();
+  }
+  btn.addEventListener('click', abrir);
+  scrim.addEventListener('click', function(){ fechar(true); });
+  fecharBtn.addEventListener('click', function(){ fechar(true); });
+  /* escolher uma tela fecha a gaveta sem roubar o foco: trocarView já o pôs no título */
+  [].slice.call(sb.querySelectorAll('.sidebar__item')).forEach(function(a){
+    a.addEventListener('click', function(){ fechar(false); });
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && sb.classList.contains('is-open')) fechar(true);
+  });
+  /* girar o tablet para largura de desktop com a gaveta aberta não deixa a página travada */
+  matchMedia('(max-width:1080px)').addEventListener('change', function(e){ if(!e.matches) fechar(false); });
+})();
 </script>
 </body>
 </html>
