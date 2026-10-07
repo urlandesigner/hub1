@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manual de implementação · Comparador público</title>
+  <meta name="description" content="O que o dev precisa para implementar o Comparador público do HUB Inteligente, gerado a partir do protótipo.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fragment+Mono&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="manual.css">
+</head>
+<body>
+
+<header class="capa">
+  <div class="capa__faixa">
+    <a class="voltar" href="../index.html">&larr; Índice do handoff</a>
+    <button class="botao" type="button" id="copiar-tudo">Copiar o manual em markdown</button>
+  </div>
+  <p class="olho">Manual de implementação</p>
+  <h1>Comparador público</h1>
+  <p class="lede">
+    O que você precisa para implementar esta tela. Quase tudo nesta página é
+    lido do protótipo na hora em que você abre, então não desatualiza sozinho.
+    O que é escrito à mão está marcado como tal.
+  </p>
+  <p class="aviso" id="estado-leitura">Lendo o protótipo…</p>
+</header>
+
+<nav class="indice" id="indice" aria-label="Seções"></nav>
+
+<main class="manual" id="manual"></main>
+
+<footer class="pe">
+  <p>Gerado do protótipo em <span id="quando"></span>. Recarregue para atualizar.</p>
+</footer>
+
+<!-- A tela, escondida: é daqui que o manual lê tudo. -->
+<iframe id="fonte" src="../../../index.html" title="Protótipo, usado como fonte" aria-hidden="true" tabindex="-1"></iframe>
+
+<script src="manual.js"></script>
+</body>
+</html>

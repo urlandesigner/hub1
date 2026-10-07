@@ -1,0 +1,328 @@
+/* Abas de código — os arquivos do protótipo como texto, com copiar e baixar.
+
+   Mesmos tokens de ferramenta das outras duas: cinza neutro, nada da marca.
+   A coluna da direita fica mais larga quando uma aba de código está aberta —
+   código em 360px não se lê. */
+
+/* ---------- a barra de abas ---------- */
+.abas {
+  /* `flex: none` é obrigatório: a coluna é flex, e sem isso a barra encolhe
+     para 5px de altura quando o conteúdo da aba é alto. */
+  flex: none;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  gap: 0;
+  padding: 0 10px;
+  background: var(--f-painel);
+  border-bottom: 1px solid var(--f-borda);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.abas::-webkit-scrollbar { display: none; }
+
+.aba {
+  flex: none;
+  position: relative;
+  padding: 13px 8px 12px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--f-apoio);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.aba:hover { color: var(--f-tinta); }
+.aba[aria-selected="true"] { color: var(--f-tinta); font-weight: 600; }
+/* A linha do selecionado fica no mesmo pixel da borda da barra, por cima. */
+.aba[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  inset: auto 6px -1px;
+  height: 2px;
+  background: var(--f-acento);
+  border-radius: 2px 2px 0 0;
+}
+
+.aba-conteudo {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+}
+.aba-conteudo[hidden] { display: none; }
+
+/* Duas rolagens diferentes, e é de propósito:
+   — na aba Inspecionar a ficha é longa e quem rola é a coluna inteira;
+   — nas abas de código a coluna fica parada e quem rola é só o <pre>, para o
+     nome do arquivo e o botão de copiar não sumirem ao descer no código. */
+.inspetor { overflow: hidden; }
+.lab[data-aba="inspecionar"] .inspetor { overflow-y: auto; }
+.aba-conteudo[data-de="inspecionar"] { flex: 1 0 auto; min-height: 0; }
+/* A barra de abas fica por cima; o cabeçalho da ficha para logo abaixo dela. */
+.inspetor__topo { top: 44px; }
+
+
+/* ---------- o cabeçalho de cada aba de código ---------- */
+.codigo__topo {
+  flex: none;
+  position: sticky;
+  top: 44px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 12px 20px 11px;
+  background: var(--f-painel);
+  border-bottom: 1px solid var(--f-borda);
+}
+.codigo__nome {
+  margin: 0;
+  min-width: 0;
+  /* Linha inteira só para ele: a 320px o nome do arquivo e os dois botões não
+     cabem lado a lado, e o nome é o que não pode ser cortado. */
+  flex: 1 0 100%;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.codigo__peso {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--f-apoio-2);
+  font-variant-numeric: tabular-nums;
+}
+.codigo__topo .botao { flex: none; padding: 7px 11px; font-size: 12px; }
+
+/* Sem peça selecionada não há nome de arquivo, nem o que copiar ou baixar, nem
+   escolha de escopo que faça sentido ali. Fica só a mensagem. */
+.aba-conteudo[data-sem-peca="true"] .codigo__topo,
+.aba-conteudo[data-sem-peca="true"] .escopo { display: none; }
+
+.codigo__saida { display: block; margin-top: 14px; }
+
+/* ---------- tela inteira ou só a peça ---------- */
+.escopo {
+  flex: none;
+  display: flex;
+  gap: 2px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--f-borda);
+}
+.escopo__opcao { position: relative; }
+.escopo__opcao input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.escopo__opcao span {
+  display: block;
+  padding: 5px 11px;
+  border-radius: var(--f-raio-pill);
+  font-size: 12px;
+  color: var(--f-apoio);
+}
+.escopo__opcao input:checked + span {
+  background: var(--f-trilha);
+  color: var(--f-tinta);
+  font-weight: 500;
+}
+.escopo__opcao input:focus-visible + span {
+  outline: 2px solid var(--f-foco);
+  outline-offset: 1px;
+}
+
+.baixar__peca {
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--f-borda);
+}
+.baixar__peca[hidden] { display: none; }
+.baixar__peca .baixar__nota { margin-top: 10px; }
+
+/* ---------- a lista de arquivos da aba ---------- */
+.arquivos {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 11px 20px;
+  border-bottom: 1px solid var(--f-borda);
+}
+.arquivos[hidden] { display: none; }
+.arquivos__grupo {
+  width: 100%;
+  margin: 4px 0 1px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--f-apoio-2);
+}
+.arquivos__grupo:first-child { margin-top: 0; }
+
+.arquivos__item {
+  padding: 4px 9px;
+  border: 1px solid var(--f-borda);
+  border-radius: var(--f-raio-pill);
+  background: var(--f-painel);
+  font: inherit;
+  font-size: 11px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--f-apoio);
+  cursor: pointer;
+}
+.arquivos__item:hover { border-color: var(--f-apoio-2); color: var(--f-tinta); }
+.arquivos__item[aria-pressed="true"] {
+  background: var(--f-acento);
+  border-color: var(--f-acento);
+  color: var(--f-acento-tinta);
+}
+
+/* ---------- o código ---------- */
+.codigo__fonte {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 14px 20px 24px;
+  /* Só rolagem vertical. A coluna tem largura fixa, e rolar de lado para ler
+     uma linha de código é pior que a linha quebrar: você perde o começo da
+     linha, que é onde está o seletor ou a tag. */
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--f-trilha);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11.5px;
+  line-height: 1.65;
+  tab-size: 2;
+  /* `pre-wrap` guarda a indentação do início de cada linha lógica; `anywhere`
+     deixa quebrar no meio de um valor de atributo longo, que é justamente o
+     que estourava a coluna. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--f-tinta);
+}
+.codigo__fonte[data-vazio="true"] {
+  background: var(--f-painel);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: normal;
+  color: var(--f-apoio);
+}
+
+/* ---------- o aviso de arquivo que não é do projeto ---------- */
+.codigo__aviso {
+  flex: none;
+  margin: 0;
+  padding: 10px 20px;
+  background: var(--f-nota-fundo);
+  border-bottom: 1px solid var(--f-nota-borda);
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--f-nota-tinta);
+}
+.codigo__aviso[hidden] { display: none; }
+
+/* ---------- a aba Baixar ---------- */
+/* A aba Baixar é a única de código que rola por dentro: a lista de arquivos
+   cresce com o protótipo. */
+.baixar {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 20px 26px;
+}
+.baixar__titulo {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.baixar__texto {
+  margin: 0 0 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--f-apoio);
+}
+.baixar__acoes {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 22px;
+}
+.baixar__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--f-borda);
+}
+.baixar__linha {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--f-borda);
+  font-size: 12px;
+}
+.baixar__caminho {
+  flex: 1;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.baixar__selo {
+  flex: none;
+  padding: 2px 7px;
+  border-radius: var(--f-raio-pill);
+  font-size: 10px;
+  font-weight: 500;
+}
+.baixar__selo[data-de="projeto"] { background: var(--f-trilha); color: var(--f-apoio); }
+.baixar__selo[data-de="sistema"] { background: var(--f-info-fundo); color: var(--f-info-tinta); }
+.baixar__peso {
+  flex: none;
+  width: 58px;
+  text-align: right;
+  font-size: 11px;
+  color: var(--f-apoio-2);
+  font-variant-numeric: tabular-nums;
+}
+.baixar__um {
+  flex: none;
+  padding: 3px 8px;
+  border: 1px solid var(--f-borda);
+  border-radius: var(--f-raio-pill);
+  background: var(--f-painel);
+  font: inherit;
+  font-size: 11px;
+  color: var(--f-apoio);
+  cursor: pointer;
+}
+.baixar__um:hover { border-color: var(--f-apoio-2); color: var(--f-tinta); }
+
+.baixar__nota {
+  margin: 18px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--f-apoio-2);
+}
+
+@media (max-width: 1200px) {
+  /* Empilhado, a coluna não é mais sticky: `top` de barra sticky não vale. */
+  .lab[data-dev="true"] .abas { position: static; }
+  .lab[data-dev="true"] .codigo__topo { position: static; }
+  .codigo__fonte { max-height: 70vh; }
+}

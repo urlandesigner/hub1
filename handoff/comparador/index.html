@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Handoff · Comparador público</title>
+<meta name="description" content="As ferramentas em volta do Comparador público do HUB Inteligente: navegar os estados, inspecionar a peça, ler e baixar o código, e o manual de implementação." />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23181510'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='Georgia,serif' font-style='italic' font-size='40' fill='%23e2727d'%3EY%3C/text%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..650;1,9..144,400..600&family=Instrument+Sans:wght@400;500;600&family=Fragment+Mono&display=swap" rel="stylesheet" />
+
+<style>
+  /* A pele escura do ideias-e-inovacao, copiada da capa da Loja do Influencer,
+     que copiou do índice do repositório. Duas capas de handoff lado a lado não
+     podem parecer de projetos diferentes. */
+  :root {
+    --papel:      #181510;
+    --papel-2:    #211e18;
+    --tinta:      #f2ece1;
+    --apoio:      #a89e8f;
+    --apoio-2:    #5b5449;
+    --linha:      rgba(242, 236, 225, 0.14);
+    --vinho:      #e2727d;
+    --vinho-meio: rgba(226, 114, 125, 0.38);
+
+    --serif: "Fraunces", Georgia, serif;
+    --sans:  "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+    --mono:  "Fragment Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --gap: clamp(20px, 4.5vw, 40px);
+  }
+
+  * { box-sizing: border-box; }
+  html { color-scheme: dark; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--papel);
+    color: var(--tinta);
+    font: 400 16px/1.55 var(--sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  a { color: var(--vinho); }
+
+  /* A medida do texto fica presa em `62ch` nos parágrafos: ela é de leitura,
+     não de página. O que usa a largura toda são as tabelas e os cartões. */
+  .pagina {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(32px, 7vw, 72px) var(--gap) clamp(48px, 9vw, 96px);
+  }
+
+  .voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--apoio);
+    text-decoration: none;
+    margin-bottom: clamp(28px, 5vw, 44px);
+  }
+  .voltar:hover { color: var(--tinta); }
+
+  .olho {
+    font: 500 11px/1 var(--mono);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--apoio-2);
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font: 400 clamp(32px, 6vw, 52px)/1.05 var(--serif);
+    letter-spacing: -.02em;
+    margin: 0 0 18px;
+  }
+  h1 em { font-style: italic; color: var(--vinho); }
+
+  .lede {
+    font-size: clamp(16px, 2vw, 18px);
+    line-height: 1.6;
+    color: var(--apoio);
+    max-width: 62ch;
+    margin: 0 0 clamp(36px, 6vw, 56px);
+  }
+  .lede strong { color: var(--tinta); font-weight: 500; }
+
+  h2 {
+    font: 400 clamp(20px, 3vw, 26px)/1.2 var(--serif);
+    margin: clamp(40px, 7vw, 64px) 0 6px;
+  }
+
+  .sub {
+    font-size: 14px;
+    color: var(--apoio);
+    margin: 0 0 24px;
+    max-width: 62ch;
+  }
+
+  .versoes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 18px;
+  }
+
+  /* Coluna, para o link poder descer até o fim do cartão. */
+  .versao {
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    background: var(--papel-2);
+    border: 1px solid var(--linha);
+    border-radius: 14px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color .18s ease, transform .18s ease;
+  }
+  .versao:hover {
+    border-color: var(--vinho-meio);
+    transform: translateY(-2px);
+  }
+  .versao:focus-visible { outline: 2px solid var(--vinho); outline-offset: 3px; }
+  .versao__tag {
+    font: 500 11px/1 var(--mono);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--vinho);
+  }
+  .versao__nome {
+    font: 400 22px/1.2 var(--serif);
+    margin: 10px 0 8px;
+  }
+  .versao__desc {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--apoio);
+    margin: 0 0 16px;
+  }
+  .versao__abrir {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--tinta);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+  }
+  .versao .versao__abrir { align-self: flex-start; }
+  .versao:hover .versao__abrir { color: var(--vinho); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  th, td {
+    text-align: left;
+    padding: 11px 14px 11px 0;
+    border-bottom: 1px solid var(--linha);
+    vertical-align: top;
+  }
+  th {
+    font: 500 11px/1 var(--mono);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--apoio-2);
+    padding-bottom: 10px;
+  }
+  td strong { font-weight: 500; }
+  td.apoio { color: var(--apoio); }
+
+  code {
+    font: 400 .88em/1 var(--mono);
+    color: var(--tinta);
+    background: rgba(242, 236, 225, .07);
+    padding: 2px 5px;
+    border-radius: 4px;
+  }
+
+  .nota {
+    margin-top: clamp(40px, 7vw, 64px);
+    padding-top: 22px;
+    border-top: 1px solid var(--linha);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--apoio-2);
+    max-width: 62ch;
+  }
+  .nota a { color: var(--apoio); }
+  .nota + .nota { margin-top: 18px; padding-top: 0; border-top: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .versao { transition: none; }
+    .versao:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+<main class="pagina">
+
+  <a class="voltar" href="../index.html">&larr; Protótipos do HUB</a>
+
+  <p class="olho">Handoff · HUB Inteligente</p>
+  <h1>Comparador <em>público</em></h1>
+
+  <p class="lede">
+    A página que o cliente abre pelo link da influenciadora: o mesmo produto Ybera
+    em três canais oficiais (Shopee, TikTok Shop e Ybera.com), com preço, prazo e
+    frete lado a lado. Tem o produto com o campo de CEP, a pilha de cards de
+    canal, o &ldquo;Como funciona&rdquo;, a faixa de garantias e o rodapé. Uma
+    coluna no celular e duas a partir de 1080 px. É um HTML só, com um
+    <code>&lt;style&gt;</code> e um <code>&lt;script&gt;</code> na própria página.
+    <br><br>
+    <strong>Nada ali é real.</strong> Não há endpoint: preços, fretes, os dois CEPs
+    conhecidos e os selos estão fixos no código, e comprar não chega à loja. Todo
+    estado se alcança usando a tela, digitando o CEP e apertando o botão de um
+    canal. O protótipo existe para validar a comparação e a saída para o canal
+    antes de alguém implementar.
+  </p>
+
+  <div class="versoes">
+    <a class="versao" href="../../index.html" target="_blank" rel="noopener">
+      <span class="versao__tag">Comece aqui</span>
+      <h2 class="versao__nome" style="margin-top:10px">Protótipo</h2>
+      <p class="versao__desc">
+        A tela sozinha, sem nada em volta. É exatamente o que o dev implementa.
+      </p>
+      <span class="versao__abrir">Abrir a tela &rarr;</span>
+    </a>
+    <a class="versao" href="ferramenta.html">
+      <span class="versao__tag">As ferramentas</span>
+      <h2 class="versao__nome" style="margin-top:10px">Handoff</h2>
+      <p class="versao__desc">
+        As ferramentas em volta da tela. Navegue cada estado, inspecione a peça
+        e veja de onde vem cada valor, leia e baixe o código.
+      </p>
+      <span class="versao__abrir">Abrir o painel &rarr;</span>
+    </a>
+    <a class="versao" href="manual/index.html">
+      <span class="versao__tag">Para implementar</span>
+      <h2 class="versao__nome" style="margin-top:10px">Manual</h2>
+      <p class="versao__desc">
+        A documentação para quem vai implementar. Leia as regras de negócio, a
+        ficha de cada componente, os textos, os tokens e o que ainda falta.
+      </p>
+      <span class="versao__abrir">Abrir o manual &rarr;</span>
+    </a>
+  </div>
+
+  <h2>O que está instalado</h2>
+  <p class="sub">
+    As quatro ferramentas do pacote. Nenhuma ficou de fora, mas duas rendem menos
+    aqui porque o markup não tem anotação, e isso está dito na linha de cada uma.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Funcionalidade</th><th>O que faz aqui</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Painel de estados</strong></td>
+        <td class="apoio">
+          Dirige a tela pelos controles dela: digita o CEP (São Paulo, Acre, fora da
+          tabela ou incompleto) e aperta o botão de comprar de cada canal. Cada
+          combinação tem URL própria, e a largura vai de 240 a 3840 px. Não há
+          cenário de conteúdo para trocar: os dados estão fixos no código e a tela
+          não lê a URL
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Dev mode</strong></td>
+        <td class="apoio">
+          Clicar numa peça abre a ficha: cor, tipografia, espaçamento, raio,
+          contraste medido e acessibilidade, com o nome da variável quando o CSS
+          usou uma (<code>--sp-*</code>, <code>--neutral-*</code>, <code>--r-*</code>),
+          mais o CSS que a alcança. Toda peça sai como CSS próprio desta tela, porque
+          não há biblioteca de componentes carregada. Props e estados saem vazios:
+          o markup não tem anotação
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Abas de código</strong></td>
+        <td class="apoio">
+          HTML, CSS e JS como arquivo, com copiar e baixar, da peça selecionada ou
+          da tela inteira. A lista sai da própria página: o HTML, o
+          <code>&lt;style&gt;</code> e o <code>&lt;script&gt;</code> embutidos e as
+          imagens. O .zip sai com as pastas no lugar
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Manual de implementação</strong></td>
+        <td class="apoio">
+          Lido da tela na hora: o dado dos canais, os textos fixos conferidos contra
+          o HTML, os tokens usados e as cores escritas direto. Escritos à mão, e
+          marcados assim: as regras de negócio, o que é demonstração e a lista de
+          estados. Sem anotação, não há ficha de componente: a seção lista os blocos
+          de classe da folha, como lugar onde procurar
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>O que esta montagem ensinou</h2>
+  <p class="sub">
+    Coisas que só apareceram montando nesta tela. As duas primeiras são correções
+    da ferramenta; as outras são achados sobre o protótipo.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>O que apareceu</th><th>Por que importa</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>A folha inteira passava por framework</strong></td>
+        <td class="apoio">A versão da Loja separava o CSS do Tailwind contando mais de 50 regras. Aqui a única folha é escrita à mão e tem centenas: a mesma conta a chamaria de Tailwind e o nome das peças sumiria. O critério virou &ldquo;não há framework&rdquo;</td>
+      </tr>
+      <tr>
+        <td><strong>O HTML sumia da lista de arquivos</strong></td>
+        <td class="apoio">O servidor deste projeto (<code>npx serve</code>) troca <code>index.html</code> por <code>/</code>, e o caminho relativo virava vazio, que a ferramenta lia como &ldquo;arquivo de fora&rdquo;. Corrigido nas abas de código</td>
+      </tr>
+      <tr>
+        <td><strong>Comprar tira a tela do handoff</strong></td>
+        <td class="apoio">O botão navega para o site do canal 1,4 s depois do clique. O painel segura só essa navegação; o &ldquo;Abrindo…&rdquo; e a cortina de saída são os da tela, sem retoque</td>
+      </tr>
+      <tr>
+        <td><strong>Três estados sem caminho</strong></td>
+        <td class="apoio">Canal indisponível, canal que não informa o frete e loja que não entrega no CEP estão implementados no código, com texto e estilo próprios, e nenhuma interação chega neles. Para conferir, a tela precisa aceitar cenário</td>
+      </tr>
+      <tr>
+        <td><strong>A tela não lê nada da URL, de propósito</strong></td>
+        <td class="apoio">É regra dela: o CEP não pode ficar guardado. Por isso o link &ldquo;abrir a tela sozinha&rdquo; abre sempre sem CEP, e o estado só se reproduz pelo painel</td>
+      </tr>
+      <tr>
+        <td><strong>Branco escrito direto</strong></td>
+        <td class="apoio">Fora do <code>:root</code> há 8 cores em hex, 6 delas <code>#fff</code>, que tem par no <code>--neutral-50</code>. A ficha mostra <code>--neutral-50</code> nessas peças pelo valor, não pela declaração: confira no CSS antes de copiar</td>
+      </tr>
+      <tr>
+        <td><strong>Regra e desenho no mesmo arquivo</strong></td>
+        <td class="apoio">Ordenação, melhor oferta e regra do frete estão no <code>&lt;script&gt;</code> junto com o código que escreve os cards. O manual aponta as funções; separar regra de render fica com quem implementa</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="nota">
+    As ferramentas não tocam na tela. Ela roda num <code>iframe</code> e tudo é
+    desenhado por fora: o que você inspeciona é exatamente o que o dev implementa,
+    sem andaime junto. A única intervenção é segurar a navegação para o canal,
+    descrita acima.
+  </p>
+  <p class="nota">
+    Precisa de servidor: o <code>iframe</code> lê o documento da tela, e por
+    <code>file://</code> o navegador barra essa leitura. A tela sozinha abre
+    direto. Se depois de editar a ferramenta a página vier com estilo velho,
+    recarregue com Cmd+Shift+R.
+  </p>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Handoff · Comparador público</title>
+  <meta name="description" content="Painel de estados, dev mode e código do Comparador público do HUB Inteligente.">
+
+  <!-- Antes das folhas, de propósito: aplicado depois, o tema escuro pisca
+       claro na primeira pintura. -->
+  <script>
+    (function () {
+      var salvo = null;
+      try { salvo = localStorage.getItem('handoff-tema'); } catch (e) { /* janela privativa */ }
+      var escuro = salvo ? salvo === 'escuro' : matchMedia('(prefers-color-scheme: dark)').matches;
+      if (escuro) document.documentElement.dataset.tema = 'escuro';
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="painel.css">
+  <link rel="stylesheet" href="dev-mode.css">
+  <link rel="stylesheet" href="codigo.css">
+</head>
+<body>
+<div class="lab" data-codigo="true" data-painel="aberto" data-aba="inspecionar">
+
+  <aside class="painel" id="painel">
+    <header class="painel__topo">
+      <h1 class="painel__titulo">Comparador público</h1>
+      <p class="painel__sub">Troque o CEP e a saída para ver cada estado da tela.</p>
+
+      <label class="chave chave--destaque">
+        <span class="chave__rotulo"><strong>Dev mode</strong><br><small>Inspecionar o elemento, ler o código e baixar</small></span>
+        <input type="checkbox" id="dev-mode" checked>
+        <span class="chave__trilha"><span class="chave__bolinha"></span></span>
+      </label>
+    </header>
+
+    <div class="painel__corpo" id="controles"></div>
+
+    <footer class="painel__pe">
+      <p class="painel__nota" id="estado-descricao"></p>
+      <button class="botao" type="button" id="copiar-link">Copiar link deste estado</button>
+      <button class="botao botao--fantasma" type="button" id="limpar">Limpar</button>
+      <a class="painel__link" href="index.html">
+        &larr; Voltar para o índice do handoff
+      </a>
+      <!-- A tela sozinha não lê estado nenhum da URL: abre sempre sem CEP. -->
+      <a class="painel__link" href="../../index.html" target="_blank" rel="noopener">
+        Abrir a tela sozinha, sempre sem CEP &rarr;
+      </a>
+    </footer>
+  </aside>
+
+  <main class="palco">
+    <div class="palco__barra">
+      <!-- Três partes em grade (1fr auto 1fr), cada uma com a trilha declarada:
+           o seletor do meio some com o dev mode desligado, e sem a trilha a
+           ponta da direita escorregaria para o centro. -->
+      <div class="palco__ponta">
+        <button class="dobrar" type="button" id="dobrar-painel" aria-expanded="true"
+                aria-controls="painel" title="Esconder o painel de estados">
+          <span class="dobrar__seta" aria-hidden="true">&#8249;</span>
+          <span class="dobrar__texto">Painel</span>
+        </button>
+        <span class="palco__largura" id="largura-atual"></span>
+      </div>
+
+      <div class="clique" role="radiogroup" aria-label="O que o clique na tela faz">
+        <label class="clique__opcao">
+          <input type="radio" name="clique" value="inspecionar" checked>
+          <span>Inspecionar</span>
+        </label>
+        <label class="clique__opcao">
+          <input type="radio" name="clique" value="usar">
+          <span>Navegar</span>
+        </label>
+      </div>
+
+      <div class="palco__ponta palco__ponta--fim">
+        <span class="palco__estado" id="aplicando" hidden>Aplicando…</span>
+
+        <button class="tema" type="button" id="tema" title="Tema escuro" aria-label="Trocar o tema da ferramenta">
+          <svg class="tema__sol" viewBox="0 0 16 16" aria-hidden="true">
+            <circle cx="8" cy="8" r="3.2"/>
+            <path d="M8 1v1.6M8 13.4V15M15 8h-1.6M2.6 8H1M12.9 3.1l-1.1 1.1M4.2 11.8l-1.1 1.1M12.9 12.9l-1.1-1.1M4.2 4.2L3.1 3.1"/>
+          </svg>
+          <svg class="tema__lua" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M13.3 9.6A5.8 5.8 0 0 1 6.4 2.7a5.8 5.8 0 1 0 6.9 6.9z"/>
+          </svg>
+        </button>
+
+        <button class="dobrar dobrar--dir" type="button" id="dobrar-codigo" aria-expanded="true"
+                aria-controls="inspetor" title="Esconder o dev mode">
+          <span class="dobrar__texto">Dev mode</span>
+          <span class="dobrar__seta" aria-hidden="true">&#8250;</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="palco__area">
+      <!-- A caixa reserva o espaço da moldura já reduzida. -->
+      <div class="moldura-caixa" id="moldura-caixa">
+        <div class="moldura" id="moldura">
+          <iframe class="moldura__tela" id="tela" title="Comparador público" src="../../index.html"></iframe>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <aside class="inspetor" id="inspetor" aria-label="Inspecionar e código">
+    <nav class="abas" role="tablist" aria-label="O que ver">
+      <button class="aba" type="button" role="tab" data-aba="inspecionar" aria-selected="true">Inspecionar</button>
+      <button class="aba" type="button" role="tab" data-aba="html" aria-selected="false">HTML</button>
+      <button class="aba" type="button" role="tab" data-aba="css" aria-selected="false">CSS</button>
+      <button class="aba" type="button" role="tab" data-aba="js" aria-selected="false">JS</button>
+      <button class="aba" type="button" role="tab" data-aba="baixar" aria-selected="false">Baixar</button>
+    </nav>
+
+    <!-- aba Inspecionar: a ficha do elemento clicado -->
+    <div class="aba-conteudo" data-de="inspecionar">
+      <div class="inspetor__topo">
+        <h2 class="inspetor__titulo">Inspecionar</h2>
+        <div id="inspetor-peca"></div>
+      </div>
+      <div class="inspetor__corpo" id="inspetor-corpo"></div>
+    </div>
+
+    <div class="aba-conteudo" data-de="codigo" hidden>
+      <div class="codigo__topo">
+        <h2 class="codigo__nome" id="codigo-nome">—</h2>
+        <span class="codigo__peso" id="codigo-peso"></span>
+        <button class="botao" type="button" id="copiar-codigo" disabled>Copiar</button>
+        <button class="botao botao--fantasma" type="button" id="baixar-codigo" disabled>Baixar</button>
+      </div>
+
+      <div class="escopo" role="radiogroup" aria-label="O que mostrar">
+        <label class="escopo__opcao">
+          <input type="radio" name="escopo" value="peca" checked>
+          <span>Só o selecionado</span>
+        </label>
+        <label class="escopo__opcao">
+          <input type="radio" name="escopo" value="tela">
+          <span>Tela inteira</span>
+        </label>
+      </div>
+
+      <p class="codigo__aviso" id="codigo-aviso" hidden></p>
+      <div class="arquivos" id="arquivos" hidden></div>
+      <pre class="codigo__fonte" id="codigo-fonte" data-vazio="true">Clique num elemento da tela.</pre>
+    </div>
+
+    <div class="aba-conteudo" data-de="baixar" hidden>
+      <div class="baixar">
+        <h2 class="baixar__titulo">Levar o código embora</h2>
+        <p class="baixar__texto">
+          O .zip sai com as pastas no lugar: descompacte, sirva a pasta e abra o
+          index.html, e a tela roda igual. O .md é o código desta tela num arquivo
+          só, para colar numa IA ou numa task.
+        </p>
+        <div class="baixar__acoes">
+          <button class="botao" type="button" id="baixar-zip">Baixar tudo em .zip</button>
+          <button class="botao" type="button" id="baixar-md">Baixar tudo num .md</button>
+          <button class="botao botao--fantasma" type="button" id="copiar-md">Copiar tudo</button>
+        </div>
+        <ul class="baixar__lista" id="baixar-lista"></ul>
+        <p class="baixar__nota" id="baixar-nota"></p>
+
+        <div class="baixar__peca" id="baixar-peca" hidden>
+          <h3 class="baixar__titulo">Só a peça selecionada</h3>
+          <p class="baixar__texto" id="baixar-peca-nome"></p>
+          <div class="baixar__acoes">
+            <button class="botao" type="button" id="baixar-peca-zip">Baixar a peça em .zip</button>
+            <button class="botao botao--fantasma" type="button" id="copiar-peca">Copiar a peça</button>
+          </div>
+          <p class="baixar__nota">
+            São dois arquivos: o markup da peça e as regras de CSS que chegam nela.
+            Não é uma página que roda sozinha: a peça depende dos tokens do :root e
+            do layout em volta dela.
+          </p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<div class="marca" id="marca-hover" hidden></div>
+<div class="marca marca--sel" id="marca-sel" hidden></div>
+
+<script src="dev-mode.js"></script>
+<script src="codigo.js"></script>
+<script src="painel.js"></script>
+</body>
+</html>

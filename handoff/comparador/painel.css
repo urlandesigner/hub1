@@ -1,0 +1,678 @@
+/* A ferramenta em volta do Comparador público do HUB Inteligente.
+
+   Copiada da Loja do Influencer, que por sua vez veio do Handoff de Checkout:
+   os tokens dos dois temas, o esqueleto da grade, o segmentado, os botões, o
+   palco pontilhado, a moldura reduzida por `transform`, o dobrador e o botão
+   de tema.
+
+   O que esta tela tem e a Loja não tinha: estados (o campo de CEP e a saída
+   para o canal) e a chave de dev mode. Os dois usam peças que já estavam aqui
+   (segmentado, `.palco__estado`, `.grupo__dica`); só o seletor do clique ganhou
+   regra nova, no fim da seção dele.
+   ========================================================================= */
+
+/* Painel de estados — a ferramenta em volta do protótipo.
+
+   Tokens próprios, de propósito. Usar os do design system faria o painel
+   parecer parte do produto, e quem abre isso precisa ver na hora o que é a
+   tela e o que é o controle em volta dela. Cinza de ferramenta, não de marca. */
+
+:root {
+  --f-fundo:      #e8e8ec;
+  --f-painel:     #ffffff;
+  --f-trilha:     #f1f1f4;
+  --f-borda:      #dcdce2;
+  --f-tinta:      #1c1c20;
+  --f-apoio:      #71717a;
+  --f-apoio-2:    #a1a1ab;
+  --f-acento:     #1c1c20;
+  --f-foco:       #2563eb;
+  --f-sombra:     0 1px 2px rgba(0,0,0,.06);
+  --f-sombra-alta: 0 10px 30px -12px rgba(0,0,0,.25);
+
+  /* a mesa pontilhada onde a tela se apoia — mais clara que o fundo geral,
+     para a moldura branca ainda se destacar dela */
+  --f-mesa:       #f4f4f5;
+  --f-ponto:      rgba(24, 24, 27, .11);
+  --f-ponto-vao:  24px;
+  --f-ponto-raio: 1px;
+
+  --f-raio:       10px;
+  --f-raio-pill:  999px;
+  /* Metade da altura de uma linha do segmentado. Numa linha, 999px já resolve
+     para este mesmo valor — então a trilha de 3 itens não muda nada. Quando
+     ela quebra para duas linhas é que a diferença aparece: 999px passaria a
+     valer metade de 70px e o bloco viraria um losango. */
+  --f-raio-seg:   18.5px;
+  --f-painel-w:   320px;
+
+  /* Cor do texto sobre o acento. Existe porque no claro o acento é quase preto
+     e no escuro é quase branco: `#fff` fixo funcionava num e sumia no outro. */
+  --f-acento-tinta: #ffffff;
+
+  /* A pastilha escolhida do segmentado. Precisa de token próprio porque a
+     relação com a trilha se inverte entre os temas: no claro ela é mais clara
+     que a trilha e sobe; usando `--f-painel` nos dois, no escuro ela ficava
+     MAIS ESCURA que a trilha e afundava. */
+  --f-seg-ativo:       #ffffff;
+  --f-seg-ativo-tinta: #1c1c20;
+
+  /* Pares de estado. São tokens e não cores soltas porque cada um precisa de
+     uma versão escura — e cor solta espalhada é o que impede trocar o tema. */
+  --f-info-fundo:   #e7f0ff;  --f-info-tinta:   #1d4ed8;   /* do design system */
+  --f-aviso-fundo:  #fdf0e3;  --f-aviso-tinta:  #a1560c;   /* local desta tela */
+  --f-ok-fundo:     #e7f6ec;  --f-ok-tinta:     #11703a;   /* copiado · AAA */
+  --f-ok2-fundo:    #eaf4e9;  --f-ok2-tinta:    #2d6a2a;   /* AA */
+  --f-meio-fundo:   #fdf4e3;  --f-meio-tinta:   #92600b;   /* só para controle */
+  --f-ruim-fundo:   #fdeaea;  --f-ruim-tinta:   #a32020;   /* não passa */
+  --f-nota-fundo:   #fdf7e9;  --f-nota-borda:   #f0e3c4;  --f-nota-tinta: #7a5a0c;
+}
+
+/* ---------- tema escuro ----------
+
+   Escurece SÓ a ferramenta. O protótipo roda noutro documento, dentro do
+   iframe, e não herda nada daqui — e o design system declara `color-scheme:
+   light` sem nenhuma regra de escuro, então a tela também não muda sozinha.
+   A moldura continua branca de propósito: ela é o papel onde o produto está. */
+[data-tema="escuro"] {
+  --f-fundo:      #141416;
+  --f-painel:     #1b1b1e;
+  --f-trilha:     #26262b;
+  --f-borda:      #303036;
+  --f-tinta:      #ededee;
+  /* Mais claros que o espelho dos tokens do tema claro. Invertendo direto,
+     `--f-apoio-2` dava 3.56:1 sobre o painel — abaixo de AA. Estes dois foram
+     escolhidos medindo: 7.9 e 5.7 sobre o painel, 4.9 o menor sobre a trilha. */
+  --f-apoio:      #b8b8c1;
+  --f-apoio-2:    #93939d;
+  --f-acento:     #ededee;
+  --f-acento-tinta: #1b1b1e;
+  /* Quase branca, como as outras coisas selecionadas do tema escuro já são. */
+  --f-seg-ativo:       #ededee;
+  --f-seg-ativo-tinta: #1b1b1e;
+  --f-foco:       #60a5fa;
+  --f-sombra:     0 1px 2px rgba(0, 0, 0, .5);
+  --f-sombra-alta: 0 10px 30px -12px rgba(0, 0, 0, .7);
+
+  --f-mesa:       #1f1f23;
+  --f-ponto:      rgba(255, 255, 255, .10);
+
+  --f-info-fundo:  #16304f;  --f-info-tinta:  #93c0ff;
+  --f-aviso-fundo: #3a2a16;  --f-aviso-tinta: #e9b476;
+  --f-ok-fundo:    #13331f;  --f-ok-tinta:    #74d99a;
+  --f-ok2-fundo:   #1a3320;  --f-ok2-tinta:   #86cc8a;
+  --f-meio-fundo:  #352a12;  --f-meio-tinta:  #e0b765;
+  --f-ruim-fundo:  #3a1d1d;  --f-ruim-tinta:  #f09a9a;
+  --f-nota-fundo:  #322a16;  --f-nota-borda:  #4a3f21;  --f-nota-tinta: #e2c489;
+
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--f-fundo);
+  color: var(--f-tinta);
+  font: 400 14px/1.5 "Inter", ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--f-foco);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* ---------- esqueleto ---------- */
+.lab {
+  --f-col-painel: var(--f-painel-w);
+  display: grid;
+  min-height: 100vh;
+}
+
+/* ---------- segmentado ---------- */
+/* A trilha é o fundo cinza; o escolhido é a pastilha branca com sombra. Rádio
+   nativo escondido por baixo: as setas do teclado e o leitor de tela seguem
+   funcionando, e o estado escolhido é `:checked`, não uma classe. */
+.seg {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 2px;
+  row-gap: 4px;
+  padding: 3px;
+  background: var(--f-trilha);
+  border-radius: var(--f-raio-seg);
+}
+.seg__opcao { flex: 1 1 auto; min-width: 0; }
+.seg__opcao input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.seg__opcao span {
+  display: block;
+  padding: 7px 10px;
+  border-radius: var(--f-raio-pill);
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--f-apoio);
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.seg__opcao input:checked + span {
+  background: var(--f-seg-ativo);
+  color: var(--f-seg-ativo-tinta);
+  font-weight: 500;
+  box-shadow: var(--f-sombra);
+}
+.seg__opcao input:focus-visible + span {
+  outline: 2px solid var(--f-foco);
+  outline-offset: 1px;
+}
+@media (hover: hover) {
+  .seg__opcao input:not(:checked) + span:hover { color: var(--f-tinta); }
+}
+
+.botao {
+  padding: 9px 12px;
+  border: 1px solid var(--f-borda);
+  border-radius: var(--f-raio);
+  background: var(--f-painel);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--f-tinta);
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease;
+}
+.botao:hover { border-color: var(--f-apoio-2); }
+.botao--fantasma {
+  border-color: transparent;
+  color: var(--f-apoio);
+}
+.botao--fantasma:hover { border-color: var(--f-borda); }
+.botao[data-feito="true"] {
+  border-color: var(--f-acento);
+  background: var(--f-acento);
+  color: var(--f-acento-tinta);
+}
+/* ---------- palco ---------- */
+.palco {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+/* Três partes: ponta esquerda, centro, ponta direita. Em grade, e não com
+   `margin: auto`, porque dois `auto` disputando o mesmo vão deixam o centro
+   fora do centro — o `1fr` de cada lado garante que o meio seja o meio. */
+.palco__barra {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  font-size: 12px;
+  color: var(--f-apoio);
+  border-bottom: 1px solid var(--f-borda);
+}
+/* CADA PARTE NA SUA TRILHA, declarada.
+
+   Sem isto, o seletor do meio com `display: none` sai da grade e a ponta da
+   direita escorrega para a trilha do meio — a grade coloca os itens em ordem,
+   e quem sumiu não guarda lugar. É o mesmo erro do `display: none` num item de
+   grade que já apareceu na coluna, agora dentro da barra. */
+.palco__ponta {
+  grid-column: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.clique { grid-column: 2; }
+.palco__ponta--fim { grid-column: 3; justify-content: flex-end; }
+.palco__largura { font-variant-numeric: tabular-nums; }
+
+.palco__area {
+  flex: 1;
+  padding: 20px;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+
+  /* A mesa é pontilhada e a tela é a folha em cima dela. Serve de recado
+     visual: o que está dentro da moldura é o produto, o resto é ferramenta. */
+  background-color: var(--f-mesa);
+  background-image: radial-gradient(circle, var(--f-ponto) var(--f-ponto-raio), transparent var(--f-ponto-raio));
+  background-size: var(--f-ponto-vao) var(--f-ponto-vao);
+  background-position: center center;
+}
+
+/* A moldura é o que a largura do dispositivo muda. `margin:auto` com
+   `flex-shrink:0` deixa ela centrada quando cabe e rolável quando não cabe. */
+/* `overflow: hidden` é o que faz a conta fechar: `transform` não muda o
+   layout, então a moldura continua ocupando os 1280px de largura mesmo reduzida.
+   Sem recortar, esses 1280 viram barra de rolagem no palco, a barra muda a
+   altura útil, a altura útil muda a escala — e o ResizeObserver entra num laço
+   e para de entregar notificação nenhuma, sem erro no console.
+
+   Nada visível é recortado: a moldura reduzida ocupa exatamente a caixa.
+   A sombra mudou para cá pelo mesmo motivo. */
+.moldura-caixa {
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: var(--f-raio);
+  box-shadow: var(--f-sombra-alta);
+}
+
+/* `transform-origin: top left` porque a caixa em volta é quem centraliza: com
+   origem no centro, a moldura reduzida sairia do lugar que a caixa reservou. */
+.moldura {
+  width: 100%;
+  /* Branca nos dois temas, de propósito: ela é o papel onde o produto está, e
+     o produto não muda de cor porque a ferramenta mudou. */
+  background: #fff;
+  border: 1px solid var(--f-borda);
+  border-radius: var(--f-raio);
+  transform-origin: top left;
+}
+.moldura__tela {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+/* ---------- dobrar as barras ---------- */
+.dobrar {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border: 1px solid transparent;
+  border-radius: var(--f-raio-pill);
+  background: none;
+  font: inherit;
+  font-size: 11px;
+  color: var(--f-apoio-2);
+  cursor: pointer;
+}
+.dobrar:hover { border-color: var(--f-borda); color: var(--f-tinta); }
+.dobrar--dir { margin-left: 0; }
+/* O `aplicando…` entra entre os dois e também usa `margin-left: auto`; quando
+   ele aparece, é ele que empurra, e o botão da direita fica logo depois. */
+.palco__estado:not([hidden]) ~ .dobrar--dir { margin-left: 12px; }
+
+.dobrar__seta { font-size: 14px; line-height: 1; }
+
+@media (max-width: 760px) {
+  .dobrar__texto { display: none; }
+}
+/* ---------- o que o clique na tela faz ---------- */
+/* Só faz sentido com o dev mode ligado: é a escolha entre selecionar a peça e
+   navegar na tela. Desligado, o clique já vai para a tela e o seletor some.
+   `visibility`, e não `display: none`, mesmo com a trilha declarada: assim a
+   barra não muda de forma quando a chave muda. */
+.clique { display: flex; gap: 2px; justify-self: center; }
+.lab[data-codigo="false"] .clique { visibility: hidden; }
+
+.clique__opcao { position: relative; }
+.clique__opcao input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.clique__opcao span {
+  display: block;
+  padding: 3px 9px;
+  border-radius: var(--f-raio-pill);
+  font-size: 11px;
+  color: var(--f-apoio-2);
+}
+.clique__opcao input:checked + span {
+  background: var(--f-acento);
+  color: var(--f-acento-tinta);
+}
+.clique__opcao input:focus-visible + span {
+  outline: 2px solid var(--f-foco);
+  outline-offset: 1px;
+}
+/* A seta aponta para onde o clique leva: fechado, ela convida a abrir. */
+.dobrar[aria-expanded="false"] .dobrar__seta { transform: scaleX(-1); }
+
+/* ---------- o botão de tema ---------- */
+.tema {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: none;
+  color: var(--f-apoio-2);
+  cursor: pointer;
+}
+.tema:hover { border-color: var(--f-borda); color: var(--f-tinta); }
+.tema svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* O ícone mostra para onde o clique leva, não onde você está. */
+.tema__lua { display: none; }
+[data-tema="escuro"] .tema__sol { display: none; }
+[data-tema="escuro"] .tema__lua { display: block; }
+
+/* Com o botão de tema puxando para a direita, quem empurrava antes não precisa
+   mais — senão os dois brigam e sobra um vão no meio. */
+.dobrar--dir { margin-left: 0; }
+.palco__estado:not([hidden]) ~ .dobrar--dir { margin-left: 0; }
+/* ---------- destaque desenhado por fora do iframe ---------- */
+/* Fica na página do laboratório, posicionado sobre o iframe. O protótipo não
+   recebe nó nenhum — é a mesma regra do painel de estados. */
+.marca {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  border-radius: 2px;
+  outline: 1px solid rgba(37, 99, 235, .9);
+  background: rgba(37, 99, 235, .10);
+}
+.marca[hidden] { display: none; }
+.marca--sel {
+  outline: 2px solid var(--f-foco);
+  background: rgba(37, 99, 235, .06);
+}
+@media (prefers-reduced-motion: reduce) {
+  .moldura, .chave__trilha, .chave__bolinha, .seg__opcao span { transition: none; }
+}
+
+/* ---------- a coluna do código ---------- */
+
+/* Duas colunas: o palco e o código. No protótipo de referência há uma terceira
+   à esquerda, com os controles de estado — aqui não existe, porque esta tela
+   não tem estado nenhum para dirigir. */
+/* Três colunas: os controles, o palco e o código. A barra da esquerda existe
+   em todo handoff, mesmo quando a tela tem pouco o que controlar — quem recebe
+   o pacote aprende um layout só, e procurar o controle no mesmo lugar vale mais
+   que economizar 320px numa tela específica. */
+.lab { grid-template-columns: var(--f-col-painel) minmax(0, 1fr) 0; }
+.lab[data-codigo="true"] { grid-template-columns: var(--f-col-painel) minmax(0, 1fr) var(--f-painel-w); }
+.lab[data-painel="fechado"] { --f-col-painel: 0px; }
+/* `visibility` e não `display: none`: item de grade com `display: none` sai do
+   fluxo e a grade inteira anda uma casa. */
+.lab[data-painel="fechado"] .painel { visibility: hidden; }
+/* `visibility` e não `display: none`: item de grade com `display: none` sai do
+   fluxo e a grade inteira anda uma casa. */
+.lab[data-codigo="false"] .inspetor { visibility: hidden; }
+
+.inspetor {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  /* `hidden` e não `auto`: quem rola aqui é o <pre>, para o nome do arquivo e
+     os botões não sumirem ao descer no código. */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--f-painel);
+  border-left: 1px solid var(--f-borda);
+}
+
+/* ---------- a peça selecionada, na barra ---------- */
+.palco__peca {
+  font-size: 11px;
+  color: var(--f-tinta);
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.palco__peca[data-vazio="true"] { color: var(--f-apoio-2); }
+
+/* ---------- os controles, na barra da esquerda ---------- */
+/* ---------- painel ---------- */
+.painel {
+  position: sticky;
+  top: 0;
+  /* Altura cheia, não altura do conteúdo. Com `align-self: start` a barra
+     terminava onde o conteúdo terminava e aparecia o fundo do palco embaixo
+     dela — parecia furo, não respiro. */
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px 20px 28px;
+  background: var(--f-painel);
+  border-right: 1px solid var(--f-borda);
+}
+
+/* No protótipo de referência o topo do painel é só um bloco sem regra própria;
+   aqui ele precisa do respiro, porque não há grupo de controle acima dele. */
+.painel__topo { padding: 18px 20px 4px; }
+
+.painel__titulo {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+.painel__sub {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--f-apoio);
+}
+
+.painel__corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ---------- grupo de controle ---------- */
+.grupo + .grupo {
+  padding-top: 20px;
+  border-top: 1px solid var(--f-borda);
+}
+.grupo__titulo {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--f-tinta);
+}
+.grupo__dica {
+  margin: 8px 0 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--f-apoio-2);
+}
+
+/* Com largura digitada, o preset marcado fica apagado. Ele continua marcado de
+   propósito — é para onde o clique volta —, mas não pode parecer que é ele quem
+   está valendo. */
+.seg[data-apagado="true"] .seg__opcao input:checked + span {
+  background: transparent;
+  color: var(--f-apoio);
+  font-weight: 400;
+  box-shadow: none;
+}
+
+/* ---------- largura exata ---------- */
+.livre {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.livre__campo {
+  width: 72px;
+  flex: none;
+  padding: 6px 8px;
+  border: 1px solid var(--f-borda);
+  border-radius: var(--f-raio);
+  background: var(--f-painel);
+  color: var(--f-tinta);
+  font: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.livre__campo::placeholder { color: var(--f-apoio); }
+.livre__campo:focus-visible {
+  outline: 2px solid var(--f-foco);
+  outline-offset: 1px;
+}
+.livre__unidade {
+  font-size: 12px;
+  color: var(--f-apoio);
+}
+.livre__limpar {
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--f-apoio);
+  font: inherit;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.livre__limpar:hover { color: var(--f-tinta); }
+
+/* ---------- chave ---------- */
+.chave {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  cursor: pointer;
+}
+.chave__rotulo {
+  font-size: 13px;
+  line-height: 1.35;
+}
+.chave input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.chave__trilha {
+  flex: none;
+  width: 40px;
+  height: 22px;
+  padding: 2px;
+  border-radius: var(--f-raio-pill);
+  background: var(--f-borda);
+  transition: background .18s ease;
+}
+.chave__bolinha {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--f-painel);
+  box-shadow: var(--f-sombra);
+  transition: transform .18s ease;
+}
+.chave input:checked + .chave__trilha { background: var(--f-acento); }
+.chave input:checked + .chave__trilha .chave__bolinha { transform: translateX(18px); }
+.chave input:focus-visible + .chave__trilha {
+  outline: 2px solid var(--f-foco);
+  outline-offset: 2px;
+}
+
+/* ---------- pé do painel ---------- */
+.painel__pe {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid var(--f-borda);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.painel__nota {
+  margin: 0 0 4px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--f-apoio);
+  min-height: 2.9em;
+}
+
+  padding: 9px 12px;
+  border: 1px solid var(--f-borda);
+  border-radius: var(--f-raio);
+  background: var(--f-painel);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--f-tinta);
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease;
+}
+  border-color: transparent;
+  color: var(--f-apoio);
+}
+  border-color: var(--f-acento);
+  background: var(--f-acento);
+  color: var(--f-acento-tinta);
+}
+
+.painel__link {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--f-apoio);
+  text-decoration: none;
+}
+.painel__link:hover { color: var(--f-tinta); text-decoration: underline; }
+
+/* ---------- o interruptor da coluna, no topo ---------- */
+.chave--destaque {
+  margin-top: 16px;
+  padding: 11px 12px;
+  border: 1px solid var(--f-borda);
+  border-radius: var(--f-raio);
+  background: var(--f-trilha);
+}
+.chave--destaque .chave__rotulo strong { font-weight: 600; }
+.chave--destaque .chave__rotulo small {
+  font-size: 11px;
+  color: var(--f-apoio);
+}
+
+/* Em dev mode o cursor avisa que o clique seleciona em vez de interagir. */
+
+/* A nota que explica o que esta tela não tem. */
+.painel__aviso {
+  margin: 4px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--f-apoio-2);
+}
+
+@media (max-width: 900px) {
+  .lab, .lab[data-codigo="true"] { grid-template-columns: minmax(0, 1fr); }
+  .painel { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--f-borda); }
+  .lab[data-codigo="true"] .inspetor {
+    position: static;
+    height: auto;
+    border-left: 0;
+    border-top: 1px solid var(--f-borda);
+  }
+  .abas, .codigo__topo { position: static; }
+  .codigo__fonte { max-height: 70vh; }
+}
+
+
+/* Em modo inspecionar o cursor avisa que o clique seleciona em vez de agir. */
+body[data-inspecionando="true"] .moldura__tela { cursor: crosshair; }

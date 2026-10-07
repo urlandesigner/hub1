@@ -1,0 +1,339 @@
+/* Dev mode — o painel que inspeciona um elemento da tela.
+
+   Mesmos tokens de ferramenta do painel de estados: cinza neutro, nada da
+   marca. Quem abre isso precisa ver na hora o que é a tela e o que é o
+   controle em volta dela. */
+
+/* A COLUNA NÃO É DECLARADA AQUI, e isso é adaptação.
+
+   Na implementação de referência este arquivo declara a grade e esconde a
+   coluna até o dev mode ligar (`display: none` + `.lab[data-dev]`). Aqui a
+   coluna tem quatro abas e abre pela chave "Código", então quem a declara é o
+   `painel.css` — e esta folha carrega depois dele. Deixar a regra de lá
+   devolvia `display: none` e a coluna sumia com 320px de trilha reservada. */
+
+.inspetor__topo {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 18px 20px 14px;
+  background: var(--f-painel);
+  border-bottom: 1px solid var(--f-borda);
+}
+.inspetor__titulo {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--f-apoio);
+}
+.inspetor__peca {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+}
+.inspetor__nome {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+.inspetor__fonte {
+  flex: none;
+  padding: 3px 8px;
+  border-radius: var(--f-raio-pill);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+/* De onde a regra vem é a informação que mais muda o trabalho do dev: usar o
+   componente do sistema ou escrever um. Então ela é a única com cor. */
+.inspetor__fonte[data-de="ds"] { background: var(--f-info-fundo); color: var(--f-info-tinta); }
+.inspetor__fonte[data-de="local"] { background: var(--f-aviso-fundo); color: var(--f-aviso-tinta); }
+.inspetor__fonte[data-de="nenhuma"] { background: var(--f-trilha); color: var(--f-apoio); }
+
+/* Limpar a seleção era só o Esc, e Esc não se vê. */
+.inspetor__limpar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--f-apoio-2);
+  cursor: pointer;
+}
+.inspetor__limpar:hover { background: var(--f-trilha); color: var(--f-tinta); }
+.inspetor__limpar svg {
+  width: 11px;
+  height: 11px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.inspetor__nota {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--f-apoio);
+}
+
+.inspetor__corpo { padding: 4px 20px 24px; }
+
+.inspetor__vazio {
+  padding: 28px 20px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--f-apoio);
+}
+
+/* ---------- caminho até o elemento ---------- */
+.trilha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  margin-top: 10px;
+}
+.trilha__passo {
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 5px;
+  background: var(--f-trilha);
+  font: inherit;
+  font-size: 11px;
+  color: var(--f-apoio);
+  cursor: pointer;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.trilha__passo:hover { color: var(--f-tinta); }
+.trilha__passo[aria-current="true"] {
+  background: var(--f-acento);
+  color: var(--f-acento-tinta);
+}
+.trilha__sep { color: var(--f-apoio-2); font-size: 10px; }
+
+/* ---------- seções ---------- */
+.secao { padding: 16px 0; border-top: 1px solid var(--f-borda); }
+.secao:first-child { border-top: 0; }
+.secao__titulo {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.linha {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 10px;
+  padding: 4px 0;
+  font-size: 12px;
+  align-items: start;
+}
+.linha__chave { color: var(--f-apoio); }
+.linha__valor {
+  min-width: 0;
+  color: var(--f-tinta);
+  font-variant-numeric: tabular-nums;
+  word-break: break-word;
+}
+
+/* Clicar num valor copia o CSS dele. O alvo é o valor inteiro, então ele é um
+   botão — e não um span com listener, que o teclado não alcança. */
+.copiavel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: -2px -4px;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  color: inherit;
+  text-align: left;
+  cursor: copy;
+}
+.copiavel:hover { background: var(--f-trilha); }
+.copiavel[data-copiado="true"] { background: var(--f-ok-fundo); color: var(--f-ok-tinta); }
+/* Negada a área de transferência, o texto fica selecionado para o Ctrl+C. */
+.copiavel[data-copiado="erro"] { background: var(--f-ruim-fundo); color: var(--f-ruim-tinta); }
+.copiavel[data-copiado="erro"] .copiavel__icone { display: none; }
+
+/* O ícone mora no botão, no lugar onde o clique acontece — e é por isso que a
+   frase explicando que dava para copiar saiu do rodapé. Fica fraco até o mouse
+   chegar, para não competir com o valor, que é o conteúdo. */
+.copiavel__icone {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: .28;
+  transition: opacity .12s ease;
+}
+.copiavel:hover .copiavel__icone,
+.copiavel:focus-visible .copiavel__icone { opacity: .75; }
+
+.copiavel__certo { display: none; }
+.copiavel[data-copiado="true"] .copiavel__papel { display: none; }
+.copiavel[data-copiado="true"] .copiavel__certo { display: block; }
+.copiavel[data-copiado="true"] .copiavel__icone { opacity: 1; }
+
+.amostra {
+  flex: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, .14);
+}
+
+.token {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+}
+.bruto {
+  display: block;
+  margin-top: 1px;
+  font-size: 11px;
+  color: var(--f-apoio-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* O selo de contraste: é medido, não estimado. */
+.contraste {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.contraste[data-passa="AAA"] { background: var(--f-ok-fundo); color: var(--f-ok-tinta); }
+.contraste[data-passa="AA"]  { background: var(--f-ok2-fundo); color: var(--f-ok2-tinta); }
+.contraste[data-passa="UI"]  { background: var(--f-meio-fundo); color: var(--f-meio-tinta); }
+.contraste[data-passa="nao"] { background: var(--f-ruim-fundo); color: var(--f-ruim-tinta); }
+
+/* ---------- estados declarados ---------- */
+.estados { display: flex; flex-wrap: wrap; gap: 5px; }
+.estados__item {
+  padding: 4px 8px;
+  border: 1px solid var(--f-borda);
+  border-radius: var(--f-raio-pill);
+  font-size: 11px;
+  color: var(--f-apoio);
+  text-decoration: none;
+}
+.estados__item:hover { border-color: var(--f-apoio-2); color: var(--f-tinta); }
+.estados__item[data-atual="true"] {
+  background: var(--f-acento);
+  border-color: var(--f-acento);
+  color: var(--f-acento-tinta);
+}
+
+/* ---------- o CSS de verdade ---------- */
+.regra {
+  margin-top: 8px;
+  border: 1px solid var(--f-borda);
+  border-radius: var(--f-raio);
+  overflow: hidden;
+}
+/* O cabeçalho agora segura duas coisas: de onde o CSS vem e o botão de copiar.
+   Em `flex` com `space-between`, para o botão ficar sempre na mesma coluna
+   mesmo quando o nome da folha é comprido. */
+.regra__fonte {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px 5px 9px;
+  background: var(--f-trilha);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--f-apoio);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.regra__arquivo {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow-wrap: anywhere;
+}
+
+/* Botão que é só o ícone: sem texto, o `gap` do `.copiavel` abriria um vão
+   fantasma, e o alvo de clique ficaria menor que o dedo. */
+.copiavel--so-icone {
+  flex: none;
+  gap: 0;
+  margin: 0;
+  padding: 4px;
+}
+.copiavel--so-icone .copiavel__icone { width: 13px; height: 13px; }
+
+/* O título da seção ganha o botão que copia a lista inteira. */
+.secao__titulo--com-acao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.regra__css {
+  margin: 0;
+  padding: 9px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--f-tinta);
+  max-height: 180px;
+  overflow: auto;
+}
+
+/* O empilhamento em tela estreita é declarado no `painel.css`, junto com a
+   grade — aqui ele dependia do `data-dev`, que neste projeto não existe. */
+
+/* ---------- destaque desenhado por fora do iframe ---------- */
+/* Fica na página do laboratório, posicionado sobre o iframe. O protótipo não
+   recebe nó nenhum — é a mesma regra do painel de estados. */
+.marca {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  border-radius: 2px;
+  outline: 1px solid rgba(37, 99, 235, .9);
+  background: rgba(37, 99, 235, .10);
+}
+.marca[hidden] { display: none; }
+.marca--sel {
+  outline: 2px solid var(--f-foco);
+  background: rgba(37, 99, 235, .06);
+}
+
+/* ---------- o interruptor do dev mode, no topo ---------- */
+.chave--destaque {
+  margin-top: 16px;
+  padding: 11px 12px;
+  border: 1px solid var(--f-borda);
+  border-radius: var(--f-raio);
+  background: var(--f-trilha);
+}
+.chave--destaque .chave__rotulo strong { font-weight: 600; }
+.chave--destaque .chave__rotulo small {
+  font-size: 11px;
+  color: var(--f-apoio);
+}
+
+/* Em dev mode o cursor avisa que o clique seleciona em vez de interagir. */
+body[data-inspecionando="true"] .moldura__tela { cursor: crosshair; }
